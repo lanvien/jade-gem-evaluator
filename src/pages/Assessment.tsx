@@ -106,7 +106,8 @@ const Assessment = () => {
   const [loading, setLoading] = useState(true);
   const [stepIdx, setStepIdx] = useState(() => {
     const saved = localStorage.getItem("jade-assessment-step");
-    return saved ? parseInt(saved, 10) : 0;
+    const parsed = saved ? parseInt(saved, 10) : 0;
+    return parsed >= 0 && parsed < steps.length ? parsed : 0;
   });
   const [answers, setAnswers] = useState<Record<number, string>>(() => {
     const saved = localStorage.getItem("jade-assessment-answers");
