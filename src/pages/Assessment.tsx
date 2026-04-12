@@ -30,7 +30,7 @@ function buildSteps(): Step[] {
   return steps;
 }
 
-/* ── Loading Screen ── */
+/* ── Loading Screen – Emerald dark bg, white text ── */
 const LoadingScreen = ({ onDone }: { onDone: () => void }) => {
   useEffect(() => {
     const t = setTimeout(onDone, 2500);
@@ -38,12 +38,12 @@ const LoadingScreen = ({ onDone }: { onDone: () => void }) => {
   }, [onDone]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center animate-fade-in-up">
-      <p className="text-lg font-semibold text-foreground mb-6">Đang chuẩn bị...</p>
-      <p className="font-serif italic text-lg text-foreground max-w-md leading-relaxed">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up" style={{ backgroundColor: "hsl(150, 30%, 15%)" }}>
+      <p className="text-xl font-bold text-white mb-8 tracking-wider">Loading...</p>
+      <p className="font-serif italic text-lg text-white/90 max-w-md leading-relaxed">
         "Ngọc dưỡng người 3 năm, người dưỡng ngọc một đời."
       </p>
-      <p className="font-serif italic text-sm text-muted-foreground mt-2">
+      <p className="font-serif italic text-sm text-white/60 mt-3">
         Hãy thả lỏng tâm trí để bắt đầu hành trình hiểu Ngọc.
       </p>
     </div>
@@ -163,7 +163,6 @@ const Assessment = () => {
 
   const next = () => {
     if (questionNumber === TOTAL) {
-      // Save survey data and navigate to results
       const surveyData = {
         answers,
         ringColors,
@@ -183,7 +182,6 @@ const Assessment = () => {
     if (target >= 0) setStepIdx(target);
   };
 
-  // Can go next logic per question type
   const canGoNext = (() => {
     switch (q.type) {
       case "color-ring":
@@ -199,11 +197,9 @@ const Assessment = () => {
     }
   })();
 
-  // Conditional text for checkbox-legal
   const showConditionalText =
     q.conditionalText && selectedAnswer && q.conditionalText.triggeredByIds.includes(selectedAnswer);
 
-  // Sub-checkbox visibility
   const showSubCheckbox =
     q.subCheckbox && selectedAnswer && q.subCheckbox.triggeredByIds.includes(selectedAnswer);
 
@@ -249,8 +245,6 @@ const Assessment = () => {
           </div>
 
           <div className="border-t border-border" />
-
-          {/* ── Question-type specific rendering ── */}
 
           {q.type === "color-ring" && (
             <>
@@ -312,7 +306,6 @@ const Assessment = () => {
             </div>
           )}
 
-          {/* Rescue button */}
           {q.rescueButton && (
             <div className="text-center">
               <button
@@ -324,7 +317,6 @@ const Assessment = () => {
             </div>
           )}
 
-          {/* Sub-checkbox */}
           {showSubCheckbox && q.subCheckbox && (
             <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer animate-fade-in-up">
               <input
@@ -337,7 +329,6 @@ const Assessment = () => {
             </label>
           )}
 
-          {/* Conditional text */}
           {showConditionalText && q.conditionalText && (
             <p className="text-sm text-gold font-medium animate-fade-in-up">
               {q.conditionalText.text}
