@@ -19,7 +19,6 @@ function computeResults(data: any) {
   const answers = data.answers || {};
   const numberInputs = data.numberInputs || {};
 
-  // Calculate weighted score from multipliers
   let totalMultiplier = 0;
   let count = 0;
 
@@ -36,7 +35,6 @@ function computeResults(data: any) {
 
   const avgScore = count > 0 ? totalMultiplier / count : 0.5;
 
-  // Determine tier
   let tierIndex = 0;
   for (let i = TIERS.length - 1; i >= 0; i--) {
     if (avgScore >= TIERS[i].minScore) {
@@ -46,42 +44,40 @@ function computeResults(data: any) {
   }
   const tier = TIERS[tierIndex];
 
-  // Volume coefficient from diameter & thickness
   const diameter = parseFloat(numberInputs[11]) || 56;
   const thickness = parseFloat(numberInputs[13]) || 8;
-  const volumeCoeff = ((diameter * thickness) / (56 * 8)); // normalized to standard 56mm/8mm
+  const volumeCoeff = (diameter * thickness) / (56 * 8);
 
-  // Price range adjusted by volume
-  const priceLow = Math.round(tier.basePrice[0] * volumeCoeff / 100_000) * 100_000;
-  const priceHigh = Math.round(tier.basePrice[1] * volumeCoeff / 100_000) * 100_000;
+  const priceLow = Math.round((tier.basePrice[0] * volumeCoeff) / 100_000) * 100_000;
+  const priceHigh = Math.round((tier.basePrice[1] * volumeCoeff) / 100_000) * 100_000;
 
-  // Rarity percentage
   const rarity = tierIndex === 0 ? 60 : tierIndex === 1 ? 35 : tierIndex === 2 ? 15 : tierIndex === 3 ? 7 : 3;
 
-  // Generate analysis texts
+  // Analysis texts based on answers
   const cotAnswer = answers[1];
-  const cotText = cotAnswer === "1a"
-    ? "Phẩm ngọc đạt chủng Nếp Băng. Cấu trúc liên kết chặt chẽ, chất ngọc mướt mát, ngậm nước như sương sớm. Lựa chọn hoàn mỹ cho những ai tìm kiếm chiều sâu của ngọc với một mức ngân sách tối ưu."
-    : cotAnswer === "1b"
-    ? "Phẩm ngọc đạt chủng Nếp. Hạt tinh thể mịn, ánh ngọc êm dịu. Đây là mức chất lượng phổ biến ở phân khúc trung – cao, phù hợp để đeo hàng ngày."
-    : "Phẩm ngọc đạt chủng Đậu. Hạt tinh thể nhìn rõ, thích hợp cho người mới bắt đầu tìm hiểu ngọc.";
+  const cotText =
+    cotAnswer === "1c"
+      ? "Phẩm ngọc đạt chủng Nếp Băng. Cấu trúc liên kết chặt chẽ, chất ngọc mướt mát, ngậm nước như sương sớm. Lựa chọn hoàn mỹ cho những ai tìm kiếm chiều sâu của ngọc với một mức ngân sách tối ưu."
+      : cotAnswer === "1b"
+      ? "Phẩm ngọc đạt chủng Nếp. Hạt tinh thể mịn, ánh ngọc êm dịu. Đây là mức chất lượng phổ biến ở phân khúc trung – cao, phù hợp để đeo hàng ngày."
+      : "Phẩm ngọc đạt chủng Đậu. Hạt tinh thể nhìn rõ, thích hợp cho người mới bắt đầu tìm hiểu ngọc.";
 
   const sacAnswer = answers[5];
-  const sacText = sacAnswer === "5a"
-    ? "Sở hữu dải màu Lục tươi vượng khí. Không màng đến sự rập khuôn vô hồn, chính những vệt hoa bay đã thổi hồn vào khối đá, tạo nên một tuyệt tác thiên nhiên duy nhất và không thể sao chép."
-    : sacAnswer === "5b"
-    ? "Màu sắc ở mức trung bình, đều đặn. Sắc diện dễ chịu, phù hợp phong cách thanh lịch kín đáo."
-    : "Màu sắc nhạt, phớt. Phù hợp cho người thích phong cách tối giản, nhẹ nhàng.";
+  const sacText =
+    sacAnswer === "5a"
+      ? "Sở hữu dải màu Lục tươi vượng khí. Không màng đến sự rập khuôn vô hồn, chính những vệt hoa bay đã thổi hồn vào khối đá, tạo nên một tuyệt tác thiên nhiên duy nhất và không thể sao chép."
+      : sacAnswer === "5b"
+      ? "Màu sắc ở mức trung bình, đều đặn. Sắc diện dễ chịu, phù hợp phong cách thanh lịch kín đáo."
+      : "Màu sắc nhạt, phớt. Phù hợp cho người thích phong cách tối giản, nhẹ nhàng.";
 
   const noiTaiText = data.subChecks?.[9]
     ? "Ngọc quý ắt trải qua phong hóa, giữ lại chút tỳ vết là lẽ thường tình. Sự xuất hiện của một vài vết sơ nhỏ chính là lời khẳng định mạnh mẽ nhất về nguồn gốc tự nhiên. Đây không chỉ là nét độc bản, mà còn là chìa khóa vàng để bạn làm chủ cuộc thương lượng (kỳ vọng giảm 15-20% giá)."
     : "Ngọc sạch, ít tạp chất. Bề mặt và nội tại đạt tiêu chuẩn tốt cho phân khúc này.";
 
-  // Personality quote
   const quotes: Record<string, string> = {
     "thuong-tai": "Nhan sắc thanh tú, an phận thủ thường, phù hợp để đeo cày deadline mỗi ngày. 😊",
     "quy-nhan": "Ôn nhu hiền thục, sắc ngọc đoan trang – xứng danh người biết chọn ngọc.",
-    "phi-tan": "Nhan sắc thanh tú, an phận thủ thường, phù hợp để đeo cày deadline mỗi ngày. 😊",
+    "phi-tan": "Phi tần kiều diễm, sắc ngọc vẹn toàn – xứng đáng chiếm trọn ánh nhìn.",
     "quy-phi": "Quý phái tựa ngọc trong sương, sắc đẹp khiến người ta phải ngoái nhìn.",
     "hoang-hau": "Mẫu nghi thiên hạ, ngọc quý hiếm có – xứng danh bảo vật truyền đời.",
   };
@@ -99,13 +95,7 @@ function computeResults(data: any) {
     quote: quotes[tier.key] || quotes["phi-tan"],
     diameter,
     thickness,
-    answeredCount: Object.keys(answers).length + Object.keys(numberInputs).length,
   };
-}
-
-function formatVND(n: number) {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1)} triệu`;
-  return n.toLocaleString("vi-VN");
 }
 
 function formatVNDFull(n: number) {
@@ -174,35 +164,34 @@ const Results = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between border-b border-border">
         <p className="font-serif text-lg font-bold text-accent">Hiểu ngọc <span className="text-muted-foreground">───</span></p>
         <div className="flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground">
           Mã tú nữ: <span className="font-bold text-foreground">#{String(Date.now()).slice(-5)}</span>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-12 max-w-4xl animate-fade-in-up">
-        {/* Main result card */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-          {/* Left – Ring visualization */}
+      <div className="container mx-auto px-4 pb-12 max-w-5xl animate-fade-in-up">
+        {/* Two-column layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
+          {/* Left – Ring + Pricing */}
           <div className="flex flex-col items-center">
-            {/* Decorative crown */}
-            <p className="text-4xl mb-2">👑</p>
-            <div className="relative w-64 h-64 rounded-xl border-2 border-dashed border-border bg-card flex items-center justify-center">
-              {/* SVG Ring from survey data */}
-              <svg viewBox="0 0 200 200" className="w-48 h-48">
-                <circle cx="100" cy="100" r="80" fill="none" stroke="hsl(var(--border))" strokeWidth="24" />
+            <p className="text-4xl mb-3">👑</p>
+
+            {/* Ring visualization */}
+            <div className="relative w-56 h-56 flex items-center justify-center">
+              <svg viewBox="0 0 200 200" className="w-full h-full">
                 {(surveyData.ringColors || []).map((color: string, i: number) => {
                   const angle = (i * 360) / 12;
                   const endAngle = ((i + 1) * 360) / 12;
                   const startRad = ((angle - 90) * Math.PI) / 180;
                   const endRad = ((endAngle - 90) * Math.PI) / 180;
-                  const r = 80;
-                  const x1 = 100 + r * Math.cos(startRad);
-                  const y1 = 100 + r * Math.sin(startRad);
-                  const x2 = 100 + r * Math.cos(endRad);
-                  const y2 = 100 + r * Math.sin(endRad);
-                  const innerR = 56;
+                  const outerR = 90;
+                  const innerR = 60;
+                  const x1 = 100 + outerR * Math.cos(startRad);
+                  const y1 = 100 + outerR * Math.sin(startRad);
+                  const x2 = 100 + outerR * Math.cos(endRad);
+                  const y2 = 100 + outerR * Math.sin(endRad);
                   const x3 = 100 + innerR * Math.cos(endRad);
                   const y3 = 100 + innerR * Math.sin(endRad);
                   const x4 = 100 + innerR * Math.cos(startRad);
@@ -210,7 +199,7 @@ const Results = () => {
                   return (
                     <path
                       key={i}
-                      d={`M ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 0 0 ${x4} ${y4} Z`}
+                      d={`M ${x1} ${y1} A ${outerR} ${outerR} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 0 0 ${x4} ${y4} Z`}
                       fill={color}
                       stroke="hsl(var(--foreground))"
                       strokeWidth="0.5"
@@ -218,19 +207,24 @@ const Results = () => {
                   );
                 })}
               </svg>
-              <button className="absolute bottom-2 right-2 text-muted-foreground hover:text-foreground">
-                <Camera className="h-5 w-5" />
+              <button className="absolute bottom-1 right-1 text-muted-foreground hover:text-foreground p-1">
+                <Camera className="h-4 w-4" />
               </button>
             </div>
 
+            {/* Title & Pricing */}
             <p className="text-sm text-muted-foreground mt-4">Danh xưng hiện tại</p>
-            <p className="font-serif text-xl font-bold text-foreground uppercase tracking-wide">
-              {r.tier.label} – {r.tier.sub}
+            <p className="font-serif text-2xl font-bold text-foreground uppercase tracking-wide mt-1">
+              {r.tier.label}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">Khung giá tham khảo</p>
-            <p className="font-serif text-2xl font-bold text-accent">
-              {formatVNDFull(r.priceLow)} - {formatVNDFull(r.priceHigh)}
-            </p>
+            <p className="text-sm text-muted-foreground">{r.tier.sub}</p>
+
+            <div className="mt-4 rounded-xl border-2 border-accent bg-accent/5 px-6 py-3 text-center">
+              <p className="text-xs text-muted-foreground mb-1">Khung giá tham khảo</p>
+              <p className="font-serif text-xl md:text-2xl font-bold text-accent">
+                {formatVNDFull(r.priceLow)} – {formatVNDFull(r.priceHigh)}
+              </p>
+            </div>
 
             {/* Personality quote */}
             <div className="mt-4 rounded-xl bg-gold/10 border border-gold/20 p-4 max-w-xs text-center">
@@ -241,8 +235,8 @@ const Results = () => {
             </div>
           </div>
 
-          {/* Right – Analysis */}
-          <div className="space-y-4">
+          {/* Right – Analysis sections */}
+          <div className="space-y-5">
             <div>
               <p className="text-muted-foreground text-sm">Chiếc vòng...</p>
               <h1 className="font-serif text-3xl font-bold text-foreground">"Ái phi hiện tại" ✏️</h1>
@@ -256,29 +250,33 @@ const Results = () => {
               Chỉ {r.rarity}% phỉ thúy trên thế giới đạt chủng này
             </div>
 
-            <ul className="space-y-4 text-sm text-foreground leading-relaxed">
-              <li>
-                <strong>Cốt Ngọc</strong>: {r.cotText}
-              </li>
-              <li>
-                <strong>Sắc Diện</strong>: {r.sacText}
-              </li>
-              <li>
-                <strong>Nội tại</strong>: {r.noiTaiText}
-              </li>
-            </ul>
+            {/* Analysis cards with green border */}
+            <div className="space-y-4">
+              <div className="rounded-lg border-2 border-accent/30 p-4">
+                <p className="text-sm font-bold text-accent mb-1">🔮 Cốt Ngọc</p>
+                <p className="text-sm text-foreground leading-relaxed">{r.cotText}</p>
+              </div>
+              <div className="rounded-lg border-2 border-accent/30 p-4">
+                <p className="text-sm font-bold text-accent mb-1">🎨 Sắc Diện</p>
+                <p className="text-sm text-foreground leading-relaxed">{r.sacText}</p>
+              </div>
+              <div className="rounded-lg border-2 border-accent/30 p-4">
+                <p className="text-sm font-bold text-accent mb-1">💎 Nội Tại</p>
+                <p className="text-sm text-foreground leading-relaxed">{r.noiTaiText}</p>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Phong kết cấu tier row */}
         <div className="mt-10">
-          <h2 className="font-serif text-xl font-bold text-accent mb-4">Phong kết cấu</h2>
-          <div className="flex items-end justify-between gap-2 overflow-x-auto pb-2">
+          <h2 className="font-serif text-xl font-bold text-accent mb-4 text-center">Phong kết cấu</h2>
+          <div className="flex items-end justify-center gap-4 md:gap-8 overflow-x-auto pb-2">
             {TIERS.map((t, i) => (
               <div
                 key={t.key}
-                className={`flex flex-col items-center text-center min-w-[80px] ${
-                  i === r.tierIndex ? "opacity-100" : "opacity-40"
+                className={`flex flex-col items-center text-center min-w-[70px] transition-all ${
+                  i === r.tierIndex ? "opacity-100 scale-110" : "opacity-30 grayscale"
                 }`}
               >
                 <span className="text-3xl mb-1">{TIER_ICONS[i]}</span>
@@ -296,36 +294,34 @@ const Results = () => {
 
         {/* Action buttons */}
         <div className="flex items-center justify-center gap-4 mt-8">
-          <div className="flex gap-2">
-            <button className="rounded-full border border-border p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-              <Download className="h-5 w-5" />
-            </button>
-            <button className="rounded-full border border-border p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-              <Share2 className="h-5 w-5" />
-            </button>
-          </div>
+          <button className="rounded-full border border-border p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <Download className="h-5 w-5" />
+          </button>
+          <button className="rounded-full border border-border p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <Share2 className="h-5 w-5" />
+          </button>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
+          <button
+            className="rounded-lg border-2 border-accent bg-accent/10 px-6 py-3 text-sm font-semibold text-accent hover:bg-accent/20 transition-colors"
+          >
+            Lưu về cốp ngọc
+          </button>
           <button
             onClick={handleRestart}
             className="rounded-lg bg-gold px-6 py-3 text-sm font-bold text-primary-foreground hover:bg-gold-dark transition-colors"
           >
             Kiểm tra Vòng khác
           </button>
-          <button
-            className="rounded-lg border-2 border-border px-6 py-3 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
-          >
-            Lưu về cốp ngọc của bạn
-          </button>
         </div>
 
         {/* Bottom navigation */}
         <div className="flex items-center justify-between mt-8 text-sm">
-          <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors font-medium">
             &lt;&lt;&lt; Về trang chủ
           </button>
-          <button className="text-muted-foreground hover:text-foreground transition-colors">
+          <button className="text-muted-foreground hover:text-foreground transition-colors font-medium">
             Về cốp ngọc của bạn &gt;&gt;&gt;
           </button>
         </div>

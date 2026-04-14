@@ -38,12 +38,12 @@ const LoadingScreen = ({ onDone }: { onDone: () => void }) => {
   }, [onDone]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up" style={{ backgroundColor: "hsl(150, 30%, 15%)" }}>
-      <p className="text-xl font-bold text-white mb-8 tracking-wider">Loading...</p>
-      <p className="font-serif italic text-lg text-white/90 max-w-md leading-relaxed">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up" style={{ backgroundColor: "#e5f5f0" }}>
+      <p className="text-xl font-bold text-foreground mb-8 tracking-wider">Loading...</p>
+      <p className="font-serif italic text-lg text-foreground max-w-md leading-relaxed">
         "Ngọc dưỡng người 3 năm, người dưỡng ngọc một đời."
       </p>
-      <p className="font-serif italic text-sm text-white/60 mt-3">
+      <p className="font-serif italic text-sm text-muted-foreground mt-3">
         Hãy thả lỏng tâm trí để bắt đầu hành trình hiểu Ngọc.
       </p>
     </div>
