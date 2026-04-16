@@ -1,16 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions, SECTIONS } from "@/data/questions";
-import { ArrowLeft, ArrowRight, Lightbulb, HelpCircle, ChevronDown } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react";
 import SectionDivider from "@/components/SectionDivider";
 import ColorRing from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
+import PatternStructure, { PatternData } from "@/components/assessment/PatternStructure";
+import ImageLightbox from "@/components/assessment/ImageLightbox";
 
 const TOTAL = questions.length;
 
@@ -30,7 +26,7 @@ function buildSteps(): Step[] {
   return steps;
 }
 
-/* ── Loading Screen – Emerald dark bg, white text ── */
+/* ── Loading Screen ── */
 const LoadingScreen = ({ onDone }: { onDone: () => void }) => {
   useEffect(() => {
     const t = setTimeout(onDone, 2500);
@@ -38,64 +34,47 @@ const LoadingScreen = ({ onDone }: { onDone: () => void }) => {
   }, [onDone]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up" style={{ backgroundColor: "#e5f5f0" }}>
-      <p className="text-xl font-bold text-foreground mb-8 tracking-wider">Loading...</p>
-      <p className="font-serif italic text-lg text-foreground max-w-md leading-relaxed">
+    <div
+      className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up"
+      style={{ backgroundColor: "#002f14" }}
+    >
+      <p className="text-xl font-bold text-white mb-8 tracking-wider">Loading...</p>
+      <p className="font-serif italic text-lg text-white max-w-md leading-relaxed">
         "Ngọc dưỡng người 3 năm, người dưỡng ngọc một đời."
       </p>
-      <p className="font-serif italic text-sm text-muted-foreground mt-3">
+      <p className="font-serif italic text-sm text-white/70 mt-3">
         Hãy thả lỏng tâm trí để bắt đầu hành trình hiểu Ngọc.
       </p>
     </div>
   );
 };
 
-/* ── Number Input with helper ── */
+/* ── Number Input ── */
 const NumberInputQuestion = ({
   value,
   onChange,
   unit,
-  helpText,
 }: {
   value: string;
   onChange: (v: string) => void;
   unit: string;
-  helpText?: string;
-}) => {
-  const [showHelp, setShowHelp] = useState(false);
+}) => (
+  <div className="flex items-center gap-3 justify-center">
+    <input
+      type="number"
+      inputMode="decimal"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="Nhập số..."
+      className="w-32 rounded-lg border-2 border-border bg-card px-4 py-3 text-center text-lg font-semibold text-foreground focus:border-gold focus:outline-none transition-colors"
+    />
+    <span className="text-lg font-semibold text-muted-foreground">{unit}</span>
+  </div>
+);
 
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3 justify-center">
-        <input
-          type="number"
-          inputMode="decimal"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Nhập số..."
-          className="w-32 rounded-lg border-2 border-border bg-card px-4 py-3 text-center text-lg font-semibold text-foreground focus:border-gold focus:outline-none transition-colors"
-        />
-        <span className="text-lg font-semibold text-muted-foreground">{unit}</span>
-      </div>
-      {helpText && (
-        <div>
-          <button
-            onClick={() => setShowHelp(!showHelp)}
-            className="flex items-center gap-1 text-sm text-accent hover:underline mx-auto"
-          >
-            <HelpCircle className="h-4 w-4" />
-            Cách đo
-            <ChevronDown className={`h-3 w-3 transition-transform ${showHelp ? "rotate-180" : ""}`} />
-          </button>
-          {showHelp && (
-            <div className="mt-2 rounded-lg bg-muted p-3 text-sm text-muted-foreground animate-fade-in-up">
-              {helpText}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
+const EMPTY_PATTERN: PatternData = {
+  groupA: {},
+  groupB: {},
 };
 
 /* ── Main Component ── */
@@ -107,7 +86,7 @@ const Assessment = () => {
   const [stepIdx, setStepIdx] = useState(() => {
     const saved = localStorage.getItem("jade-assessment-step");
     const parsed = saved ? parseInt(saved, 10) : 0;
-    return parsed >= 0 && parsed < steps.length ? parsed : 0;
+    return parsed >= 0 && parsed < buildSteps().length ? parsed : 0;
   });
   const [answers, setAnswers] = useState<Record<number, string>>(() => {
     const saved = localStorage.getItem("jade-assessment-answers");
@@ -125,7 +104,11 @@ const Assessment = () => {
     const saved = localStorage.getItem("jade-ring-colors");
     return saved ? JSON.parse(saved) : Array(12).fill("#e5e7eb");
   });
-  const [guideOpen, setGuideOpen] = useState(false);
+  const [patternData, setPatternData] = useState<PatternData>(() => {
+    const saved = localStorage.getItem("jade-pattern-data");
+    return saved ? JSON.parse(saved) : EMPTY_PATTERN;
+  });
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; caption: string } | null>(null);
 
   // Persist state
   useEffect(() => {
@@ -134,11 +117,27 @@ const Assessment = () => {
     localStorage.setItem("jade-ring-colors", JSON.stringify(ringColors));
     localStorage.setItem("jade-number-inputs", JSON.stringify(numberInputs));
     localStorage.setItem("jade-sub-checks", JSON.stringify(subChecks));
-  }, [stepIdx, answers, ringColors, numberInputs, subChecks]);
+    localStorage.setItem("jade-pattern-data", JSON.stringify(patternData));
+  }, [stepIdx, answers, ringColors, numberInputs, subChecks, patternData]);
 
   const handleDividerDone = useCallback(() => {
     setStepIdx((s) => Math.min(s + 1, steps.length - 1));
   }, [steps.length]);
+
+  const next = useCallback(() => {
+    const currentStep = steps[stepIdx];
+    if (currentStep.type !== "question") return;
+    const qIndex = currentStep.index;
+    const questionNumber = qIndex + 1;
+
+    if (questionNumber === TOTAL) {
+      const surveyData = { answers, ringColors, numberInputs, subChecks, patternData };
+      localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
+      navigate("/results");
+      return;
+    }
+    if (stepIdx < steps.length - 1) setStepIdx((s) => s + 1);
+  }, [stepIdx, steps, answers, ringColors, numberInputs, subChecks, patternData, navigate]);
 
   if (loading) return <LoadingScreen onDone={() => setLoading(false)} />;
 
@@ -155,25 +154,25 @@ const Assessment = () => {
 
   const handleSelect = (optionId: string) => {
     setAnswers((prev) => ({ ...prev, [q.id]: optionId }));
-  };
 
-  const handleRescue = () => {
-    if (q.rescueButton) handleSelect(q.rescueButton.autoSelectId);
-  };
-
-  const next = () => {
-    if (questionNumber === TOTAL) {
-      const surveyData = {
-        answers,
-        ringColors,
-        numberInputs,
-        subChecks,
-      };
-      localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
-      navigate("/results");
-      return;
+    // Auto-advance for single-choice and surface-check after a brief delay
+    if (q.type === "single-choice" || q.type === "surface-check" || q.type === "card-style") {
+      setTimeout(() => {
+        if (questionNumber === TOTAL) {
+          const surveyData = {
+            answers: { ...answers, [q.id]: optionId },
+            ringColors,
+            numberInputs,
+            subChecks,
+            patternData,
+          };
+          localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
+          navigate("/results");
+        } else if (stepIdx < steps.length - 1) {
+          setStepIdx((s) => s + 1);
+        }
+      }, 350);
     }
-    if (stepIdx < steps.length - 1) setStepIdx((s) => s + 1);
   };
 
   const prev = () => {
@@ -188,9 +187,12 @@ const Assessment = () => {
         return ringColors.some((c) => c !== "#e5e7eb");
       case "number-input":
         return !!(numberInputs[q.id] && parseFloat(numberInputs[q.id]) > 0);
+      case "pattern-structure":
+        return true; // Always allow advancing (optional selections)
       case "checkbox-legal":
       case "single-choice":
       case "card-style":
+      case "surface-check":
         return !!selectedAnswer;
       default:
         return !!selectedAnswer;
@@ -200,18 +202,22 @@ const Assessment = () => {
   const showConditionalText =
     q.conditionalText && selectedAnswer && q.conditionalText.triggeredByIds.includes(selectedAnswer);
 
-  const showSubCheckbox =
-    q.subCheckbox && selectedAnswer && q.subCheckbox.triggeredByIds.includes(selectedAnswer);
+  const isSurfaceSmooth = answers[7] === "7a";
 
   return (
     <div className="min-h-screen bg-background">
       {/* Progress */}
       <div className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors">
+          <button
+            onClick={() => navigate("/")}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <span className="text-sm font-semibold text-gold">{questionNumber}/{TOTAL}</span>
+          <span className="text-sm font-semibold text-gold">
+            {questionNumber}/{TOTAL}
+          </span>
           <div />
         </div>
         <div className="h-1 bg-muted">
@@ -223,29 +229,21 @@ const Assessment = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in-up" key={stepIdx}>
-        <h2 className="font-serif text-xl md:text-2xl font-bold text-foreground mb-8">{q.category}</h2>
-
         <div className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-6">
           <div className="text-center space-y-3">
-            <span className="text-sm text-gold font-semibold">{questionNumber}/{TOTAL}</span>
+            <span className="text-sm text-gold font-semibold">
+              {questionNumber}/{TOTAL}
+            </span>
             <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground">{q.title}</h3>
             <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
               <Lightbulb className="h-4 w-4 text-gold" />
-              Gợi ý: {q.hint}
+              {q.hint}
             </p>
-          </div>
-
-          <div className="text-center">
-            <button
-              onClick={() => setGuideOpen(true)}
-              className="rounded-lg bg-gold px-5 py-2 text-sm font-bold text-primary-foreground hover:bg-gold-dark transition-colors"
-            >
-              Hướng dẫn
-            </button>
           </div>
 
           <div className="border-t border-border" />
 
+          {/* Color Ring */}
           {q.type === "color-ring" && (
             <>
               <ColorRing value={ringColors} onChange={setRingColors} />
@@ -253,16 +251,17 @@ const Assessment = () => {
             </>
           )}
 
+          {/* Number Input */}
           {q.type === "number-input" && (
             <NumberInputQuestion
               value={numberInputs[q.id] || ""}
               onChange={(v) => setNumberInputs((prev) => ({ ...prev, [q.id]: v }))}
               unit={q.inputUnit || "mm"}
-              helpText={q.inputHelpText}
             />
           )}
 
-          {(q.type === "single-choice" || q.type === "checkbox-legal") && (
+          {/* Single Choice & Surface Check & Checkbox Legal */}
+          {(q.type === "single-choice" || q.type === "checkbox-legal" || q.type === "surface-check") && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {q.options.map((opt) => (
                 <button
@@ -274,7 +273,16 @@ const Assessment = () => {
                       : "border-border bg-card hover:border-gold/50"
                   }`}
                 >
-                  <div className="aspect-video rounded-md bg-muted mb-3" />
+                  {/* Image placeholder - tap to open lightbox */}
+                  <div
+                    className="aspect-video rounded-md bg-muted mb-3 flex items-center justify-center cursor-zoom-in"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setLightboxImg({ src: "", caption: opt.label });
+                    }}
+                  >
+                    <span className="text-xs text-muted-foreground">Ảnh minh họa</span>
+                  </div>
                   <p className="text-sm font-semibold text-foreground">{opt.label}</p>
                   {opt.description && (
                     <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
@@ -284,6 +292,7 @@ const Assessment = () => {
             </div>
           )}
 
+          {/* Card Style */}
           {q.type === "card-style" && (
             <div className="grid grid-cols-2 gap-4">
               {q.options.map((opt) => (
@@ -306,29 +315,16 @@ const Assessment = () => {
             </div>
           )}
 
-          {q.rescueButton && (
-            <div className="text-center">
-              <button
-                onClick={handleRescue}
-                className="rounded-lg border border-border px-4 py-2 text-sm text-muted-foreground hover:bg-muted transition-colors"
-              >
-                🆘 {q.rescueButton.label}
-              </button>
-            </div>
+          {/* Pattern Structure (Section III - Q8) */}
+          {q.type === "pattern-structure" && (
+            <PatternStructure
+              value={patternData}
+              onChange={setPatternData}
+              surfaceSmooth={isSurfaceSmooth}
+            />
           )}
 
-          {showSubCheckbox && q.subCheckbox && (
-            <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer animate-fade-in-up">
-              <input
-                type="checkbox"
-                checked={!!subChecks[q.id]}
-                onChange={(e) => setSubChecks((prev) => ({ ...prev, [q.id]: e.target.checked }))}
-                className="rounded border-border text-gold focus:ring-gold"
-              />
-              {q.subCheckbox.label}
-            </label>
-          )}
-
+          {/* Conditional text */}
           {showConditionalText && q.conditionalText && (
             <p className="text-sm text-gold font-medium animate-fade-in-up">
               {q.conditionalText.text}
@@ -350,23 +346,20 @@ const Assessment = () => {
             disabled={!canGoNext}
             className="flex items-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-30 hover:bg-gold-dark transition-colors"
           >
-            {questionNumber === TOTAL ? "Hoàn thành" : "Tiếp theo"} <ArrowRight className="h-4 w-4" />
+            {questionNumber === TOTAL ? "Hoàn thành" : "Tiếp theo"}{" "}
+            <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       </div>
 
-      {/* Guide Modal */}
-      <Dialog open={guideOpen} onOpenChange={setGuideOpen}>
-        <DialogContent className="bg-card">
-          <DialogHeader>
-            <DialogTitle className="font-serif">Hướng dẫn</DialogTitle>
-          </DialogHeader>
-          <div className="py-8 text-center text-muted-foreground">
-            <p>Nội dung hướng dẫn sẽ được cập nhật sớm.</p>
-            <p className="text-sm mt-2">Video hoặc hình ảnh hướng dẫn kỹ thuật soi đèn sẽ hiển thị tại đây.</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Lightbox */}
+      {lightboxImg && (
+        <ImageLightbox
+          src={lightboxImg.src}
+          caption={lightboxImg.caption}
+          onClose={() => setLightboxImg(null)}
+        />
+      )}
     </div>
   );
 };

@@ -10,7 +10,9 @@ export type QuestionType =
   | "color-ring"
   | "number-input"
   | "card-style"
-  | "checkbox-legal";
+  | "checkbox-legal"
+  | "surface-check"
+  | "pattern-structure";
 
 export interface Question {
   id: number;
@@ -30,8 +32,8 @@ export const SECTIONS = [
   { before: 1, label: "I. CỐT NGỌC (Kết cấu & Độ trong)" },
   { before: 4, label: "II. SẮC DIỆN (Màu sắc)" },
   { before: 7, label: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)" },
-  { before: 11, label: "IV. KÍCH THƯỚC & KIỂU DÁNG" },
-  { before: 14, label: "V. BỐI CẢNH GIAO DỊCH" },
+  { before: 9, label: "IV. KÍCH THƯỚC & KIỂU DÁNG" },
+  { before: 12, label: "V. BỐI CẢNH GIAO DỊCH" },
 ];
 
 export const questions: Question[] = [
@@ -65,7 +67,7 @@ export const questions: Question[] = [
     id: 3,
     category: "I. CỐT NGỌC (Kết cấu & Độ trong)",
     type: "single-choice",
-    title: "Phần chất ngọc trong nhất/đẹp nhất chiếm khoảng bao nhiêu diện tích chiếc vòng?",
+    title: "Phần chất ngọc trong nhất/đẹp nhất bạn vừa đánh giá ở trên chiếm khoảng bao nhiêu diện tích chiếc vòng?",
     hint: "Xoay vòng 360° quan sát tổng thể.",
     options: [
       { id: "3a", label: "[A] Đều tăm tắp 100%", description: "Cả vòng đều đẹp như vậy.", multiplier: 1.0 },
@@ -113,106 +115,73 @@ export const questions: Question[] = [
   {
     id: 7,
     category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
-    type: "single-choice",
-    title: "Có đường nứt chạy xuyên trong lòng ngọc không?",
-    hint: "Soi đèn pin từ đằng sau cách 2-3cm thẳng vào vòng.",
+    type: "surface-check",
+    title: "1. Kiểm tra Bề Mặt (Cảm giác tay)",
+    hint: "Dùng móng tay cà nhẹ quanh bản vòng (mặt trong và ngoài).",
     options: [
-      { id: "7a", label: "0 – Không có", multiplier: 1.0 },
-      { id: "7b", label: "1 – Nứt mảnh < 3cm", multiplier: 0.85 },
-      { id: "7c", label: "2 – Nứt rõ ≥ 3cm", multiplier: 0.7 },
-      { id: "7d", label: "3 – Nhiều đường nứt hoặc giao cắt", multiplier: 0.5 },
+      { id: "7a", label: "Mượt hoàn toàn", description: "Không thấy vấp hay khựng ở đâu.", multiplier: 1.0 },
+      { id: "7b", label: "Vết sần/Lõm", description: "Cảm giác hơi hụt tay nhưng không sắc cạnh.", multiplier: 0.7 },
+      { id: "7c", label: "Vết nứt cấn tay", description: "Móng tay bị vướng/vấp lại rõ rệt.", multiplier: 0.5 },
     ],
   },
   {
     id: 8,
     category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
-    type: "single-choice",
-    title: "Có các đường \"sớ\" hoặc gân chạy trong lòng ngọc không?",
-    hint: "Ví dụ sớ, gân và chỉ màu.",
-    options: [
-      { id: "8a", label: "Không có", multiplier: 1.0 },
-      { id: "8b", label: "Có nhẹ nhưng ngắn (<3cm)", multiplier: 0.85 },
-      { id: "8c", label: "Có rõ, dài (≥3cm)", multiplier: 0.7 },
-      { id: "8d", label: "Có đường dài và chạy xuyên vòng (ngang / chéo)", multiplier: 0.5 },
-    ],
-  },
-  {
-    id: 9,
-    category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
-    type: "single-choice",
-    title: "Có tạp chất li ti bên trong không?",
-    hint: "Soi đèn pin xuyên qua thân vòng.",
-    options: [
-      { id: "9a", label: "[0] Không", multiplier: 1.0 },
-      { id: "9b", label: "[1] Rất ít", multiplier: 0.9 },
-      { id: "9c", label: "[2] Vừa phải", multiplier: 0.75 },
-      { id: "9d", label: "[3] Nhiều", multiplier: 0.6 },
-    ],
-    subCheckbox: { label: "Có đốm trắng / Đốm đen", triggeredByIds: ["9b", "9c", "9d"] },
-  },
-  {
-    id: 10,
-    category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
-    type: "single-choice",
-    title: "Bề mặt khi sờ có chỗ sần hoặc lõm không?",
-    hint: "Dùng ngón tay lướt nhẹ trên bề mặt vòng.",
-    options: [
-      { id: "10a", label: "0 – Hoàn toàn mịn", multiplier: 1.0 },
-      { id: "10b", label: "1 – Sần nhẹ (khó thấy bằng mắt, cảm nhận khi sờ)", multiplier: 0.85 },
-      { id: "10c", label: "2 – Có lõm / sần rõ", multiplier: 0.7 },
-      { id: "10d", label: "3 – Có mẻ hoặc khiếm khuyết đáng kể", multiplier: 0.5 },
-    ],
+    type: "pattern-structure",
+    title: "2. Kiểm tra Họa Tiết & Cấu Trúc (Soi đèn)",
+    hint: "Nếu thấy nhiều đường kẻ, hãy Zoom ảnh mẫu để đối chiếu chính xác nhất.",
+    options: [],
   },
 
   // ===== IV. KÍCH THƯỚC & KIỂU DÁNG =====
   {
-    id: 11,
+    id: 9,
     category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
     type: "number-input",
     title: "Ni vòng (đường kính trong - mm)",
     hint: "Dùng thước kẹp (tốt nhất). Hoặc dùng thước thẳng đặt ngang lòng vòng. Hoặc đo chu vi bằng dây rồi chia cho 3.14.",
     inputUnit: "mm",
-    inputHelpText: "Dùng thước kẹp: mở rộng ra và đặt vào lòng vòng, đọc số trên thước. Hoặc dùng thước thẳng đo khoảng cách bên trong vòng. Hoặc đo chu vi bằng dây rồi chia cho 3.14.",
+    inputHelpText: "Dùng thước kẹp: mở rộng ra và đặt vào lòng vòng, đọc số trên thước.",
     options: [],
   },
   {
-    id: 12,
+    id: 10,
     category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
     type: "card-style",
     title: "Kiểu dáng vòng ngọc?",
     hint: "So sánh mặt cắt ngang của vòng.",
     options: [
-      { id: "12a", label: "Bản đũa", description: "Thân tròn, nhỏ gọn" },
-      { id: "12b", label: "Bản hẹ", description: "Thân dẹp, bề mặt phẳng" },
-      { id: "12c", label: "Bản vuông", description: "Thân vuông vức, dày dặn" },
-      { id: "12d", label: "Khắc hoa", description: "Có hoa văn chạm khắc" },
+      { id: "10a", label: "Bản đũa", description: "Thân tròn, nhỏ gọn" },
+      { id: "10b", label: "Bản hẹ", description: "Thân dẹp, bề mặt phẳng" },
+      { id: "10c", label: "Bản vuông", description: "Thân vuông vức, dày dặn" },
+      { id: "10d", label: "Khắc hoa", description: "Có hoa văn chạm khắc" },
     ],
   },
   {
-    id: 13,
+    id: 11,
     category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
     type: "number-input",
     title: "Độ dày bản vòng - chột (mm)",
     hint: "Đo phần mặt cắt ngang dày nhất của vòng.",
     inputUnit: "mm",
-    inputHelpText: "Dùng thước kẹp kẹp vào phần dày nhất của thân vòng. Hoặc dùng thước thẳng đo từ mặt ngoài đến mặt trong.",
+    inputHelpText: "Dùng thước kẹp kẹp vào phần dày nhất của thân vòng.",
     options: [],
   },
 
   // ===== V. BỐI CẢNH GIAO DỊCH =====
   {
-    id: 14,
+    id: 12,
     category: "V. BỐI CẢNH GIAO DỊCH",
     type: "checkbox-legal",
     title: "Tính pháp lý của ngọc",
     hint: "Kiểm tra giấy tờ đi kèm khi mua.",
     options: [
-      { id: "14a", label: "Đã có giấy kiểm định uy tín (SJC, GIV, Liulab, hoặc chứng thư quốc tế)" },
-      { id: "14b", label: "Có giấy nhưng chữ nước ngoài / không rõ nguồn gốc" },
-      { id: "14c", label: "Chưa có giấy" },
+      { id: "12a", label: "Đã có giấy kiểm định uy tín (SJC, GIV, Liulab, hoặc chứng thư quốc tế)" },
+      { id: "12b", label: "Có giấy nhưng chữ nước ngoài / không rõ nguồn gốc" },
+      { id: "12c", label: "Chưa có giấy" },
     ],
     conditionalText: {
-      triggeredByIds: ["14c"],
+      triggeredByIds: ["12c"],
       text: "⚠️ Định giá chỉ mang tính tham khảo giả định đây là ngọc Type A (ngọc tự nhiên, chưa qua xử lý hóa học).",
     },
   },

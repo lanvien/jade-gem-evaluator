@@ -44,8 +44,8 @@ function computeResults(data: any) {
   }
   const tier = TIERS[tierIndex];
 
-  const diameter = parseFloat(numberInputs[11]) || 56;
-  const thickness = parseFloat(numberInputs[13]) || 8;
+  const diameter = parseFloat(numberInputs[9] || numberInputs[11]) || 56;
+  const thickness = parseFloat(numberInputs[11] || numberInputs[13]) || 8;
   const volumeCoeff = (diameter * thickness) / (56 * 8);
 
   const priceLow = Math.round((tier.basePrice[0] * volumeCoeff) / 100_000) * 100_000;
