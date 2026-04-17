@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions } from "@/data/questions";
-import { Download, Share2, Camera } from "lucide-react";
+import { Camera } from "lucide-react";
 
 import rankThuongTai from "@/assets/jade/rank_thuongtai.png";
 import rankThuongTaiLocked from "@/assets/jade/rank_thuongtai_locked.png";
@@ -13,6 +13,11 @@ import rankQuyPhi from "@/assets/jade/rank_quyphi.png";
 import rankQuyPhiLocked from "@/assets/jade/rank_quyphi_locked.png";
 import rankHoangHau from "@/assets/jade/rank_hoanghau.png";
 import rankHoangHauLocked from "@/assets/jade/rank_hoanghau_locked.png";
+
+import iconEdit from "@/assets/jade/icon_edit.png";
+import iconShare from "@/assets/jade/icon_share.png";
+import iconDownload from "@/assets/jade/icon_download.png";
+import iconUpload from "@/assets/jade/icon_upload.png";
 
 /* ── Grading / Pricing Engine ── */
 
