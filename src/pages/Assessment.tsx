@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions, SECTIONS } from "@/data/questions";
-import { ArrowLeft, ArrowRight, Lightbulb } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn } from "lucide-react";
 import SectionDivider from "@/components/SectionDivider";
-import ColorRing from "@/components/ColorRing";
+import ColorRing, { ColorTone } from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
 import PatternStructure, { PatternData } from "@/components/assessment/PatternStructure";
 import ImageLightbox from "@/components/assessment/ImageLightbox";
@@ -104,6 +104,10 @@ const Assessment = () => {
     const saved = localStorage.getItem("jade-ring-colors");
     return saved ? JSON.parse(saved) : Array(12).fill("#e5e7eb");
   });
+  const [colorTones, setColorTones] = useState<Record<string, ColorTone>>(() => {
+    const saved = localStorage.getItem("jade-color-tones");
+    return saved ? JSON.parse(saved) : {};
+  });
   const [patternData, setPatternData] = useState<PatternData>(() => {
     const saved = localStorage.getItem("jade-pattern-data");
     return saved ? JSON.parse(saved) : EMPTY_PATTERN;
@@ -115,10 +119,11 @@ const Assessment = () => {
     localStorage.setItem("jade-assessment-step", String(stepIdx));
     localStorage.setItem("jade-assessment-answers", JSON.stringify(answers));
     localStorage.setItem("jade-ring-colors", JSON.stringify(ringColors));
+    localStorage.setItem("jade-color-tones", JSON.stringify(colorTones));
     localStorage.setItem("jade-number-inputs", JSON.stringify(numberInputs));
     localStorage.setItem("jade-sub-checks", JSON.stringify(subChecks));
     localStorage.setItem("jade-pattern-data", JSON.stringify(patternData));
-  }, [stepIdx, answers, ringColors, numberInputs, subChecks, patternData]);
+  }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, patternData]);
 
   const handleDividerDone = useCallback(() => {
     setStepIdx((s) => Math.min(s + 1, steps.length - 1));
@@ -131,13 +136,13 @@ const Assessment = () => {
     const questionNumber = qIndex + 1;
 
     if (questionNumber === TOTAL) {
-      const surveyData = { answers, ringColors, numberInputs, subChecks, patternData };
+      const surveyData = { answers, ringColors, colorTones, numberInputs, subChecks, patternData };
       localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
       navigate("/results");
       return;
     }
     if (stepIdx < steps.length - 1) setStepIdx((s) => s + 1);
-  }, [stepIdx, steps, answers, ringColors, numberInputs, subChecks, patternData, navigate]);
+  }, [stepIdx, steps, answers, ringColors, colorTones, numberInputs, subChecks, patternData, navigate]);
 
   if (loading) return <LoadingScreen onDone={() => setLoading(false)} />;
 
@@ -152,16 +157,19 @@ const Assessment = () => {
   const selectedAnswer = answers[q.id];
   const questionNumber = qIndex + 1;
 
+  const isAutoAdvance = q.type === "single-choice" || q.type === "surface-check" || q.type === "card-style";
+
   const handleSelect = (optionId: string) => {
     setAnswers((prev) => ({ ...prev, [q.id]: optionId }));
 
-    // Auto-advance for single-choice and surface-check after a brief delay
-    if (q.type === "single-choice" || q.type === "surface-check" || q.type === "card-style") {
+    // Auto-advance
+    if (isAutoAdvance) {
       setTimeout(() => {
         if (questionNumber === TOTAL) {
           const surveyData = {
             answers: { ...answers, [q.id]: optionId },
             ringColors,
+            colorTones,
             numberInputs,
             subChecks,
             patternData,
@@ -188,7 +196,7 @@ const Assessment = () => {
       case "number-input":
         return !!(numberInputs[q.id] && parseFloat(numberInputs[q.id]) > 0);
       case "pattern-structure":
-        return true; // Always allow advancing (optional selections)
+        return true;
       case "checkbox-legal":
       case "single-choice":
       case "card-style":
@@ -202,7 +210,13 @@ const Assessment = () => {
   const showConditionalText =
     q.conditionalText && selectedAnswer && q.conditionalText.triggeredByIds.includes(selectedAnswer);
 
-  const isSurfaceSmooth = answers[7] === "7a";
+  // Always show Group B (Structural Warnings) — exclusive logic in PatternStructure
+  // resets selections but tab stays visible per user feedback.
+  const isSurfaceSmooth = false;
+
+  const openLightbox = (src: string, caption: string) => {
+    setLightboxImg({ src, caption });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -246,7 +260,12 @@ const Assessment = () => {
           {/* Color Ring */}
           {q.type === "color-ring" && (
             <>
-              <ColorRing value={ringColors} onChange={setRingColors} />
+              <ColorRing
+                value={ringColors}
+                onChange={setRingColors}
+                tones={colorTones}
+                onTonesChange={setColorTones}
+              />
               <ColorRingAlerts colors={ringColors} />
             </>
           )}
@@ -273,15 +292,28 @@ const Assessment = () => {
                       : "border-border bg-card hover:border-gold/50"
                   }`}
                 >
-                  {/* Image placeholder - tap to open lightbox */}
+                  {/* Image - tap to open lightbox */}
                   <div
-                    className="aspect-video rounded-md bg-muted mb-3 flex items-center justify-center cursor-zoom-in"
+                    className="aspect-video rounded-md bg-muted mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setLightboxImg({ src: "", caption: opt.label });
+                      if (opt.image) openLightbox(opt.image, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
                     }}
                   >
-                    <span className="text-xs text-muted-foreground">Ảnh minh họa</span>
+                    {opt.image ? (
+                      <>
+                        <img
+                          src={opt.image}
+                          alt={opt.label}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute top-1.5 right-1.5 bg-background/80 rounded-full p-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                          <ZoomIn className="h-3.5 w-3.5 text-foreground" />
+                        </div>
+                      </>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Ảnh minh họa</span>
+                    )}
                   </div>
                   <p className="text-sm font-semibold text-foreground">{opt.label}</p>
                   {opt.description && (
@@ -315,7 +347,7 @@ const Assessment = () => {
             </div>
           )}
 
-          {/* Pattern Structure (Section III - Q8) */}
+          {/* Pattern Structure */}
           {q.type === "pattern-structure" && (
             <PatternStructure
               value={patternData}
@@ -341,14 +373,17 @@ const Assessment = () => {
           >
             <ArrowLeft className="h-4 w-4" /> Quay lại
           </button>
-          <button
-            onClick={next}
-            disabled={!canGoNext}
-            className="flex items-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-30 hover:bg-gold-dark transition-colors"
-          >
-            {questionNumber === TOTAL ? "Hoàn thành" : "Tiếp theo"}{" "}
-            <ArrowRight className="h-4 w-4" />
-          </button>
+          {/* Hide "Next" button for auto-advance question types */}
+          {!isAutoAdvance && (
+            <button
+              onClick={next}
+              disabled={!canGoNext}
+              className="flex items-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-30 hover:bg-gold-dark transition-colors"
+            >
+              {questionNumber === TOTAL ? "Hoàn thành" : "Tiếp theo"}{" "}
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 

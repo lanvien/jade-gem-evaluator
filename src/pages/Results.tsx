@@ -3,17 +3,26 @@ import { useNavigate } from "react-router-dom";
 import { questions } from "@/data/questions";
 import { Download, Share2, Camera } from "lucide-react";
 
+import rankThuongTai from "@/assets/jade/rank_thuongtai.png";
+import rankThuongTaiLocked from "@/assets/jade/rank_thuongtai_locked.png";
+import rankQuyNhan from "@/assets/jade/rank_quynhan.png";
+import rankQuyNhanLocked from "@/assets/jade/rank_quynhan_locked.png";
+import rankPhiTan from "@/assets/jade/rank_phitan.png";
+import rankPhiTanLocked from "@/assets/jade/rank_phitan_locked.png";
+import rankQuyPhi from "@/assets/jade/rank_quyphi.png";
+import rankQuyPhiLocked from "@/assets/jade/rank_quyphi_locked.png";
+import rankHoangHau from "@/assets/jade/rank_hoanghau.png";
+import rankHoangHauLocked from "@/assets/jade/rank_hoanghau_locked.png";
+
 /* ── Grading / Pricing Engine ── */
 
 const TIERS = [
-  { key: "thuong-tai", label: "Thường tại", sub: "Chủng đậu", minScore: 0, basePrice: [1_000_000, 3_000_000] },
-  { key: "quy-nhan", label: "Quý nhân", sub: "Nếp mịn", minScore: 0.55, basePrice: [3_000_000, 8_000_000] },
-  { key: "phi-tan", label: "Phi tần", sub: "Nếp băng", minScore: 0.7, basePrice: [5_000_000, 15_000_000] },
-  { key: "quy-phi", label: "Quý phi", sub: "Băng", minScore: 0.82, basePrice: [12_000_000, 35_000_000] },
-  { key: "hoang-hau", label: "Hoàng hậu", sub: "Thủy tinh", minScore: 0.92, basePrice: [30_000_000, 100_000_000] },
+  { key: "thuong-tai", label: "Thường tại", sub: "Chủng đậu", minScore: 0, basePrice: [1_000_000, 3_000_000], icon: rankThuongTai, iconLocked: rankThuongTaiLocked },
+  { key: "quy-nhan", label: "Quý nhân", sub: "Nếp mịn", minScore: 0.55, basePrice: [3_000_000, 8_000_000], icon: rankQuyNhan, iconLocked: rankQuyNhanLocked },
+  { key: "phi-tan", label: "Phi tần", sub: "Nếp băng", minScore: 0.7, basePrice: [5_000_000, 15_000_000], icon: rankPhiTan, iconLocked: rankPhiTanLocked },
+  { key: "quy-phi", label: "Quý phi", sub: "Băng", minScore: 0.82, basePrice: [12_000_000, 35_000_000], icon: rankQuyPhi, iconLocked: rankQuyPhiLocked },
+  { key: "hoang-hau", label: "Hoàng hậu", sub: "Thủy tinh", minScore: 0.92, basePrice: [30_000_000, 100_000_000], icon: rankHoangHau, iconLocked: rankHoangHauLocked },
 ];
-
-const TIER_ICONS = ["🏠", "👑", "👸", "💎", "🏆"];
 
 function computeResults(data: any) {
   const answers = data.answers || {};
@@ -62,13 +71,16 @@ function computeResults(data: any) {
       ? "Phẩm ngọc đạt chủng Nếp. Hạt tinh thể mịn, ánh ngọc êm dịu. Đây là mức chất lượng phổ biến ở phân khúc trung – cao, phù hợp để đeo hàng ngày."
       : "Phẩm ngọc đạt chủng Đậu. Hạt tinh thể nhìn rõ, thích hợp cho người mới bắt đầu tìm hiểu ngọc.";
 
-  const sacAnswer = answers[5];
+  const tones: Record<string, string> = data.colorTones || {};
+  const toneValues = Object.values(tones);
+  const darkCount = toneValues.filter((t) => t === "dark").length;
+  const lightCount = toneValues.filter((t) => t === "light").length;
   const sacText =
-    sacAnswer === "5a"
-      ? "Sở hữu dải màu Lục tươi vượng khí. Không màng đến sự rập khuôn vô hồn, chính những vệt hoa bay đã thổi hồn vào khối đá, tạo nên một tuyệt tác thiên nhiên duy nhất và không thể sao chép."
-      : sacAnswer === "5b"
-      ? "Màu sắc ở mức trung bình, đều đặn. Sắc diện dễ chịu, phù hợp phong cách thanh lịch kín đáo."
-      : "Màu sắc nhạt, phớt. Phù hợp cho người thích phong cách tối giản, nhẹ nhàng.";
+    darkCount >= toneValues.length / 2 && toneValues.length > 0
+      ? "Sở hữu dải màu Lục tươi vượng khí, độ đậm sống động. Không màng đến sự rập khuôn vô hồn, chính những vệt hoa bay đã thổi hồn vào khối đá, tạo nên một tuyệt tác thiên nhiên duy nhất và không thể sao chép."
+      : lightCount >= toneValues.length / 2 && toneValues.length > 0
+      ? "Màu sắc nhạt, phớt. Phù hợp cho người thích phong cách tối giản, nhẹ nhàng."
+      : "Màu sắc ở mức trung bình, đều đặn. Sắc diện dễ chịu, phù hợp phong cách thanh lịch kín đáo.";
 
   const noiTaiText = data.subChecks?.[9]
     ? "Ngọc quý ắt trải qua phong hóa, giữ lại chút tỳ vết là lẽ thường tình. Sự xuất hiện của một vài vết sơ nhỏ chính là lời khẳng định mạnh mẽ nhất về nguồn gốc tự nhiên. Đây không chỉ là nét độc bản, mà còn là chìa khóa vàng để bạn làm chủ cuộc thương lượng (kỳ vọng giảm 15-20% giá)."
@@ -272,14 +284,20 @@ const Results = () => {
         <div className="mt-10">
           <h2 className="font-serif font-bold text-accent mb-4 text-left text-2xl">Phong kết cấu</h2>
           <div className="flex items-end justify-center gap-4 md:gap-8 overflow-x-auto pb-2 text-base">
-            {TIERS.map((t, i) => (
+            {TIERS.map((t, i) => {
+              const isActive = i === r.tierIndex;
+              return (
               <div
                 key={t.key}
                 className={`flex flex-col items-center text-center min-w-[70px] transition-all ${
-                  i === r.tierIndex ? "opacity-100 scale-110" : "opacity-30 grayscale"
+                  isActive ? "opacity-100 scale-110" : "opacity-40 grayscale"
                 }`}
               >
-                <span className="text-3xl mb-1">{TIER_ICONS[i]}</span>
+                <img
+                  src={isActive ? t.icon : t.iconLocked}
+                  alt={t.label}
+                  className="w-14 h-14 object-contain mb-1"
+                />
                 <p className={`text-xs font-bold ${i === r.tierIndex ? "text-foreground" : "text-muted-foreground"}`}>
                   {t.label}
                 </p>
@@ -287,7 +305,8 @@ const Results = () => {
                   {t.sub}
                 </p>
               </div>
-            ))}
+              );
+            })}
           </div>
           <div className="h-px bg-border mt-4" />
         </div>
