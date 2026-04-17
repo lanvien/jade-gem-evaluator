@@ -281,14 +281,20 @@ const Results = () => {
         <div className="mt-10">
           <h2 className="font-serif font-bold text-accent mb-4 text-left text-2xl">Phong kết cấu</h2>
           <div className="flex items-end justify-center gap-4 md:gap-8 overflow-x-auto pb-2 text-base">
-            {TIERS.map((t, i) => (
+            {TIERS.map((t, i) => {
+              const isActive = i === r.tierIndex;
+              return (
               <div
                 key={t.key}
                 className={`flex flex-col items-center text-center min-w-[70px] transition-all ${
-                  i === r.tierIndex ? "opacity-100 scale-110" : "opacity-30 grayscale"
+                  isActive ? "opacity-100 scale-110" : "opacity-40 grayscale"
                 }`}
               >
-                <span className="text-3xl mb-1">{TIER_ICONS[i]}</span>
+                <img
+                  src={isActive ? t.icon : t.iconLocked}
+                  alt={t.label}
+                  className="w-14 h-14 object-contain mb-1"
+                />
                 <p className={`text-xs font-bold ${i === r.tierIndex ? "text-foreground" : "text-muted-foreground"}`}>
                   {t.label}
                 </p>
