@@ -1,8 +1,17 @@
+import q1_dau from "@/assets/jade/q1_dau.png";
+import q1_nep from "@/assets/jade/q1_nep.png";
+import q1_nbang from "@/assets/jade/q1_nbang.png";
+import q2_dau from "@/assets/jade/q2_dau.png";
+import q2_nep from "@/assets/jade/q2_nep.png";
+import q2_bang from "@/assets/jade/q2_bang.png";
+import q2_nbang from "@/assets/jade/q2_nbang.png";
+
 export interface QuestionOption {
   id: string;
   label: string;
   description?: string;
   multiplier?: number;
+  image?: string;
 }
 
 export type QuestionType =
@@ -45,9 +54,9 @@ export const questions: Question[] = [
     title: "Hạt tinh thể ngọc trông như thế nào?",
     hint: "Soi đèn pin từ cạnh cách 1-2cm vào vòng, không chiếu thẳng vào mắt.",
     options: [
-      { id: "1a", label: "Hạt thô, nhìn rõ cấu trúc lấm tấm", description: "Xếp chồng như đậu nấu chín", multiplier: 0.65 },
-      { id: "1b", label: "Không thấy hạt riêng lẻ, cấu trúc mịn, đặc", description: "Giống sứ hoặc cháo nhuyễn", multiplier: 0.85 },
-      { id: "1c", label: "Tinh thể mịn như sương vừa bị đông lại", description: "Giống bông tuyết bị làm mờ đi trong kính", multiplier: 1.0 },
+      { id: "1a", label: "Hạt thô, nhìn rõ cấu trúc lấm tấm", description: "Xếp chồng như đậu nấu chín", multiplier: 0.65, image: q1_dau },
+      { id: "1b", label: "Không thấy hạt riêng lẻ, cấu trúc mịn, đặc", description: "Giống sứ hoặc cháo nhuyễn", multiplier: 0.85, image: q1_nep },
+      { id: "1c", label: "Tinh thể mịn như sương vừa bị đông lại", description: "Giống bông tuyết bị làm mờ đi trong kính", multiplier: 1.0, image: q1_nbang },
     ],
   },
   {
@@ -57,10 +66,10 @@ export const questions: Question[] = [
     title: "Độ xuyên sáng (chất ngọc) trông thế nào?",
     hint: "Hướng vòng về phía cửa sổ (không phải chiếu ánh sáng trực diện).",
     options: [
-      { id: "2a", label: "Đục hoàn toàn, không xuyên sáng", description: "Nhìn có cảm giác khô với hạt lấm tấm", multiplier: 0.5 },
-      { id: "2b", label: "Đục gần như hoàn toàn", description: "Chỉ lóe sáng nhẹ khi đưa sát nguồn sáng", multiplier: 0.65 },
-      { id: "2c", label: "Xuyên sáng vừa phải", description: "Nhìn như nước vo gạo; áp sát ngón tay phía sau thấy bóng mờ", multiplier: 0.85 },
-      { id: "2d", label: "Xuyên sáng rõ, có chiều sâu", description: "Như viên đá lạnh; thấy đường viền ngón tay tương đối rõ", multiplier: 1.0 },
+      { id: "2a", label: "Đục hoàn toàn, không xuyên sáng", description: "Nhìn có cảm giác khô với hạt lấm tấm", multiplier: 0.5, image: q2_dau },
+      { id: "2b", label: "Đục gần như hoàn toàn", description: "Chỉ lóe sáng nhẹ khi đưa sát nguồn sáng", multiplier: 0.65, image: q2_nep },
+      { id: "2c", label: "Xuyên sáng vừa phải", description: "Nhìn như nước vo gạo; áp sát ngón tay phía sau thấy bóng mờ", multiplier: 0.85, image: q2_nbang },
+      { id: "2d", label: "Xuyên sáng rõ, có chiều sâu", description: "Như viên đá lạnh; thấy đường viền ngón tay tương đối rõ", multiplier: 1.0, image: q2_bang },
     ],
   },
   {
@@ -82,33 +91,9 @@ export const questions: Question[] = [
     id: 4,
     category: "II. SẮC DIỆN (Màu sắc)",
     type: "color-ring",
-    title: "Diện mạo chiếc vòng: Nhìn tổng thể, màu sắc phân bổ theo kiểu nào?",
-    hint: "Chọn màu từ bảng palette rồi chạm vào múi trên vòng để tô màu.",
+    title: "Diện mạo chiếc vòng: Tô màu & chọn độ đậm cho từng sắc",
+    hint: "Chọn màu từ bảng → tô vào múi vòng → chọn [Nhạt] [Vừa] [Đậm] cho từng sắc đã dùng.",
     options: [],
-  },
-  {
-    id: 5,
-    category: "II. SẮC DIỆN (Màu sắc)",
-    type: "single-choice",
-    title: "Độ bão hòa màu sắc như thế nào?",
-    hint: "So sánh cường độ màu với hình mẫu.",
-    options: [
-      { id: "5a", label: "Rất đậm, sống động", multiplier: 1.0 },
-      { id: "5b", label: "Trung bình", multiplier: 0.85 },
-      { id: "5c", label: "Nhạt, phớt", multiplier: 0.65 },
-    ],
-  },
-  {
-    id: 6,
-    category: "II. SẮC DIỆN (Màu sắc)",
-    type: "single-choice",
-    title: "Màu phân bố trên vòng như thế nào?",
-    hint: "Xoay vòng 360 độ quan sát.",
-    options: [
-      { id: "6a", label: "Đều toàn vòng", multiplier: 1.0 },
-      { id: "6b", label: "Loang từng mảng", multiplier: 0.85 },
-      { id: "6c", label: "Chỉ một phần nhỏ", multiplier: 0.65 },
-    ],
   },
 
   // ===== III. NỘI TẠI =====
