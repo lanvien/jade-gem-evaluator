@@ -302,7 +302,8 @@ const Results = () => {
                   {t.sub}
                 </p>
               </div>
-            ))}
+              );
+            })}
           </div>
           <div className="h-px bg-border mt-4" />
         </div>
