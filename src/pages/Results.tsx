@@ -71,13 +71,16 @@ function computeResults(data: any) {
       ? "Phẩm ngọc đạt chủng Nếp. Hạt tinh thể mịn, ánh ngọc êm dịu. Đây là mức chất lượng phổ biến ở phân khúc trung – cao, phù hợp để đeo hàng ngày."
       : "Phẩm ngọc đạt chủng Đậu. Hạt tinh thể nhìn rõ, thích hợp cho người mới bắt đầu tìm hiểu ngọc.";
 
-  const sacAnswer = answers[5];
+  const tones: Record<string, string> = data.colorTones || {};
+  const toneValues = Object.values(tones);
+  const darkCount = toneValues.filter((t) => t === "dark").length;
+  const lightCount = toneValues.filter((t) => t === "light").length;
   const sacText =
-    sacAnswer === "5a"
-      ? "Sở hữu dải màu Lục tươi vượng khí. Không màng đến sự rập khuôn vô hồn, chính những vệt hoa bay đã thổi hồn vào khối đá, tạo nên một tuyệt tác thiên nhiên duy nhất và không thể sao chép."
-      : sacAnswer === "5b"
-      ? "Màu sắc ở mức trung bình, đều đặn. Sắc diện dễ chịu, phù hợp phong cách thanh lịch kín đáo."
-      : "Màu sắc nhạt, phớt. Phù hợp cho người thích phong cách tối giản, nhẹ nhàng.";
+    darkCount >= toneValues.length / 2 && toneValues.length > 0
+      ? "Sở hữu dải màu Lục tươi vượng khí, độ đậm sống động. Không màng đến sự rập khuôn vô hồn, chính những vệt hoa bay đã thổi hồn vào khối đá, tạo nên một tuyệt tác thiên nhiên duy nhất và không thể sao chép."
+      : lightCount >= toneValues.length / 2 && toneValues.length > 0
+      ? "Màu sắc nhạt, phớt. Phù hợp cho người thích phong cách tối giản, nhẹ nhàng."
+      : "Màu sắc ở mức trung bình, đều đặn. Sắc diện dễ chịu, phù hợp phong cách thanh lịch kín đáo.";
 
   const noiTaiText = data.subChecks?.[9]
     ? "Ngọc quý ắt trải qua phong hóa, giữ lại chút tỳ vết là lẽ thường tình. Sự xuất hiện của một vài vết sơ nhỏ chính là lời khẳng định mạnh mẽ nhất về nguồn gốc tự nhiên. Đây không chỉ là nét độc bản, mà còn là chìa khóa vàng để bạn làm chủ cuộc thương lượng (kỳ vọng giảm 15-20% giá)."
