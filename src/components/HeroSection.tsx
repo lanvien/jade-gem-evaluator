@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import jadeBangle from "@/assets/jade-bangle.png";
+import jadeBangle from "@/assets/jade/ui_hero_bangle.png";
 
 const HeroSection = () => {
   return (

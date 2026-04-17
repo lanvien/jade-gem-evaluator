@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions } from "@/data/questions";
-import { Download, Share2, Camera } from "lucide-react";
+
 
 import rankThuongTai from "@/assets/jade/rank_thuongtai.png";
 import rankThuongTaiLocked from "@/assets/jade/rank_thuongtai_locked.png";
@@ -13,6 +13,11 @@ import rankQuyPhi from "@/assets/jade/rank_quyphi.png";
 import rankQuyPhiLocked from "@/assets/jade/rank_quyphi_locked.png";
 import rankHoangHau from "@/assets/jade/rank_hoanghau.png";
 import rankHoangHauLocked from "@/assets/jade/rank_hoanghau_locked.png";
+
+import iconEdit from "@/assets/jade/icon_edit.png";
+import iconShare from "@/assets/jade/icon_share.png";
+import iconDownload from "@/assets/jade/icon_download.png";
+import iconUpload from "@/assets/jade/icon_upload.png";
 
 /* ── Grading / Pricing Engine ── */
 
@@ -188,10 +193,15 @@ const Results = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
-            <p className="text-4xl mb-3">👑</p>
-
-            {/* Ring visualization */}
+            {/* Ring visualization with diagonal crown overlay */}
             <div className="relative w-56 h-56 flex items-center justify-center">
+              {/* Active crown — overlaps top-left diagonally */}
+              <img
+                src={r.tier.icon}
+                alt={r.tier.label}
+                className="absolute -top-6 -left-6 w-20 h-20 object-contain rotate-[-18deg] drop-shadow-lg z-10 select-none pointer-events-none"
+              />
+
               <svg viewBox="0 0 200 200" className="w-full h-full">
                 {(surveyData.ringColors || []).map((color: string, i: number) => {
                   const angle = (i * 360) / 12;
@@ -219,8 +229,11 @@ const Results = () => {
                   );
                 })}
               </svg>
-              <button className="absolute bottom-1 right-1 text-muted-foreground hover:text-foreground p-1">
-                <Camera className="h-4 w-4" />
+              <button
+                aria-label="Tải ảnh vòng"
+                className="absolute bottom-1 right-1 hover:opacity-80 transition-opacity p-1"
+              >
+                <img src={iconUpload} alt="" className="h-5 w-5 object-contain" />
               </button>
             </div>
 
@@ -251,7 +264,12 @@ const Results = () => {
           <div className="space-y-5">
             <div>
               <p className="text-muted-foreground text-base">Chiếc vòng...</p>
-              <h1 className="font-serif font-bold text-foreground text-3xl">"Ái phi hiện tại" ✏️</h1>
+              <h1 className="font-serif font-bold text-foreground text-3xl flex items-center gap-2">
+                "Ái phi hiện tại"
+                <button aria-label="Đổi tên" className="hover:opacity-70 transition-opacity">
+                  <img src={iconEdit} alt="" className="h-6 w-6 object-contain inline-block" />
+                </button>
+              </h1>
               <div className="flex gap-2 mt-2 flex-wrap">
                 <span className="rounded-full border border-border px-3 py-1 text-muted-foreground text-base">#Sắc tím dịu dàng</span>
                 <span className="rounded-full border border-border px-3 py-1 text-muted-foreground text-base">#Hoa bay yêu kiều</span>
@@ -313,11 +331,11 @@ const Results = () => {
 
         {/* Action buttons */}
         <div className="flex items-center justify-center gap-4 mt-8 text-right">
-          <button className="rounded-full border border-border p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-            <Download className="h-5 w-5" />
+          <button aria-label="Tải xuống" className="rounded-full border border-border p-2.5 hover:bg-muted transition-colors">
+            <img src={iconDownload} alt="" className="h-5 w-5 object-contain" />
           </button>
-          <button className="rounded-full border border-border p-2.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-            <Share2 className="h-5 w-5" />
+          <button aria-label="Chia sẻ" className="rounded-full border border-border p-2.5 hover:bg-muted transition-colors">
+            <img src={iconShare} alt="" className="h-5 w-5 object-contain" />
           </button>
         </div>
 

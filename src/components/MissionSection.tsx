@@ -1,7 +1,23 @@
+import splash from "@/assets/jade/ui_splash_2.png";
+
 const MissionSection = () => {
   return (
-    <section id="mission" className="bg-beige-dark py-16 md:py-24">
-      <div className="container mx-auto px-4">
+    <section id="mission" className="relative bg-beige-dark py-16 md:py-24 overflow-hidden">
+      {/* Decorative splashes */}
+      <img
+        src={splash}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-16 top-8 w-56 md:w-72 opacity-60 select-none"
+      />
+      <img
+        src={splash}
+        alt=""
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-20 bottom-0 w-64 md:w-80 opacity-50 -scale-x-100 select-none"
+      />
+
+      <div className="container mx-auto px-4 relative">
         <div className="flex flex-col md:flex-row items-start gap-12 md:gap-20">
           <div className="md:w-1/3 space-y-3">
             <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">Sứ mệnh</h2>
