@@ -120,20 +120,34 @@ function formatVNDFull(n: number) {
   return n.toLocaleString("vi-VN") + " VNĐ";
 }
 
-/* ── Loading Screen ── */
+/* ── Loading Screen (green bg, random quote) ── */
+const RESULTS_QUOTES = [
+  {
+    title: "⏳ Đang đối chiếu dữ liệu thị trường...",
+    quote: "Giá ngọc tùy duyên, nhưng kiến thức sẽ giúp bạn không mua hớ.",
+  },
+  {
+    title: "⏳ Đang kiểm tra chứng thư...",
+    quote:
+      "Ngọc luôn đi đôi với giấy kiểm định. Đừng mua ngọc nếu không có giấy kiểm định từ các trung tâm uy tín như SJC, Liulab hay GIV.",
+  },
+];
+
 const ResultsLoading = ({ onDone }: { onDone: () => void }) => {
+  const [q] = useState(() => RESULTS_QUOTES[Math.floor(Math.random() * RESULTS_QUOTES.length)]);
   useEffect(() => {
     const t = setTimeout(onDone, 3000);
     return () => clearTimeout(t);
   }, [onDone]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up bg-background">
-      <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin mb-6" />
-      <p className="text-lg font-bold text-foreground mb-6">Đang kiểm tra chứng thư...</p>
-      <p className="font-serif italic text-base text-foreground max-w-md leading-relaxed">
-        Ngọc luôn đi đôi với giấy kiểm định. Đừng mua ngọc nếu không có giấy kiểm định từ các trung tâm uy tín như SJC, Liulab hay GIV
-      </p>
+    <div
+      className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up"
+      style={{ backgroundColor: "#002f14", color: "#ffffff" }}
+    >
+      <div className="w-12 h-12 border-4 border-white/80 border-t-transparent rounded-full animate-spin mb-6" />
+      <p className="text-xl font-bold mb-6">{q.title}</p>
+      <p className="font-serif italic text-base max-w-md leading-relaxed">{q.quote}</p>
     </div>
   );
 };
