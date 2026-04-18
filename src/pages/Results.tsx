@@ -249,18 +249,18 @@ const Results = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-12 max-w-5xl animate-fade-in-up">
+      <div ref={cardRef} className="container mx-auto px-4 pb-12 max-w-5xl animate-fade-in-up bg-background">
         {/* Two-column layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
             {/* Ring visualization with diagonal crown overlay */}
-            <div className="relative w-56 h-56 flex items-center justify-center">
-              {/* Active crown — overlaps top-left diagonally */}
+            <div className="relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center">
+              {/* Active crown — overlaps top-left diagonally, larger & glowing */}
               <img
                 src={r.tier.icon}
                 alt={r.tier.label}
-                className="absolute -top-6 -left-6 w-20 h-20 object-contain rotate-[-18deg] drop-shadow-lg z-10 select-none pointer-events-none"
+                className="absolute -top-10 -left-10 w-32 h-32 md:w-36 md:h-36 object-contain rotate-[-18deg] z-10 select-none pointer-events-none animate-crown-glow"
               />
 
               <svg viewBox="0 0 200 200" className="w-full h-full">
@@ -325,10 +325,27 @@ const Results = () => {
           <div className="space-y-5">
             <div>
               <p className="text-muted-foreground text-base">Chiếc vòng...</p>
-              <h1 className="font-serif font-bold text-foreground text-3xl flex items-center gap-2">
-                "Ái phi hiện tại"
-                <button aria-label="Đổi tên" className="hover:opacity-70 transition-opacity">
-                  <img src={iconEdit} alt="" className="h-6 w-6 object-contain inline-block" />
+              <h1 className="font-serif font-bold text-foreground text-3xl flex items-center gap-2 flex-wrap">
+                {editingName ? (
+                  <input
+                    autoFocus
+                    value={ringName}
+                    onChange={(e) => setRingName(e.target.value)}
+                    onBlur={() => setEditingName(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") setEditingName(false);
+                    }}
+                    className="font-serif font-bold text-foreground text-3xl bg-transparent border-b-2 border-gold outline-none px-1 max-w-full"
+                  />
+                ) : (
+                  <span>"{ringName}"</span>
+                )}
+                <button
+                  aria-label="Đổi tên"
+                  onClick={() => setEditingName((v) => !v)}
+                  className="hover:opacity-70 transition-opacity"
+                >
+                  <img src={iconEdit} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain inline-block" />
                 </button>
               </h1>
               <div className="flex gap-2 mt-2 flex-wrap">
@@ -362,25 +379,25 @@ const Results = () => {
         {/* Phong kết cấu tier row */}
         <div className="mt-10">
           <h2 className="font-serif font-bold text-accent mb-4 text-left text-2xl">Phong kết cấu</h2>
-          <div className="flex items-end justify-center gap-4 md:gap-8 overflow-x-auto pb-2 text-base">
+          <div className="flex items-end justify-center gap-3 md:gap-6 overflow-x-auto pb-2">
             {TIERS.map((t, i) => {
               const isActive = i === r.tierIndex;
               return (
               <div
                 key={t.key}
-                className={`flex flex-col items-center text-center min-w-[70px] transition-all ${
-                  isActive ? "opacity-100 scale-110" : "opacity-40 grayscale"
+                className={`flex flex-col items-center text-center min-w-[100px] md:min-w-[120px] transition-all ${
+                  isActive ? "opacity-100 scale-110" : "opacity-50 grayscale"
                 }`}
               >
                 <img
                   src={isActive ? t.icon : t.iconLocked}
                   alt={t.label}
-                  className="w-14 h-14 object-contain mb-1"
+                  className={`w-20 h-20 md:w-24 md:h-24 object-contain mb-2 ${isActive ? "animate-crown-glow" : ""}`}
                 />
-                <p className={`text-xs font-bold ${i === r.tierIndex ? "text-foreground" : "text-muted-foreground"}`}>
+                <p className={`text-base md:text-lg font-bold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
                   {t.label}
                 </p>
-                <p className={`text-xs ${i === r.tierIndex ? "font-bold text-foreground" : "text-muted-foreground"}`}>
+                <p className={`text-sm md:text-base ${isActive ? "font-bold text-foreground" : "text-muted-foreground"}`}>
                   {t.sub}
                 </p>
               </div>
@@ -390,13 +407,22 @@ const Results = () => {
           <div className="h-px bg-border mt-4" />
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center justify-center gap-4 mt-8 text-right">
-          <button aria-label="Tải xuống" className="rounded-full border border-border p-2.5 hover:bg-muted transition-colors">
-            <img src={iconDownload} alt="" className="h-5 w-5 object-contain" />
+        {/* Action buttons - larger */}
+        <div className="flex items-center justify-center gap-6 mt-8">
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            aria-label="Tải xuống"
+            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors disabled:opacity-50"
+          >
+            <img src={iconDownload} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
           </button>
-          <button aria-label="Chia sẻ" className="rounded-full border border-border p-2.5 hover:bg-muted transition-colors">
-            <img src={iconShare} alt="" className="h-5 w-5 object-contain" />
+          <button
+            onClick={handleShare}
+            aria-label="Chia sẻ"
+            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors"
+          >
+            <img src={iconShare} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
           </button>
         </div>
 
