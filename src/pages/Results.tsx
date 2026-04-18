@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toPng } from "html-to-image";
 import { questions } from "@/data/questions";
 
 
@@ -119,20 +120,34 @@ function formatVNDFull(n: number) {
   return n.toLocaleString("vi-VN") + " VNĐ";
 }
 
-/* ── Loading Screen ── */
+/* ── Loading Screen (green bg, random quote) ── */
+const RESULTS_QUOTES = [
+  {
+    title: "⏳ Đang đối chiếu dữ liệu thị trường...",
+    quote: "Giá ngọc tùy duyên, nhưng kiến thức sẽ giúp bạn không mua hớ.",
+  },
+  {
+    title: "⏳ Đang kiểm tra chứng thư...",
+    quote:
+      "Ngọc luôn đi đôi với giấy kiểm định. Đừng mua ngọc nếu không có giấy kiểm định từ các trung tâm uy tín như SJC, Liulab hay GIV.",
+  },
+];
+
 const ResultsLoading = ({ onDone }: { onDone: () => void }) => {
+  const [q] = useState(() => RESULTS_QUOTES[Math.floor(Math.random() * RESULTS_QUOTES.length)]);
   useEffect(() => {
     const t = setTimeout(onDone, 3000);
     return () => clearTimeout(t);
   }, [onDone]);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up bg-background">
-      <div className="w-12 h-12 border-4 border-gold border-t-transparent rounded-full animate-spin mb-6" />
-      <p className="text-lg font-bold text-foreground mb-6">Đang kiểm tra chứng thư...</p>
-      <p className="font-serif italic text-base text-foreground max-w-md leading-relaxed">
-        Ngọc luôn đi đôi với giấy kiểm định. Đừng mua ngọc nếu không có giấy kiểm định từ các trung tâm uy tín như SJC, Liulab hay GIV
-      </p>
+    <div
+      className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up"
+      style={{ backgroundColor: "#002f14", color: "#ffffff" }}
+    >
+      <div className="w-12 h-12 border-4 border-white/80 border-t-transparent rounded-full animate-spin mb-6" />
+      <p className="text-xl font-bold mb-6">{q.title}</p>
+      <p className="font-serif italic text-base max-w-md leading-relaxed">{q.quote}</p>
     </div>
   );
 };
@@ -142,11 +157,21 @@ const Results = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [surveyData, setSurveyData] = useState<any>(null);
+  const [ringName, setRingName] = useState<string>(() => {
+    return localStorage.getItem("jade-ring-name") || "Ái phi hiện tại";
+  });
+  const [editingName, setEditingName] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const data = localStorage.getItem("jade-survey-data");
     if (data) setSurveyData(JSON.parse(data));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("jade-ring-name", ringName);
+  }, [ringName]);
 
   if (loading) {
     return <ResultsLoading onDone={() => setLoading(false)} />;
@@ -171,11 +196,47 @@ const Results = () => {
   const handleRestart = () => {
     localStorage.removeItem("jade-assessment-step");
     localStorage.removeItem("jade-assessment-answers");
-    localStorage.removeItem("jade-ring-colors");
     localStorage.removeItem("jade-number-inputs");
     localStorage.removeItem("jade-sub-checks");
+    localStorage.removeItem("jade-ring-colors");
+    localStorage.removeItem("jade-color-tones");
+    localStorage.removeItem("jade-pattern-data");
     localStorage.removeItem("jade-survey-data");
     navigate("/assessment");
+  };
+
+  const handleDownload = async () => {
+    if (!cardRef.current || downloading) return;
+    try {
+      setDownloading(true);
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#faf6ee",
+      });
+      const link = document.createElement("a");
+      link.download = `hieu-ngoc-${ringName.replace(/\s+/g, "-")}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (e) {
+      console.error("Download failed", e);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Hiểu ngọc - ${ringName}`,
+          text: `Vòng "${ringName}" của tôi đạt phẩm cấp ${r.tier.label} – ${r.tier.sub}!`,
+          url: window.location.href,
+        });
+      } catch {}
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+    }
   };
 
   return (
@@ -188,18 +249,18 @@ const Results = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-12 max-w-5xl animate-fade-in-up">
+      <div ref={cardRef} className="container mx-auto px-4 pb-12 max-w-5xl animate-fade-in-up bg-background">
         {/* Two-column layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
             {/* Ring visualization with diagonal crown overlay */}
-            <div className="relative w-56 h-56 flex items-center justify-center">
-              {/* Active crown — overlaps top-left diagonally */}
+            <div className="relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center">
+              {/* Active crown — overlaps top-left diagonally, larger & glowing */}
               <img
                 src={r.tier.icon}
                 alt={r.tier.label}
-                className="absolute -top-6 -left-6 w-20 h-20 object-contain rotate-[-18deg] drop-shadow-lg z-10 select-none pointer-events-none"
+                className="absolute -top-10 -left-10 w-32 h-32 md:w-36 md:h-36 object-contain rotate-[-18deg] z-10 select-none pointer-events-none animate-crown-glow"
               />
 
               <svg viewBox="0 0 200 200" className="w-full h-full">
@@ -264,10 +325,27 @@ const Results = () => {
           <div className="space-y-5">
             <div>
               <p className="text-muted-foreground text-base">Chiếc vòng...</p>
-              <h1 className="font-serif font-bold text-foreground text-3xl flex items-center gap-2">
-                "Ái phi hiện tại"
-                <button aria-label="Đổi tên" className="hover:opacity-70 transition-opacity">
-                  <img src={iconEdit} alt="" className="h-6 w-6 object-contain inline-block" />
+              <h1 className="font-serif font-bold text-foreground text-3xl flex items-center gap-2 flex-wrap">
+                {editingName ? (
+                  <input
+                    autoFocus
+                    value={ringName}
+                    onChange={(e) => setRingName(e.target.value)}
+                    onBlur={() => setEditingName(false)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") setEditingName(false);
+                    }}
+                    className="font-serif font-bold text-foreground text-3xl bg-transparent border-b-2 border-gold outline-none px-1 max-w-full"
+                  />
+                ) : (
+                  <span>"{ringName}"</span>
+                )}
+                <button
+                  aria-label="Đổi tên"
+                  onClick={() => setEditingName((v) => !v)}
+                  className="hover:opacity-70 transition-opacity"
+                >
+                  <img src={iconEdit} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain inline-block" />
                 </button>
               </h1>
               <div className="flex gap-2 mt-2 flex-wrap">
@@ -301,25 +379,25 @@ const Results = () => {
         {/* Phong kết cấu tier row */}
         <div className="mt-10">
           <h2 className="font-serif font-bold text-accent mb-4 text-left text-2xl">Phong kết cấu</h2>
-          <div className="flex items-end justify-center gap-4 md:gap-8 overflow-x-auto pb-2 text-base">
+          <div className="flex items-end justify-center gap-3 md:gap-6 overflow-x-auto pb-2">
             {TIERS.map((t, i) => {
               const isActive = i === r.tierIndex;
               return (
               <div
                 key={t.key}
-                className={`flex flex-col items-center text-center min-w-[70px] transition-all ${
-                  isActive ? "opacity-100 scale-110" : "opacity-40 grayscale"
+                className={`flex flex-col items-center text-center min-w-[100px] md:min-w-[120px] transition-all ${
+                  isActive ? "opacity-100 scale-110" : "opacity-50 grayscale"
                 }`}
               >
                 <img
                   src={isActive ? t.icon : t.iconLocked}
                   alt={t.label}
-                  className="w-14 h-14 object-contain mb-1"
+                  className={`w-20 h-20 md:w-24 md:h-24 object-contain mb-2 ${isActive ? "animate-crown-glow" : ""}`}
                 />
-                <p className={`text-xs font-bold ${i === r.tierIndex ? "text-foreground" : "text-muted-foreground"}`}>
+                <p className={`text-base md:text-lg font-bold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
                   {t.label}
                 </p>
-                <p className={`text-xs ${i === r.tierIndex ? "font-bold text-foreground" : "text-muted-foreground"}`}>
+                <p className={`text-sm md:text-base ${isActive ? "font-bold text-foreground" : "text-muted-foreground"}`}>
                   {t.sub}
                 </p>
               </div>
@@ -329,13 +407,22 @@ const Results = () => {
           <div className="h-px bg-border mt-4" />
         </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center justify-center gap-4 mt-8 text-right">
-          <button aria-label="Tải xuống" className="rounded-full border border-border p-2.5 hover:bg-muted transition-colors">
-            <img src={iconDownload} alt="" className="h-5 w-5 object-contain" />
+        {/* Action buttons - larger */}
+        <div className="flex items-center justify-center gap-6 mt-8">
+          <button
+            onClick={handleDownload}
+            disabled={downloading}
+            aria-label="Tải xuống"
+            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors disabled:opacity-50"
+          >
+            <img src={iconDownload} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
           </button>
-          <button aria-label="Chia sẻ" className="rounded-full border border-border p-2.5 hover:bg-muted transition-colors">
-            <img src={iconShare} alt="" className="h-5 w-5 object-contain" />
+          <button
+            onClick={handleShare}
+            aria-label="Chia sẻ"
+            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors"
+          >
+            <img src={iconShare} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
           </button>
         </div>
 

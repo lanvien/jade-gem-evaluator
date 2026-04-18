@@ -5,6 +5,8 @@ import q2_dau from "@/assets/jade/q2_dau.png";
 import q2_nep from "@/assets/jade/q2_nep.png";
 import q2_bang from "@/assets/jade/q2_bang.png";
 import q2_nbang from "@/assets/jade/q2_nbang.png";
+import q5_san_lom from "@/assets/jade/q5_san_lom.png";
+import q5_vet_nut from "@/assets/jade/q5_vet_nut.png";
 
 export interface QuestionOption {
   id: string;
@@ -105,8 +107,8 @@ export const questions: Question[] = [
     hint: "Dùng móng tay cà nhẹ quanh bản vòng (mặt trong và ngoài).",
     options: [
       { id: "7a", label: "Mượt hoàn toàn", description: "Không thấy vấp hay khựng ở đâu.", multiplier: 1.0 },
-      { id: "7b", label: "Vết sần/Lõm", description: "Cảm giác hơi hụt tay nhưng không sắc cạnh.", multiplier: 0.7 },
-      { id: "7c", label: "Vết nứt cấn tay", description: "Móng tay bị vướng/vấp lại rõ rệt.", multiplier: 0.5 },
+      { id: "7b", label: "Vết sần/Lõm", description: "Cảm giác hơi hụt tay nhưng không sắc cạnh.", multiplier: 0.7, image: q5_san_lom },
+      { id: "7c", label: "Vết nứt cấn tay", description: "Móng tay bị vướng/vấp lại rõ rệt.", multiplier: 0.5, image: q5_vet_nut },
     ],
   },
   {

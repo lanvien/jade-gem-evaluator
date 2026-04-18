@@ -99,4 +99,13 @@
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
+
+  @keyframes crown-glow {
+    0%, 100% { filter: drop-shadow(0 0 4px hsl(38 80% 60% / 0.4)) drop-shadow(0 0 10px hsl(38 80% 60% / 0.2)); }
+    50% { filter: drop-shadow(0 0 10px hsl(38 90% 65% / 0.85)) drop-shadow(0 0 22px hsl(38 90% 65% / 0.45)); }
+  }
+
+  .animate-crown-glow {
+    animation: crown-glow 2.4s ease-in-out infinite;
+  }
 }

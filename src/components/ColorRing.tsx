@@ -93,6 +93,13 @@ const ColorRing = ({ value, onChange, tones = {}, onTonesChange }: ColorRingProp
     return all.find((c) => c.color.toLowerCase() === color.toLowerCase())?.label || color;
   };
 
+  // Tone → fill opacity (dark = full, medium = slight, light = more dim)
+  const toneOpacity = (color: string) => {
+    if (color === "#e5e7eb") return 1;
+    const t = tones[color] || "medium";
+    return t === "dark" ? 1 : t === "medium" ? 0.7 : 0.45;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
@@ -103,6 +110,7 @@ const ColorRing = ({ value, onChange, tones = {}, onTonesChange }: ColorRingProp
               key={i}
               d={segmentPath(i)}
               fill={colors[i]}
+              fillOpacity={toneOpacity(colors[i])}
               stroke="hsl(var(--foreground))"
               strokeWidth="1.5"
               className="cursor-pointer hover:opacity-80 transition-opacity"

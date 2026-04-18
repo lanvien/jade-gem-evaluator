@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
+import iconCopNgoc from "@/assets/jade/icon_copngoc.png";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,9 +21,10 @@ const Header = () => {
 
         <Link
           to="/assessment"
-          className="hidden md:flex items-center gap-2 rounded-full border-2 border-gold bg-background px-4 py-2 text-sm font-semibold text-foreground animate-pulse-gentle hover:bg-gold hover:text-primary-foreground transition-colors"
+          className="hidden md:flex items-center gap-3 rounded-full border-2 border-gold bg-background px-5 py-2 text-base font-semibold text-foreground animate-pulse-gentle hover:bg-gold hover:text-primary-foreground transition-colors"
         >
-          Cốp ngọc của bạn 📦
+          Cốp ngọc của bạn
+          <img src={iconCopNgoc} alt="" className="h-8 w-8 object-contain" />
         </Link>
 
         <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-foreground">
@@ -38,9 +40,10 @@ const Header = () => {
           <Link
             to="/assessment"
             onClick={() => setMobileOpen(false)}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-gold px-4 py-2 text-sm font-semibold"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-gold px-4 py-2 text-base font-semibold"
           >
-            Cốp ngọc của bạn 📦
+            Cốp ngọc của bạn
+            <img src={iconCopNgoc} alt="" className="h-7 w-7 object-contain" />
           </Link>
         </nav>
       )}
