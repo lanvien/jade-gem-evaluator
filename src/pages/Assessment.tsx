@@ -27,7 +27,21 @@ function buildSteps(): Step[] {
 }
 
 /* ── Loading Screen ── */
+const LOADING_QUOTES = [
+  {
+    title: "⏳ Đang phân tích cốt ngọc và sắc diện...",
+    quote: '"Ngọc dưỡng người 3 năm, người dưỡng ngọc một đời"',
+    sub: "Hãy thả lỏng tâm trí để bắt đầu hành trình hiểu Ngọc.",
+  },
+  {
+    title: "⏳ Đang chuẩn bị thước đo và đèn soi ảo...",
+    quote: "Bạn đã sẵn sàng quan sát kỹ chiếc vòng của mình chưa?",
+    sub: "",
+  },
+];
+
 const LoadingScreen = ({ onDone }: { onDone: () => void }) => {
+  const [q] = useState(() => LOADING_QUOTES[Math.floor(Math.random() * LOADING_QUOTES.length)]);
   useEffect(() => {
     const t = setTimeout(onDone, 2500);
     return () => clearTimeout(t);
@@ -36,15 +50,11 @@ const LoadingScreen = ({ onDone }: { onDone: () => void }) => {
   return (
     <div
       className="flex min-h-screen flex-col items-center justify-center px-4 text-center animate-fade-in-up"
-      style={{ backgroundColor: "#002f14" }}
+      style={{ backgroundColor: "#002f14", color: "#ffffff" }}
     >
-      <p className="text-xl font-bold text-white mb-8 tracking-wider">Loading...</p>
-      <p className="font-serif italic text-lg text-white max-w-md leading-relaxed">
-        "Ngọc dưỡng người 3 năm, người dưỡng ngọc một đời."
-      </p>
-      <p className="font-serif italic text-sm text-white/70 mt-3">
-        Hãy thả lỏng tâm trí để bắt đầu hành trình hiểu Ngọc.
-      </p>
+      <p className="text-xl font-bold mb-8 tracking-wider">{q.title}</p>
+      <p className="font-serif italic text-lg max-w-md leading-relaxed">{q.quote}</p>
+      {q.sub && <p className="font-serif italic text-sm mt-3 opacity-80">{q.sub}</p>}
     </div>
   );
 };
@@ -282,7 +292,10 @@ const Assessment = () => {
           {/* Single Choice & Surface Check & Checkbox Legal */}
           {(q.type === "single-choice" || q.type === "checkbox-legal" || q.type === "surface-check") && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {q.options.map((opt) => (
+              {q.options.map((opt) => {
+                // Hide images entirely for Q3 (id === 3)
+                const showImageSlot = q.id !== 3;
+                return (
                 <button
                   key={opt.id}
                   onClick={() => handleSelect(opt.id)}
@@ -292,35 +305,32 @@ const Assessment = () => {
                       : "border-border bg-card hover:border-gold/50"
                   }`}
                 >
-                  {/* Image - tap to open lightbox */}
-                  <div
-                    className="aspect-video rounded-md bg-muted mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (opt.image) openLightbox(opt.image, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
-                    }}
-                  >
-                    {opt.image ? (
-                      <>
-                        <img
-                          src={opt.image}
-                          alt={opt.label}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-1.5 right-1.5 bg-background/80 rounded-full p-1 opacity-70 group-hover:opacity-100 transition-opacity">
-                          <ZoomIn className="h-3.5 w-3.5 text-foreground" />
-                        </div>
-                      </>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">Ảnh minh họa</span>
-                    )}
-                  </div>
+                  {/* Image - tap to open lightbox - only if image exists */}
+                  {showImageSlot && opt.image && (
+                    <div
+                      className="rounded-md bg-muted mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group h-56 sm:h-64"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
+                      }}
+                    >
+                      <img
+                        src={opt.image}
+                        alt={opt.label}
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <ZoomIn className="h-4 w-4 text-foreground" />
+                      </div>
+                    </div>
+                  )}
                   <p className="text-sm font-semibold text-foreground">{opt.label}</p>
                   {opt.description && (
                     <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
                   )}
                 </button>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -373,17 +383,15 @@ const Assessment = () => {
           >
             <ArrowLeft className="h-4 w-4" /> Quay lại
           </button>
-          {/* Hide "Next" button for auto-advance question types */}
-          {!isAutoAdvance && (
-            <button
-              onClick={next}
-              disabled={!canGoNext}
-              className="flex items-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-30 hover:bg-gold-dark transition-colors"
-            >
-              {questionNumber === TOTAL ? "Hoàn thành" : "Tiếp theo"}{" "}
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          )}
+          {/* Always show Next button — auto-advance still works on click */}
+          <button
+            onClick={next}
+            disabled={!canGoNext}
+            className="flex items-center gap-2 rounded-lg bg-gold px-5 py-2.5 text-sm font-bold text-primary-foreground disabled:opacity-30 hover:bg-gold-dark transition-colors"
+          >
+            {questionNumber === TOTAL ? "Hoàn thành" : "Tiếp theo"}{" "}
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
