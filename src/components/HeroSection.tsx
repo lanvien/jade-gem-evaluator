@@ -9,9 +9,9 @@ const HeroSection = () => {
           <img
             src={jadeBangle}
             alt="Vòng ngọc phỉ thúy"
-            width={400}
-            height={400}
-            className="w-64 md:w-96 animate-float drop-shadow-2xl"
+            width={700}
+            height={700}
+            className="w-[22rem] sm:w-[28rem] md:w-[34rem] lg:w-[40rem] animate-float drop-shadow-2xl"
           />
         </div>
 
