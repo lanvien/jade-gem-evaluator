@@ -157,11 +157,21 @@ const Results = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [surveyData, setSurveyData] = useState<any>(null);
+  const [ringName, setRingName] = useState<string>(() => {
+    return localStorage.getItem("jade-ring-name") || "Ái phi hiện tại";
+  });
+  const [editingName, setEditingName] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const data = localStorage.getItem("jade-survey-data");
     if (data) setSurveyData(JSON.parse(data));
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("jade-ring-name", ringName);
+  }, [ringName]);
 
   if (loading) {
     return <ResultsLoading onDone={() => setLoading(false)} />;
@@ -186,11 +196,47 @@ const Results = () => {
   const handleRestart = () => {
     localStorage.removeItem("jade-assessment-step");
     localStorage.removeItem("jade-assessment-answers");
-    localStorage.removeItem("jade-ring-colors");
     localStorage.removeItem("jade-number-inputs");
     localStorage.removeItem("jade-sub-checks");
+    localStorage.removeItem("jade-ring-colors");
+    localStorage.removeItem("jade-color-tones");
+    localStorage.removeItem("jade-pattern-data");
     localStorage.removeItem("jade-survey-data");
     navigate("/assessment");
+  };
+
+  const handleDownload = async () => {
+    if (!cardRef.current || downloading) return;
+    try {
+      setDownloading(true);
+      const dataUrl = await toPng(cardRef.current, {
+        cacheBust: true,
+        pixelRatio: 2,
+        backgroundColor: "#faf6ee",
+      });
+      const link = document.createElement("a");
+      link.download = `hieu-ngoc-${ringName.replace(/\s+/g, "-")}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (e) {
+      console.error("Download failed", e);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Hiểu ngọc - ${ringName}`,
+          text: `Vòng "${ringName}" của tôi đạt phẩm cấp ${r.tier.label} – ${r.tier.sub}!`,
+          url: window.location.href,
+        });
+      } catch {}
+    } else {
+      navigator.clipboard?.writeText(window.location.href);
+    }
   };
 
   return (
