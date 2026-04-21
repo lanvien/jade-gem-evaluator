@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toPng } from "html-to-image";
 import { questions } from "@/data/questions";
-
+import {
+  buildJadeInputFromSurvey,
+  calculateJadePrice,
+  formatVND,
+  type PricingResult,
+} from "@/lib/pricingEngine";
+import { saveCopNgoc, generateCopId } from "@/lib/copNgoc";
 
 import rankThuongTai from "@/assets/jade/rank_thuongtai.png";
 import rankThuongTaiLocked from "@/assets/jade/rank_thuongtai_locked.png";
