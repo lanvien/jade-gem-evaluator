@@ -106,12 +106,16 @@ function computeResults(data: any) {
     "hoang-hau": "Mẫu nghi thiên hạ, ngọc quý hiếm có – xứng danh bảo vật truyền đời.",
   };
 
+  // Pricing engine v2
+  const jadeInput = buildJadeInputFromSurvey(data);
+  const pricing = calculateJadePrice(jadeInput);
+
   return {
     tier,
     tierIndex,
     avgScore,
-    priceLow,
-    priceHigh,
+    priceLow: pricing.minPrice,
+    priceHigh: pricing.maxPrice,
     rarity,
     cotText,
     sacText,
@@ -119,6 +123,7 @@ function computeResults(data: any) {
     quote: quotes[tier.key] || quotes["phi-tan"],
     diameter,
     thickness,
+    pricing,
   };
 }
 
