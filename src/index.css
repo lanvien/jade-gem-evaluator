@@ -108,4 +108,23 @@
   .animate-crown-glow {
     animation: crown-glow 2.4s ease-in-out infinite;
   }
+
+  @keyframes imperial-glow {
+    0%, 100% {
+      box-shadow:
+        0 0 30px hsl(140 60% 55% / 0.35),
+        0 0 60px hsl(140 60% 55% / 0.25),
+        inset 0 0 20px hsl(45 90% 60% / 0.15);
+    }
+    50% {
+      box-shadow:
+        0 0 50px hsl(140 70% 60% / 0.7),
+        0 0 100px hsl(45 90% 60% / 0.45),
+        inset 0 0 30px hsl(45 90% 60% / 0.3);
+    }
+  }
+
+  .imperial-glow {
+    animation: imperial-glow 3s ease-in-out infinite;
+  }
 }

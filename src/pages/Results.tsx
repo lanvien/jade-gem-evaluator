@@ -520,7 +520,7 @@ const Results = () => {
           <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors font-medium text-base">
             &lt;&lt;&lt; Về trang chủ
           </button>
-          <button className="text-muted-foreground hover:text-foreground transition-colors font-medium text-base">
+          <button onClick={() => navigate("/cop-ngoc")} className="text-muted-foreground hover:text-foreground transition-colors font-medium text-base">
             Về cốp ngọc của bạn &gt;&gt;&gt;
           </button>
         </div>
