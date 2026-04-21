@@ -342,7 +342,29 @@ const Results = () => {
               </p>
             </div>
 
-            {/* Personality quote */}
+            {/* Bảng điểm chi tiết */}
+            <div className="mt-3 grid grid-cols-3 gap-2 w-full max-w-xs">
+              <div className="rounded-lg border border-border bg-card px-2 py-2 text-center">
+                <p className="text-xs text-muted-foreground">Điểm Chủng</p>
+                <p className="font-serif font-bold text-foreground text-lg">{r.pricing.scoreChung}</p>
+              </div>
+              <div className="rounded-lg border border-border bg-card px-2 py-2 text-center">
+                <p className="text-xs text-muted-foreground">Điểm Sắc</p>
+                <p className="font-serif font-bold text-foreground text-lg">{r.pricing.scoreSac}</p>
+              </div>
+              <div className="rounded-lg border-2 border-accent bg-accent/10 px-2 py-2 text-center">
+                <p className="text-xs text-muted-foreground">Q<sub>Jade</sub></p>
+                <p className="font-serif font-bold text-accent text-lg">{r.pricing.qJade}</p>
+              </div>
+            </div>
+
+            {/* Danh xưng phong kiến */}
+            <p className="mt-3 text-center font-serif italic text-sm text-foreground max-w-xs">
+              👑 {r.pricing.chungLabel}
+            </p>
+            <p className="text-center text-xs text-muted-foreground max-w-xs mt-1">
+              {r.pricing.colorLabel}
+            </p>
             <div className="mt-4 rounded-xl bg-gold/10 border border-gold/20 p-4 max-w-xs text-center">
               <p className="text-sm text-foreground">
                 <span className="font-bold text-lg">Ngự phê:</span>{" "}
