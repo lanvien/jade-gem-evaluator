@@ -173,6 +173,14 @@ const Results = () => {
   });
   const [editingName, setEditingName] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [copId] = useState<string>(() => {
+    const existing = localStorage.getItem("jade-current-cop-id");
+    if (existing) return existing;
+    const fresh = generateCopId();
+    localStorage.setItem("jade-current-cop-id", fresh);
+    return fresh;
+  });
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -213,7 +221,18 @@ const Results = () => {
     localStorage.removeItem("jade-color-tones");
     localStorage.removeItem("jade-pattern-data");
     localStorage.removeItem("jade-survey-data");
+    localStorage.removeItem("jade-current-cop-id");
     navigate("/assessment");
+  };
+
+  const handleSaveToCop = () => {
+    const entry = saveCopNgoc({
+      id: copId,
+      name: ringName,
+      result: r.pricing,
+      ringColors: surveyData.ringColors,
+    });
+    setSavedId(entry.id);
   };
 
   const handleDownload = async () => {
