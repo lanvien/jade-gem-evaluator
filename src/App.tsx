@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import Assessment from "./pages/Assessment.tsx";
 import Results from "./pages/Results.tsx";
+import CopNgoc from "./pages/CopNgoc.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/cop-ngoc" element={<CopNgoc />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

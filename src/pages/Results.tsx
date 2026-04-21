@@ -1,8 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toPng } from "html-to-image";
 import { questions } from "@/data/questions";
-
+import {
+  buildJadeInputFromSurvey,
+  calculateJadePrice,
+  formatVND,
+  type PricingResult,
+} from "@/lib/pricingEngine";
+import { saveCopNgoc, generateCopId } from "@/lib/copNgoc";
 
 import rankThuongTai from "@/assets/jade/rank_thuongtai.png";
 import rankThuongTaiLocked from "@/assets/jade/rank_thuongtai_locked.png";
@@ -100,12 +106,16 @@ function computeResults(data: any) {
     "hoang-hau": "Mẫu nghi thiên hạ, ngọc quý hiếm có – xứng danh bảo vật truyền đời.",
   };
 
+  // Pricing engine v2
+  const jadeInput = buildJadeInputFromSurvey(data);
+  const pricing = calculateJadePrice(jadeInput);
+
   return {
     tier,
     tierIndex,
     avgScore,
-    priceLow,
-    priceHigh,
+    priceLow: pricing.minPrice,
+    priceHigh: pricing.maxPrice,
     rarity,
     cotText,
     sacText,
@@ -113,6 +123,7 @@ function computeResults(data: any) {
     quote: quotes[tier.key] || quotes["phi-tan"],
     diameter,
     thickness,
+    pricing,
   };
 }
 
@@ -162,6 +173,14 @@ const Results = () => {
   });
   const [editingName, setEditingName] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [savedId, setSavedId] = useState<string | null>(null);
+  const [copId] = useState<string>(() => {
+    const existing = localStorage.getItem("jade-current-cop-id");
+    if (existing) return existing;
+    const fresh = generateCopId();
+    localStorage.setItem("jade-current-cop-id", fresh);
+    return fresh;
+  });
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -202,7 +221,18 @@ const Results = () => {
     localStorage.removeItem("jade-color-tones");
     localStorage.removeItem("jade-pattern-data");
     localStorage.removeItem("jade-survey-data");
+    localStorage.removeItem("jade-current-cop-id");
     navigate("/assessment");
+  };
+
+  const handleSaveToCop = () => {
+    const entry = saveCopNgoc({
+      id: copId,
+      name: ringName,
+      result: r.pricing,
+      ringColors: surveyData.ringColors,
+    });
+    setSavedId(entry.id);
   };
 
   const handleDownload = async () => {
@@ -245,7 +275,7 @@ const Results = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between border-b border-border">
         <p className="font-serif text-lg font-bold text-[#13532e]">Hiểu ngọc <span className="text-muted-foreground">───</span></p>
         <div className="flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground bg-[#ffeba3]">
-          Mã tú nữ: <span className="font-bold text-foreground">#{String(Date.now()).slice(-5)}</span>
+          Mã Cốp: <span className="font-mono font-bold text-foreground">{copId}</span>
         </div>
       </div>
 
@@ -255,7 +285,7 @@ const Results = () => {
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
             {/* Ring visualization with diagonal crown overlay */}
-            <div className="relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center">
+            <div className={`relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
               {/* Active crown — overlaps top-left diagonally, larger & glowing */}
               <img
                 src={r.tier.icon}
@@ -312,7 +342,29 @@ const Results = () => {
               </p>
             </div>
 
-            {/* Personality quote */}
+            {/* Bảng điểm chi tiết */}
+            <div className="mt-3 grid grid-cols-3 gap-2 w-full max-w-xs">
+              <div className="rounded-lg border border-border bg-card px-2 py-2 text-center">
+                <p className="text-xs text-muted-foreground">Điểm Chủng</p>
+                <p className="font-serif font-bold text-foreground text-lg">{r.pricing.scoreChung}</p>
+              </div>
+              <div className="rounded-lg border border-border bg-card px-2 py-2 text-center">
+                <p className="text-xs text-muted-foreground">Điểm Sắc</p>
+                <p className="font-serif font-bold text-foreground text-lg">{r.pricing.scoreSac}</p>
+              </div>
+              <div className="rounded-lg border-2 border-accent bg-accent/10 px-2 py-2 text-center">
+                <p className="text-xs text-muted-foreground">Q<sub>Jade</sub></p>
+                <p className="font-serif font-bold text-accent text-lg">{r.pricing.qJade}</p>
+              </div>
+            </div>
+
+            {/* Danh xưng phong kiến */}
+            <p className="mt-3 text-center font-serif italic text-sm text-foreground max-w-xs">
+              👑 {r.pricing.chungLabel}
+            </p>
+            <p className="text-center text-xs text-muted-foreground max-w-xs mt-1">
+              {r.pricing.colorLabel}
+            </p>
             <div className="mt-4 rounded-xl bg-gold/10 border border-gold/20 p-4 max-w-xs text-center">
               <p className="text-sm text-foreground">
                 <span className="font-bold text-lg">Ngự phê:</span>{" "}
@@ -407,6 +459,28 @@ const Results = () => {
           <div className="h-px bg-border mt-4" />
         </div>
 
+        {/* Warnings từ Pricing Engine */}
+        {r.pricing.warnings.length > 0 && (
+          <div className="mt-8 space-y-3">
+            <h3 className="font-serif font-bold text-foreground text-xl">⚠️ Lưu ý quan trọng</h3>
+            {r.pricing.warnings.map((w, i) => {
+              const isRed = w.includes("nứt") || w.includes("Crack") || w.includes("Cảnh báo tài sản") || w.includes("Chưa có giấy");
+              return (
+                <div
+                  key={i}
+                  className={`rounded-lg border-l-4 p-4 text-sm leading-relaxed ${
+                    isRed
+                      ? "border-red-500 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-200"
+                      : "border-orange-400 bg-orange-50 text-orange-900 dark:bg-orange-950/30 dark:text-orange-200"
+                  }`}
+                >
+                  {w}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Action buttons - larger */}
         <div className="flex items-center justify-center gap-6 mt-8">
           <button
@@ -428,9 +502,10 @@ const Results = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
           <button
+            onClick={handleSaveToCop}
             className="rounded-lg border-2 border-accent bg-accent/10 px-6 py-3 font-semibold text-accent hover:bg-accent/20 transition-colors text-base"
           >
-            Lưu về cốp ngọc
+            {savedId ? `✓ Đã lưu (${savedId})` : "Lưu về cốp ngọc"}
           </button>
           <button
             onClick={handleRestart}
@@ -445,7 +520,7 @@ const Results = () => {
           <button onClick={() => navigate("/")} className="text-muted-foreground hover:text-foreground transition-colors font-medium text-base">
             &lt;&lt;&lt; Về trang chủ
           </button>
-          <button className="text-muted-foreground hover:text-foreground transition-colors font-medium text-base">
+          <button onClick={() => navigate("/cop-ngoc")} className="text-muted-foreground hover:text-foreground transition-colors font-medium text-base">
             Về cốp ngọc của bạn &gt;&gt;&gt;
           </button>
         </div>
