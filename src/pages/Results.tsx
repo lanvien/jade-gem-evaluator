@@ -275,7 +275,7 @@ const Results = () => {
       <div className="container mx-auto px-4 py-4 flex items-center justify-between border-b border-border">
         <p className="font-serif text-lg font-bold text-[#13532e]">Hiểu ngọc <span className="text-muted-foreground">───</span></p>
         <div className="flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground bg-[#ffeba3]">
-          Mã tú nữ: <span className="font-bold text-foreground">#{String(Date.now()).slice(-5)}</span>
+          Mã Cốp: <span className="font-mono font-bold text-foreground">{copId}</span>
         </div>
       </div>
 
@@ -285,7 +285,7 @@ const Results = () => {
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
             {/* Ring visualization with diagonal crown overlay */}
-            <div className="relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center">
+            <div className={`relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
               {/* Active crown — overlaps top-left diagonally, larger & glowing */}
               <img
                 src={r.tier.icon}
