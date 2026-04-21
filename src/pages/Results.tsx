@@ -459,6 +459,28 @@ const Results = () => {
           <div className="h-px bg-border mt-4" />
         </div>
 
+        {/* Warnings từ Pricing Engine */}
+        {r.pricing.warnings.length > 0 && (
+          <div className="mt-8 space-y-3">
+            <h3 className="font-serif font-bold text-foreground text-xl">⚠️ Lưu ý quan trọng</h3>
+            {r.pricing.warnings.map((w, i) => {
+              const isRed = w.includes("nứt") || w.includes("Crack") || w.includes("Cảnh báo tài sản") || w.includes("Chưa có giấy");
+              return (
+                <div
+                  key={i}
+                  className={`rounded-lg border-l-4 p-4 text-sm leading-relaxed ${
+                    isRed
+                      ? "border-red-500 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-200"
+                      : "border-orange-400 bg-orange-50 text-orange-900 dark:bg-orange-950/30 dark:text-orange-200"
+                  }`}
+                >
+                  {w}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Action buttons - larger */}
         <div className="flex items-center justify-center gap-6 mt-8">
           <button
@@ -480,9 +502,10 @@ const Results = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
           <button
+            onClick={handleSaveToCop}
             className="rounded-lg border-2 border-accent bg-accent/10 px-6 py-3 font-semibold text-accent hover:bg-accent/20 transition-colors text-base"
           >
-            Lưu về cốp ngọc
+            {savedId ? `✓ Đã lưu (${savedId})` : "Lưu về cốp ngọc"}
           </button>
           <button
             onClick={handleRestart}
