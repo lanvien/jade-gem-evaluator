@@ -8,7 +8,8 @@ import {
   formatVND,
   type PricingResult,
 } from "@/lib/pricingEngine";
-import { saveCopNgoc, generateCopId } from "@/lib/copNgoc";
+import { useSaveToCop, useCopNgoc } from "@/lib/copNgoc";
+import { toast } from "@/hooks/use-toast";
 
 import rankThuongTai from "@/assets/jade/rank_thuongtai.png";
 import rankThuongTaiLocked from "@/assets/jade/rank_thuongtai_locked.png";
@@ -173,15 +174,12 @@ const Results = () => {
   });
   const [editingName, setEditingName] = useState(false);
   const [downloading, setDownloading] = useState(false);
-  const [savedId, setSavedId] = useState<string | null>(null);
-  const [copId] = useState<string>(() => {
-    const existing = localStorage.getItem("jade-current-cop-id");
-    if (existing) return existing;
-    const fresh = generateCopId();
-    localStorage.setItem("jade-current-cop-id", fresh);
-    return fresh;
-  });
+  const [savedCode, setSavedCode] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const saveToCop = useSaveToCop();
+  const { data: copData } = useCopNgoc();
+  const copId = copData?.copCode ?? "Chưa có";
 
   useEffect(() => {
     const data = localStorage.getItem("jade-survey-data");
@@ -221,18 +219,29 @@ const Results = () => {
     localStorage.removeItem("jade-color-tones");
     localStorage.removeItem("jade-pattern-data");
     localStorage.removeItem("jade-survey-data");
-    localStorage.removeItem("jade-current-cop-id");
     navigate("/assessment");
   };
 
-  const handleSaveToCop = () => {
-    const entry = saveCopNgoc({
-      id: copId,
-      name: ringName,
-      result: r.pricing,
-      ringColors: surveyData.ringColors,
-    });
-    setSavedId(entry.id);
+  const handleSaveToCop = async () => {
+    try {
+      const jadeInput = buildJadeInputFromSurvey(surveyData);
+      const saved = await saveToCop.mutateAsync({
+        nickname: ringName,
+        input: jadeInput,
+        result: r.pricing,
+      });
+      setSavedCode(saved.copCode);
+      toast({
+        title: "✓ Đã cất vào cốp",
+        description: `Mã cốp của bạn: ${saved.copCode}. Lưu lại để truy cập trên máy khác!`,
+      });
+    } catch (e: any) {
+      toast({
+        title: "Lưu thất bại",
+        description: e?.message ?? "Vui lòng thử lại sau.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDownload = async () => {
@@ -503,9 +512,14 @@ const Results = () => {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
           <button
             onClick={handleSaveToCop}
-            className="rounded-lg border-2 border-accent bg-accent/10 px-6 py-3 font-semibold text-accent hover:bg-accent/20 transition-colors text-base"
+            disabled={saveToCop.isPending}
+            className="rounded-lg border-2 border-accent bg-accent/10 px-6 py-3 font-semibold text-accent hover:bg-accent/20 transition-colors text-base disabled:opacity-60"
           >
-            {savedId ? `✓ Đã lưu (${savedId})` : "Lưu về cốp ngọc"}
+            {saveToCop.isPending
+              ? "Đang cất..."
+              : savedCode
+                ? `✓ Đã lưu (${savedCode})`
+                : "Cất vào cốp"}
           </button>
           <button
             onClick={handleRestart}
