@@ -11,7 +11,7 @@ const HeroSection = () => {
             alt="Vòng ngọc phỉ thúy"
             width={700}
             height={700}
-            className="w-[22rem] sm:w-[28rem] md:w-[34rem] lg:w-[40rem] animate-float drop-shadow-2xl"
+            className="w-[32rem] sm:w-[40rem] md:w-[48rem] lg:w-[56rem] max-w-full animate-float drop-shadow-2xl"
           />
         </div>
 
