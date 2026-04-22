@@ -6,7 +6,6 @@
 // ─────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────
-
 export type Chung =
   | "Đậu thô"
   | "Đậu mịn"
@@ -78,29 +77,28 @@ export interface PricingResult {
 // ─────────────────────────────────────────────
 // DICTIONARIES
 // ─────────────────────────────────────────────
-
 export const CHUNG_SCORE: Record<Chung, number> = {
-  "Đậu thô":   15,
-  "Đậu mịn":   28,
-  "Nếp Mịn":   52,
-  "Nếp Hóa":   68,
-  "Nếp Băng":  82,
+  "Đậu thô": 15,
+  "Đậu mịn": 28,
+  "Nếp Mịn": 52,
+  "Nếp Hóa": 68,
+  "Nếp Băng": 82,
 };
 
 export const CHUNG_LABEL: Record<Chung, string> = {
-  "Đậu thô":  "Thường Tại – Chủng Đậu",
-  "Đậu mịn":  "Quý Nhân – Chủng Đậu Mịn",
-  "Nếp Mịn":  "Phi Tần – Chủng Nếp Mịn",
-  "Nếp Hóa":  "Quý Phi – Chủng Nếp Hóa",
+  "Đậu thô": "Thường Tại – Chủng Đậu",
+  "Đậu mịn": "Quý Nhân – Chủng Đậu Mịn",
+  "Nếp Mịn": "Phi Tần – Chủng Nếp Mịn",
+  "Nếp Hóa": "Quý Phi – Chủng Nếp Hóa",
   "Nếp Băng": "Hoàng Hậu – Chủng Nếp Băng",
 };
 
 export const HARD_CAP: Record<Chung, number> = {
-  "Đậu thô":   8_000_000,
-  "Đậu mịn":   10_000_000,
-  "Nếp Mịn":   35_000_000,
-  "Nếp Hóa":   70_000_000,
-  "Nếp Băng":  250_000_000,
+  "Đậu thô": 8_000_000,
+  "Đậu mịn": 10_000_000,
+  "Nếp Mịn": 35_000_000,
+  "Nếp Hóa": 70_000_000,
+  "Nếp Băng": 250_000_000,
 };
 
 const COVERAGE_RATIO: Record<1 | 2 | 3 | 4, number> = {
@@ -111,53 +109,53 @@ const COVERAGE_RATIO: Record<1 | 2 | 3 | 4, number> = {
 };
 
 export const COLOR_HUE_SCORE: Record<ColorName, number> = {
-  "Đế Vương Lục":   100,
+  "Đế Vương Lục": 100,
   "Chính Dương Lục": 95,
-  "Xanh Cay":        88,
-  "Xanh Ngọt":       82,
-  "Lục Táo":         72,
-  "Đậu Lục":         50,
-  "Thanh Thủy Lục":  45,
-  "Xanh Dầu":        30,
-  "Hồi Lục":         20,
-  "Tử La Lan":       90,
-  "Tím Cà":          80,
-  "Tím Lam":         65,
+  "Xanh Cay": 88,
+  "Xanh Ngọt": 82,
+  "Lục Táo": 72,
+  "Đậu Lục": 50,
+  "Thanh Thủy Lục": 45,
+  "Xanh Dầu": 30,
+  "Hồi Lục": 20,
+  "Tử La Lan": 90,
+  "Tím Cà": 80,
+  "Tím Lam": 65,
   "Lam Thiên Không": 85,
-  "Lam Thanh":       60,
-  "Lão Lam Thủy":    45,
-  "Hồng Phỉ":        75,
-  "Hoàng Tông Phỉ":  65,
-  "Mặc Thúy":        55,
+  "Lam Thanh": 60,
+  "Lão Lam Thủy": 45,
+  "Hồng Phỉ": 75,
+  "Hoàng Tông Phỉ": 65,
+  "Mặc Thúy": 55,
   "Bạch Nguyệt Quang": 40,
-  "Trắng Cháo":      35,
-  "Gà Đen":          30,
-  "Xám":             15,
+  "Trắng Cháo": 35,
+  "Gà Đen": 30,
+  "Xám": 15,
 };
 
 export const COLOR_LABEL: Record<ColorName, string> = {
-  "Đế Vương Lục":    "Đế Vương Lục – Cực phẩm thiên nhiên",
+  "Đế Vương Lục": "Đế Vương Lục – Cực phẩm thiên nhiên",
   "Chính Dương Lục": "Chính Dương Lục – Tươi tràn sức sống",
-  "Xanh Cay":        "Xanh Cay – Nồng đậm, mãnh liệt",
-  "Xanh Ngọt":       "Xanh Ngọt – Dịu mắt, thư thái",
-  "Lục Táo":         "Lục Táo – Tươi sáng, dễ chịu",
-  "Đậu Lục":         "Đậu Lục – Sắc ngọc phổ thông",
-  "Thanh Thủy Lục":  "Thanh Thủy Lục – Lục pha lam nhẹ",
-  "Xanh Dầu":        "Xanh Dầu – Trầm, ít bắt sáng",
-  "Hồi Lục":         "Hồi Lục – Xỉn, phẩm cấp thấp",
-  "Tử La Lan":       "Tử La Lan – Tuyệt sắc mùa xuân",
-  "Tím Cà":          "Tím Cà – Đậm đà, cực hiếm lên băng",
-  "Tím Lam":         "Tím Lam – Huyền bí, trung-cao cấp",
+  "Xanh Cay": "Xanh Cay – Nồng đậm, mãnh liệt",
+  "Xanh Ngọt": "Xanh Ngọt – Dịu mắt, thư thái",
+  "Lục Táo": "Lục Táo – Tươi sáng, dễ chịu",
+  "Đậu Lục": "Đậu Lục – Sắc ngọc phổ thông",
+  "Thanh Thủy Lục": "Thanh Thủy Lục – Lục pha lam nhẹ",
+  "Xanh Dầu": "Xanh Dầu – Trầm, ít bắt sáng",
+  "Hồi Lục": "Hồi Lục – Xỉn, phẩm cấp thấp",
+  "Tử La Lan": "Tử La Lan – Tuyệt sắc mùa xuân",
+  "Tím Cà": "Tím Cà – Đậm đà, cực hiếm lên băng",
+  "Tím Lam": "Tím Lam – Huyền bí, trung-cao cấp",
   "Lam Thiên Không": "Lam Thiên Không – Xanh ngắt như trời",
-  "Lam Thanh":       "Lam Thanh – Nhẹ nhàng, dễ chịu",
-  "Lão Lam Thủy":    "Lão Lam Thủy – Trầm mặc, hoa băng",
-  "Hồng Phỉ":        "Hồng Phỉ – Huyết ngọc, cực hiếm",
-  "Hoàng Tông Phỉ":  "Hoàng Tông Phỉ – Cam vàng tài lộc",
-  "Mặc Thúy":        "Mặc Thúy – Đen huyền, soi đèn xanh",
+  "Lam Thanh": "Lam Thanh – Nhẹ nhàng, dễ chịu",
+  "Lão Lam Thủy": "Lão Lam Thủy – Trầm mặc, hoa băng",
+  "Hồng Phỉ": "Hồng Phỉ – Huyết ngọc, cực hiếm",
+  "Hoàng Tông Phỉ": "Hoàng Tông Phỉ – Cam vàng tài lộc",
+  "Mặc Thúy": "Mặc Thúy – Đen huyền, soi đèn xanh",
   "Bạch Nguyệt Quang": "Bạch Nguyệt Quang – Trắng tinh khiết",
-  "Trắng Cháo":      "Trắng Cháo – Nền trắng cơ bản",
-  "Gà Đen":          "Gà Đen – Trắng đốm xám, có duyên",
-  "Xám":             "Xám – Tông trung tính, dìm giá trị",
+  "Trắng Cháo": "Trắng Cháo – Nền trắng cơ bản",
+  "Gà Đen": "Gà Đen – Trắng đốm xám, có duyên",
+  "Xám": "Xám – Tông trung tính, dìm giá trị",
 };
 
 const TONE_WEIGHT: Record<ToneLevel, number> = {
@@ -193,19 +191,19 @@ const YELLOW_COLORS = new Set<ColorName>([
 ]);
 
 const FLAW_RISK: Record<FlawType, number> = {
-  "Không lỗi":                                 1.00,
-  "Vân ngọc":                                  1.00,
-  "Sớ bông / Gân già":                          0.9888,
-  "Chỉ màu / Gân non / Sớ âm / Sớ dọc":        0.9555,
-  "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm":    0.88,
-  "Sớ dọc dài / Sớ lưỡi gà":                   0.75,
-  "Sớ chéo / Sớ ngang":                         0.73,
-  "Vết nứt (Crack)":                            0.50,
+  "Không lỗi": 1.00,
+  "Vân ngọc": 1.00,
+  "Sớ bông / Gân già": 0.9888,
+  "Chỉ màu / Gân non / Sớ âm / Sớ dọc": 0.9555,
+  "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": 0.88,
+  "Sớ dọc dài / Sớ lưỡi gà": 0.75,
+  "Sớ chéo / Sớ ngang": 0.73,
+  "Vết nứt (Crack)": 0.50,
 };
 
 const SHAPE_FACTOR: Record<Shape, number> = {
-  "Bản Đũa":  1.003,
-  "Bản Dẹt":  1.0,
+  "Bản Đũa": 1.003,
+  "Bản Dẹt": 1.0,
   "Bản Vuông": 1.0,
   "Khắc Hoa": 0.7,
 };
@@ -213,18 +211,17 @@ const SHAPE_FACTOR: Record<Shape, number> = {
 // ─────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────
-
 function getNiFactor(ni: number): number {
-  if (ni < 50)  return 0.95;
+  if (ni < 50) return 0.95;
   if (ni <= 56) return 1.0;
   if (ni <= 60) return 1.005;
   return 1.01;
 }
 
 function getChotFactor(mm: number): number {
-  if (mm < 6.5)   return 0.9;
-  if (mm < 10)    return 0.95;
-  if (mm < 12)    return 1.0;
+  if (mm < 6.5) return 0.9;
+  if (mm < 10) return 0.95;
+  if (mm < 12) return 1.0;
   if (mm <= 13.5) return 1.0005;
   if (mm <= 15.5) return 1.005;
   return 1.05;
@@ -245,11 +242,11 @@ function getVolumeFactor(ni: number, chot: number): number {
 }
 
 function getFloorPrice(q: number): number {
-  if (q < 30)  return 2_000_000;
-  if (q < 55)  return 5_000_000;
-  if (q < 75)  return 15_000_000;
-  if (q < 85)  return 30_000_000;
-  if (q < 95)  return 100_000_000;
+  if (q < 30) return 2_000_000;
+  if (q < 55) return 5_000_000;
+  if (q < 75) return 15_000_000;
+  if (q < 85) return 30_000_000;
+  if (q < 95) return 100_000_000;
   return 200_000_000;
 }
 
@@ -267,7 +264,6 @@ function roundToHundredK(n: number): number {
 // ─────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────
-
 export function calculateJadePrice(input: JadeInput): PricingResult {
   const warnings: string[] = [];
 
@@ -316,11 +312,11 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
 
   const vFloor = getFloorPrice(qJade);
 
-  const wNi       = getNiFactor(input.ni);
-  const wShape    = SHAPE_FACTOR[input.shape];
-  const wChot     = getChotFactor(input.chot);
-  const wVolume   = getVolumeFactor(input.ni, input.chot);
-  const wPhysic   = wNi * wShape * wChot * wVolume;
+  const wNi = getNiFactor(input.ni);
+  const wShape = SHAPE_FACTOR[input.shape];
+  const wChot = getChotFactor(input.chot);
+  const wVolume = getVolumeFactor(input.ni, input.chot);
+  const wPhysic = wNi * wShape * wChot * wVolume;
 
   const riskFactors = input.flaws.length > 0
     ? input.flaws.map(f => FLAW_RISK[f] ?? 1.0)
@@ -334,12 +330,12 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
 
   const vPre = vFloor * wPhysic * wRisk;
   const hardCap = HARD_CAP[input.chungPeak];
-  const vFinal  = Math.min(vPre, hardCap);
+  const vFinal = Math.min(vPre, hardCap);
   const hardCapApplied = vPre > hardCap;
 
   let confidence = 1.0;
   if (!input.hasCertificate) confidence -= 0.1;
-  if (wRisk < 0.75)          confidence -= 0.15;
+  if (wRisk < 0.75) confidence -= 0.15;
   if (input.coverageLevel >= 3) confidence -= 0.05;
   confidence = Math.max(confidence, 0.6);
 
@@ -356,18 +352,15 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
       "Yêu cầu xem video dưới nắng tự nhiên (không qua kính) trước khi chốt."
     );
   }
-
   if (isImperialCandidate) {
     warnings.push(
       "👑 Cảnh báo tài sản lớn: Ngọc đạt độ màu này có giá trị sưu tầm cực cao. " +
       "Nếu được chào dưới 10 triệu, 99% là ngọc nhuộm (Type B/C) hoặc đá giả."
     );
   }
-
   if (xuanDaiTai) {
     warnings.push("✨ Xuân Đới Tài! Combo Lục + Tím cực hiếm — giá trị cộng thêm đáng kể.");
   }
-
   if (hardCapApplied) {
     warnings.push(
       `🔒 Giá đã khóa trần theo Chủng ${input.chungPeak} ` +
@@ -375,7 +368,6 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
       "Dù màu đẹp đến đâu, chủng thấp thì giá không thể vượt mức này."
     );
   }
-
   if (!input.hasCertificate) {
     warnings.push(
       "📋 Chưa có giấy kiểm định. Định giá chỉ mang tính tham khảo. " +
@@ -384,29 +376,28 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
   }
 
   return {
-    scoreChung:          Math.round(scoreChung * 10) / 10,
-    scoreSac:            Math.round(scoreSac * 10) / 10,
-    qJade:               Math.round(qJade * 10) / 10,
+    scoreChung: Math.round(scoreChung * 10) / 10,
+    scoreSac: Math.round(scoreSac * 10) / 10,
+    qJade: Math.round(qJade * 10) / 10,
     vFloor,
-    vFinal:              roundToHundredK(vFinal),
+    vFinal: roundToHundredK(vFinal),
     minPrice,
     maxPrice,
     hardCapApplied,
     isImperialCandidate,
     hasLightEffect,
     hasYellowSpots,
-    xuanDaiTaiBonus:     xuanDaiTai,
+    xuanDaiTaiBonus: xuanDaiTai,
     confidence,
     warnings,
-    colorLabel:          COLOR_LABEL[maxColorName] ?? maxColorName,
-    chungLabel:          CHUNG_LABEL[input.chungPeak],
+    colorLabel: COLOR_LABEL[maxColorName] ?? maxColorName,
+    chungLabel: CHUNG_LABEL[input.chungPeak],
   };
 }
 
 // ─────────────────────────────────────────────
 // DISPLAY HELPERS
 // ─────────────────────────────────────────────
-
 export function formatVND(n: number): string {
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)} tỷ`;
   if (n >= 1_000_000)     return `${(n / 1_000_000).toFixed(0)} triệu`;
@@ -419,6 +410,7 @@ export function getPriceRangeLabel(result: PricingResult): string {
 
 // ─────────────────────────────────────────────
 // SURVEY ADAPTER — map UI answers → JadeInput
+// (kept from previous version — used by Results page)
 // ─────────────────────────────────────────────
 
 function mapChung(ans: string | undefined): Chung {
@@ -454,18 +446,11 @@ function mapTone(tones: Record<string, string>): ToneLevel {
 }
 
 function mapBaseColor(ringColors: string[]): ColorName {
-  // Pick most-frequent non-empty color, map hex → ColorName by simple heuristic
   const counts: Record<string, number> = {};
   ringColors.forEach(c => { if (c) counts[c] = (counts[c] || 0) + 1; });
   const top = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0] || "";
   const hex = top.toLowerCase();
-  // Heuristic by hue
   if (!hex) return "Trắng Cháo";
-  if (hex.includes("#0") && hex.match(/#0[0-9a-f]/)) {
-    // green family
-    if (hex.startsWith("#00") || hex.startsWith("#0a") || hex.startsWith("#0b")) return "Chính Dương Lục";
-  }
-  // Fallback by simple RGB parse
   const r = parseInt(hex.slice(1, 3), 16) || 0;
   const g = parseInt(hex.slice(3, 5), 16) || 0;
   const b = parseInt(hex.slice(5, 7), 16) || 0;
