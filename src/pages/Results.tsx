@@ -294,12 +294,12 @@ const Results = () => {
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
             {/* Ring visualization with diagonal crown overlay */}
-            <div className={`relative w-64 h-64 md:w-72 md:h-72 flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
+            <div className={`relative w-[22rem] h-[22rem] md:w-[26rem] md:h-[26rem] flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
               {/* Active crown — overlaps top-left diagonally, larger & glowing */}
               <img
                 src={r.tier.icon}
                 alt={r.tier.label}
-                className="absolute -top-10 -left-10 w-32 h-32 md:w-36 md:h-36 object-contain rotate-[-18deg] z-10 select-none pointer-events-none animate-crown-glow"
+                className="absolute -top-20 -left-20 w-60 h-60 md:w-72 md:h-72 object-contain rotate-[-18deg] z-10 select-none pointer-events-none animate-crown-glow"
               />
 
               <svg viewBox="0 0 200 200" className="w-full h-full">
@@ -446,14 +446,14 @@ const Results = () => {
               return (
               <div
                 key={t.key}
-                className={`flex flex-col items-center text-center min-w-[100px] md:min-w-[120px] transition-all ${
+                className={`flex flex-col items-center text-center min-w-[140px] md:min-w-[170px] transition-all ${
                   isActive ? "opacity-100 scale-110" : "opacity-50 grayscale"
                 }`}
               >
                 <img
                   src={isActive ? t.icon : t.iconLocked}
                   alt={t.label}
-                  className={`w-20 h-20 md:w-24 md:h-24 object-contain mb-2 ${isActive ? "animate-crown-glow" : ""}`}
+                  className={`w-36 h-36 md:w-44 md:h-44 object-contain mb-2 ${isActive ? "animate-crown-glow" : ""}`}
                 />
                 <p className={`text-base md:text-lg font-bold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
                   {t.label}

@@ -308,7 +308,7 @@ const Assessment = () => {
                   {/* Image - tap to open lightbox - only if image exists */}
                   {showImageSlot && opt.image && (
                     <div
-                      className="rounded-md bg-muted mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group h-56 sm:h-64"
+                      className="rounded-md bg-muted mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group h-80 sm:h-96 md:h-[28rem]"
                       onClick={(e) => {
                         e.stopPropagation();
                         openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
