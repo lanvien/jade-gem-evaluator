@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toPng } from "html-to-image";
+import { Copy, Check, Download, Share2 } from "lucide-react";
 import { questions } from "@/data/questions";
 import {
   buildJadeInputFromSurvey,
