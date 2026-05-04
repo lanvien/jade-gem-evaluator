@@ -176,11 +176,22 @@ const Results = () => {
   const [editingName, setEditingName] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [savedCode, setSavedCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const saveToCop = useSaveToCop();
-  const { data: copData } = useCopNgoc();
-  const copId = copData?.copCode ?? "Chưa có";
+  // Mã cốp riêng cho mỗi vòng — random 4 chữ số, ổn định trong session view
+  const ringCode = useMemo(() => `NGOC-${Math.floor(1000 + Math.random() * 9000)}`, []);
+  const displayCode = savedCode ?? ringCode;
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(displayCode);
+      setCopied(true);
+      toast({ title: "Đã copy mã cốp", description: displayCode });
+      setTimeout(() => setCopied(false), 1800);
+    } catch {}
+  };
 
   useEffect(() => {
     const data = localStorage.getItem("jade-survey-data");
