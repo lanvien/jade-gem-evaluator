@@ -21,10 +21,10 @@ const Header = () => {
 
         <Link
           to="/assessment"
-          className="hidden md:flex items-center gap-3 rounded-full border-2 border-gold bg-background px-5 py-2 text-base font-semibold text-foreground animate-pulse-gentle hover:bg-gold hover:text-primary-foreground transition-colors"
+          className="hidden md:inline-flex items-center gap-2 rounded-full border-2 border-gold bg-background px-5 py-2 text-base font-semibold leading-none text-foreground animate-pulse-gentle hover:bg-gold hover:text-primary-foreground transition-colors"
         >
-          Cốp ngọc của bạn
-          <img src={iconCopNgoc} alt="" className="h-8 w-8 object-contain" />
+          <span>Cốp ngọc của bạn</span>
+          <img src={iconCopNgoc} alt="" className="h-[1em] w-auto object-contain" />
         </Link>
 
         <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-foreground">
