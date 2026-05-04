@@ -518,21 +518,21 @@ const Results = () => {
         )}
 
         {/* Action buttons - larger */}
-        <div className="flex items-center justify-center gap-6 mt-8">
+        <div className="flex items-center justify-center gap-8 mt-8">
           <button
             onClick={handleDownload}
             disabled={downloading}
             aria-label="Tải xuống"
-            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors disabled:opacity-50"
+            className="group rounded-full border-2 border-border h-20 w-20 md:h-24 md:w-24 inline-flex items-center justify-center hover:border-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
           >
-            <img src={iconDownload} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
+            <Download className="h-10 w-10 md:h-12 md:w-12 text-foreground group-hover:text-gold-dark transition-colors" strokeWidth={2.25} />
           </button>
           <button
             onClick={handleShare}
             aria-label="Chia sẻ"
-            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors"
+            className="group rounded-full border-2 border-border h-20 w-20 md:h-24 md:w-24 inline-flex items-center justify-center hover:border-gold hover:bg-gold/10 transition-colors"
           >
-            <img src={iconShare} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
+            <Share2 className="h-10 w-10 md:h-12 md:w-12 text-foreground group-hover:text-gold-dark transition-colors" strokeWidth={2.25} />
           </button>
         </div>
 
