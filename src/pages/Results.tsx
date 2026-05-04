@@ -315,48 +315,51 @@ const Results = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
-            {/* Ring visualization with diagonal crown overlay */}
-            <div className={`relative w-[22rem] h-[22rem] md:w-[26rem] md:h-[26rem] flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
-              {/* Active crown — overlaps top-left diagonally, larger & glowing */}
+            {/* Wrapper provides breathing room around ring + crown */}
+            <div className="relative p-12 md:p-16">
+              {/* Active crown — kiêu sa, là linh hồn của khung */}
               <img
                 src={r.tier.icon}
                 alt={r.tier.label}
-                className="absolute -top-20 -left-20 w-60 h-60 md:w-72 md:h-72 object-contain rotate-[-18deg] z-10 select-none pointer-events-none animate-crown-glow"
+                className="absolute -top-6 -left-6 md:-top-10 md:-left-10 w-[18rem] h-[18rem] md:w-[22rem] md:h-[22rem] object-contain rotate-[-18deg] z-20 select-none pointer-events-none animate-crown-glow drop-shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
               />
 
-              <svg viewBox="0 0 200 200" className="w-full h-full">
-                {(surveyData.ringColors || []).map((color: string, i: number) => {
-                  const angle = (i * 360) / 12;
-                  const endAngle = ((i + 1) * 360) / 12;
-                  const startRad = ((angle - 90) * Math.PI) / 180;
-                  const endRad = ((endAngle - 90) * Math.PI) / 180;
-                  const outerR = 90;
-                  const innerR = 60;
-                  const x1 = 100 + outerR * Math.cos(startRad);
-                  const y1 = 100 + outerR * Math.sin(startRad);
-                  const x2 = 100 + outerR * Math.cos(endRad);
-                  const y2 = 100 + outerR * Math.sin(endRad);
-                  const x3 = 100 + innerR * Math.cos(endRad);
-                  const y3 = 100 + innerR * Math.sin(endRad);
-                  const x4 = 100 + innerR * Math.cos(startRad);
-                  const y4 = 100 + innerR * Math.sin(startRad);
-                  return (
-                    <path
-                      key={i}
-                      d={`M ${x1} ${y1} A ${outerR} ${outerR} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 0 0 ${x4} ${y4} Z`}
-                      fill={color}
-                      stroke="hsl(var(--foreground))"
-                      strokeWidth="0.5"
-                    />
-                  );
-                })}
-              </svg>
-              <button
-                aria-label="Tải ảnh vòng"
-                className="absolute bottom-1 right-1 hover:opacity-80 transition-opacity p-1"
-              >
-                <img src={iconUpload} alt="" className="h-5 w-5 object-contain" />
-              </button>
+              {/* Ring visualization (sơ đồ kỹ thuật, nhỏ lại 60%) */}
+              <div className={`relative w-56 h-56 md:w-64 md:h-64 flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
+                <svg viewBox="0 0 200 200" className="w-full h-full">
+                  {(surveyData.ringColors || []).map((color: string, i: number) => {
+                    const angle = (i * 360) / 12;
+                    const endAngle = ((i + 1) * 360) / 12;
+                    const startRad = ((angle - 90) * Math.PI) / 180;
+                    const endRad = ((endAngle - 90) * Math.PI) / 180;
+                    const outerR = 90;
+                    const innerR = 60;
+                    const x1 = 100 + outerR * Math.cos(startRad);
+                    const y1 = 100 + outerR * Math.sin(startRad);
+                    const x2 = 100 + outerR * Math.cos(endRad);
+                    const y2 = 100 + outerR * Math.sin(endRad);
+                    const x3 = 100 + innerR * Math.cos(endRad);
+                    const y3 = 100 + innerR * Math.sin(endRad);
+                    const x4 = 100 + innerR * Math.cos(startRad);
+                    const y4 = 100 + innerR * Math.sin(startRad);
+                    return (
+                      <path
+                        key={i}
+                        d={`M ${x1} ${y1} A ${outerR} ${outerR} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 0 0 ${x4} ${y4} Z`}
+                        fill={color}
+                        stroke="hsl(var(--foreground))"
+                        strokeWidth="0.5"
+                      />
+                    );
+                  })}
+                </svg>
+                <button
+                  aria-label="Tải ảnh vòng"
+                  className="absolute bottom-1 right-1 hover:opacity-80 transition-opacity p-1"
+                >
+                  <img src={iconUpload} alt="" className="h-5 w-5 object-contain" />
+                </button>
+              </div>
             </div>
 
             {/* Title & Pricing */}
