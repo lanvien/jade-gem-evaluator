@@ -465,25 +465,27 @@ const Results = () => {
         {/* Phong kết cấu tier row */}
         <div className="mt-10">
           <h2 className="font-serif font-bold text-accent mb-4 text-left text-2xl">Phong kết cấu</h2>
-          <div className="flex items-end justify-center gap-3 md:gap-6 overflow-x-auto pb-2">
+          <div className="flex items-end justify-center gap-6 md:gap-10 overflow-x-auto pb-4">
             {TIERS.map((t, i) => {
               const isActive = i === r.tierIndex;
               return (
               <div
                 key={t.key}
-                className={`flex flex-col items-center text-center min-w-[140px] md:min-w-[170px] transition-all ${
+                className={`flex flex-col items-center text-center min-w-[200px] md:min-w-[260px] transition-all ${
                   isActive ? "opacity-100 scale-110" : "opacity-50 grayscale"
                 }`}
               >
-                <img
-                  src={isActive ? t.icon : t.iconLocked}
-                  alt={t.label}
-                  className={`w-36 h-36 md:w-44 md:h-44 object-contain mb-2 ${isActive ? "animate-crown-glow" : ""}`}
-                />
-                <p className={`text-base md:text-lg font-bold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                <div className={isActive ? "relative rounded-full p-4 imperial-glow" : ""}>
+                  <img
+                    src={isActive ? t.icon : t.iconLocked}
+                    alt={t.label}
+                    className={`w-56 h-56 md:w-72 md:h-72 object-contain mb-2 ${isActive ? "animate-crown-glow drop-shadow-[0_8px_24px_rgba(212,160,55,0.55)]" : ""}`}
+                  />
+                </div>
+                <p className={`text-lg md:text-xl font-bold mt-2 ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
                   {t.label}
                 </p>
-                <p className={`text-sm md:text-base ${isActive ? "font-bold text-foreground" : "text-muted-foreground"}`}>
+                <p className={`text-base md:text-lg ${isActive ? "font-bold text-foreground" : "text-muted-foreground"}`}>
                   {t.sub}
                 </p>
               </div>
