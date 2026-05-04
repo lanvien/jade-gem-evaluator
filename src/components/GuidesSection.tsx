@@ -36,9 +36,9 @@ const GuidesSection = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-3 mt-12 max-w-3xl mx-auto">
+        <div className="flex items-center gap-3 mt-14 max-w-5xl mx-auto">
           <div className="h-px flex-1 bg-border" />
-          <span className="font-serif italic text-accent font-semibold">Hiểu ngọc</span>
+          <span className="font-serif text-accent font-bold text-xl">Hiểu ngọc</span>
         </div>
       </div>
     </section>
