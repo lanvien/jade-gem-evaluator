@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toPng } from "html-to-image";
+import { Copy, Check, Download, Share2 } from "lucide-react";
 import { questions } from "@/data/questions";
 import {
   buildJadeInputFromSurvey,
@@ -175,11 +176,22 @@ const Results = () => {
   const [editingName, setEditingName] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [savedCode, setSavedCode] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   const saveToCop = useSaveToCop();
-  const { data: copData } = useCopNgoc();
-  const copId = copData?.copCode ?? "Chưa có";
+  // Mã cốp riêng cho mỗi vòng — random 4 chữ số, ổn định trong session view
+  const ringCode = useMemo(() => `NGOC-${Math.floor(1000 + Math.random() * 9000)}`, []);
+  const displayCode = savedCode ?? ringCode;
+
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(displayCode);
+      setCopied(true);
+      toast({ title: "Đã copy mã cốp", description: displayCode });
+      setTimeout(() => setCopied(false), 1800);
+    } catch {}
+  };
 
   useEffect(() => {
     const data = localStorage.getItem("jade-survey-data");
@@ -282,9 +294,19 @@ const Results = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="container mx-auto px-4 py-4 flex items-center justify-between border-b border-border">
-        <p className="font-serif text-lg font-bold text-[#13532e]">Hiểu ngọc <span className="text-muted-foreground">───</span></p>
-        <div className="flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground bg-[#ffeba3]">
-          Mã Cốp: <span className="font-mono font-bold text-foreground">{copId}</span>
+        <Link to="/" className="font-serif text-lg font-bold text-[#13532e] hover:opacity-80 transition-opacity">
+          Hiểu ngọc <span className="text-muted-foreground">───</span>
+        </Link>
+        <div className="flex items-center gap-2 rounded-full border border-border pl-4 pr-2 py-1.5 text-sm text-muted-foreground bg-[#ffeba3]">
+          <span>Mã Cốp:</span>
+          <span className="font-mono font-bold text-foreground">{displayCode}</span>
+          <button
+            onClick={handleCopyCode}
+            aria-label="Copy mã cốp"
+            className="ml-1 inline-flex items-center justify-center h-7 w-7 rounded-full bg-foreground/90 text-primary-foreground hover:bg-gold hover:text-primary-foreground transition-colors"
+          >
+            {copied ? <Check className="h-4 w-4" strokeWidth={3} /> : <Copy className="h-4 w-4" strokeWidth={2.5} />}
+          </button>
         </div>
       </div>
 
@@ -293,48 +315,51 @@ const Results = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
           {/* Left – Ring + Pricing */}
           <div className="items-center flex flex-col">
-            {/* Ring visualization with diagonal crown overlay */}
-            <div className={`relative w-[22rem] h-[22rem] md:w-[26rem] md:h-[26rem] flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
-              {/* Active crown — overlaps top-left diagonally, larger & glowing */}
+            {/* Wrapper provides breathing room around ring + crown */}
+            <div className="relative p-12 md:p-16">
+              {/* Active crown — kiêu sa, là linh hồn của khung */}
               <img
                 src={r.tier.icon}
                 alt={r.tier.label}
-                className="absolute -top-20 -left-20 w-60 h-60 md:w-72 md:h-72 object-contain rotate-[-18deg] z-10 select-none pointer-events-none animate-crown-glow"
+                className="absolute -top-6 -left-6 md:-top-10 md:-left-10 w-[18rem] h-[18rem] md:w-[22rem] md:h-[22rem] object-contain rotate-[-18deg] z-20 select-none pointer-events-none animate-crown-glow drop-shadow-[0_8px_20px_rgba(0,0,0,0.25)]"
               />
 
-              <svg viewBox="0 0 200 200" className="w-full h-full">
-                {(surveyData.ringColors || []).map((color: string, i: number) => {
-                  const angle = (i * 360) / 12;
-                  const endAngle = ((i + 1) * 360) / 12;
-                  const startRad = ((angle - 90) * Math.PI) / 180;
-                  const endRad = ((endAngle - 90) * Math.PI) / 180;
-                  const outerR = 90;
-                  const innerR = 60;
-                  const x1 = 100 + outerR * Math.cos(startRad);
-                  const y1 = 100 + outerR * Math.sin(startRad);
-                  const x2 = 100 + outerR * Math.cos(endRad);
-                  const y2 = 100 + outerR * Math.sin(endRad);
-                  const x3 = 100 + innerR * Math.cos(endRad);
-                  const y3 = 100 + innerR * Math.sin(endRad);
-                  const x4 = 100 + innerR * Math.cos(startRad);
-                  const y4 = 100 + innerR * Math.sin(startRad);
-                  return (
-                    <path
-                      key={i}
-                      d={`M ${x1} ${y1} A ${outerR} ${outerR} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 0 0 ${x4} ${y4} Z`}
-                      fill={color}
-                      stroke="hsl(var(--foreground))"
-                      strokeWidth="0.5"
-                    />
-                  );
-                })}
-              </svg>
-              <button
-                aria-label="Tải ảnh vòng"
-                className="absolute bottom-1 right-1 hover:opacity-80 transition-opacity p-1"
-              >
-                <img src={iconUpload} alt="" className="h-5 w-5 object-contain" />
-              </button>
+              {/* Ring visualization (sơ đồ kỹ thuật, nhỏ lại 60%) */}
+              <div className={`relative w-56 h-56 md:w-64 md:h-64 flex items-center justify-center ${r.pricing.isImperialCandidate || r.pricing.xuanDaiTaiBonus ? "imperial-glow rounded-full" : ""}`}>
+                <svg viewBox="0 0 200 200" className="w-full h-full">
+                  {(surveyData.ringColors || []).map((color: string, i: number) => {
+                    const angle = (i * 360) / 12;
+                    const endAngle = ((i + 1) * 360) / 12;
+                    const startRad = ((angle - 90) * Math.PI) / 180;
+                    const endRad = ((endAngle - 90) * Math.PI) / 180;
+                    const outerR = 90;
+                    const innerR = 60;
+                    const x1 = 100 + outerR * Math.cos(startRad);
+                    const y1 = 100 + outerR * Math.sin(startRad);
+                    const x2 = 100 + outerR * Math.cos(endRad);
+                    const y2 = 100 + outerR * Math.sin(endRad);
+                    const x3 = 100 + innerR * Math.cos(endRad);
+                    const y3 = 100 + innerR * Math.sin(endRad);
+                    const x4 = 100 + innerR * Math.cos(startRad);
+                    const y4 = 100 + innerR * Math.sin(startRad);
+                    return (
+                      <path
+                        key={i}
+                        d={`M ${x1} ${y1} A ${outerR} ${outerR} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${innerR} ${innerR} 0 0 0 ${x4} ${y4} Z`}
+                        fill={color}
+                        stroke="hsl(var(--foreground))"
+                        strokeWidth="0.5"
+                      />
+                    );
+                  })}
+                </svg>
+                <button
+                  aria-label="Tải ảnh vòng"
+                  className="absolute bottom-1 right-1 hover:opacity-80 transition-opacity p-1"
+                >
+                  <img src={iconUpload} alt="" className="h-5 w-5 object-contain" />
+                </button>
+              </div>
             </div>
 
             {/* Title & Pricing */}
@@ -440,25 +465,27 @@ const Results = () => {
         {/* Phong kết cấu tier row */}
         <div className="mt-10">
           <h2 className="font-serif font-bold text-accent mb-4 text-left text-2xl">Phong kết cấu</h2>
-          <div className="flex items-end justify-center gap-3 md:gap-6 overflow-x-auto pb-2">
+          <div className="flex items-end justify-center gap-6 md:gap-10 overflow-x-auto pb-4">
             {TIERS.map((t, i) => {
               const isActive = i === r.tierIndex;
               return (
               <div
                 key={t.key}
-                className={`flex flex-col items-center text-center min-w-[140px] md:min-w-[170px] transition-all ${
+                className={`flex flex-col items-center text-center min-w-[200px] md:min-w-[260px] transition-all ${
                   isActive ? "opacity-100 scale-110" : "opacity-50 grayscale"
                 }`}
               >
-                <img
-                  src={isActive ? t.icon : t.iconLocked}
-                  alt={t.label}
-                  className={`w-36 h-36 md:w-44 md:h-44 object-contain mb-2 ${isActive ? "animate-crown-glow" : ""}`}
-                />
-                <p className={`text-base md:text-lg font-bold ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                <div className={isActive ? "relative rounded-full p-4 imperial-glow" : ""}>
+                  <img
+                    src={isActive ? t.icon : t.iconLocked}
+                    alt={t.label}
+                    className={`w-56 h-56 md:w-72 md:h-72 object-contain mb-2 ${isActive ? "animate-crown-glow drop-shadow-[0_8px_24px_rgba(212,160,55,0.55)]" : ""}`}
+                  />
+                </div>
+                <p className={`text-lg md:text-xl font-bold mt-2 ${isActive ? "text-foreground" : "text-muted-foreground"}`}>
                   {t.label}
                 </p>
-                <p className={`text-sm md:text-base ${isActive ? "font-bold text-foreground" : "text-muted-foreground"}`}>
+                <p className={`text-base md:text-lg ${isActive ? "font-bold text-foreground" : "text-muted-foreground"}`}>
                   {t.sub}
                 </p>
               </div>
@@ -491,21 +518,21 @@ const Results = () => {
         )}
 
         {/* Action buttons - larger */}
-        <div className="flex items-center justify-center gap-6 mt-8">
+        <div className="flex items-center justify-center gap-8 mt-8">
           <button
             onClick={handleDownload}
             disabled={downloading}
             aria-label="Tải xuống"
-            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors disabled:opacity-50"
+            className="group rounded-full border-2 border-border h-20 w-20 md:h-24 md:w-24 inline-flex items-center justify-center hover:border-gold hover:bg-gold/10 transition-colors disabled:opacity-50"
           >
-            <img src={iconDownload} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
+            <Download className="h-10 w-10 md:h-12 md:w-12 text-foreground group-hover:text-gold-dark transition-colors" strokeWidth={2.25} />
           </button>
           <button
             onClick={handleShare}
             aria-label="Chia sẻ"
-            className="rounded-full border-2 border-border p-4 hover:bg-muted transition-colors"
+            className="group rounded-full border-2 border-border h-20 w-20 md:h-24 md:w-24 inline-flex items-center justify-center hover:border-gold hover:bg-gold/10 transition-colors"
           >
-            <img src={iconShare} alt="" className="h-9 w-9 md:h-10 md:w-10 object-contain" />
+            <Share2 className="h-10 w-10 md:h-12 md:w-12 text-foreground group-hover:text-gold-dark transition-colors" strokeWidth={2.25} />
           </button>
         </div>
 

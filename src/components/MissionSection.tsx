@@ -17,16 +17,16 @@ const MissionSection = () => {
         className="pointer-events-none absolute -right-20 bottom-0 w-64 md:w-80 opacity-50 -scale-x-100 select-none"
       />
 
-      <div className="container mx-auto px-4 relative">
-        <div className="flex flex-col md:flex-row items-start gap-12 md:gap-20">
-          <div className="md:w-1/3 space-y-3">
-            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">Sứ mệnh</h2>
+      <div className="container mx-auto px-8 md:px-16 relative">
+        <div className="grid grid-cols-1 md:grid-cols-3 items-start gap-12 md:gap-16">
+          <div className="md:col-span-1 space-y-3">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground leading-tight">Sứ mệnh</h2>
             <p className="font-serif italic text-lg text-muted-foreground">
               Nhìn thấu cốt ngọc<br />– định đúng giá trị.
             </p>
           </div>
 
-          <div className="md:w-2/3 space-y-6 text-muted-foreground leading-relaxed">
+          <div className="md:col-span-2 space-y-6 text-muted-foreground leading-relaxed text-justify pr-2 md:pr-8">
             <p>
               Thị trường ngọc Phỉ Thúy vốn mập mờ, nơi người mua thường phải đặt niềm tin vào cảm tính và những lời hoa mỹ. Chúng mình mong muốn thay đổi điều đó.
             </p>
@@ -39,7 +39,7 @@ const MissionSection = () => {
 
             <div className="flex items-center gap-3 pt-4">
               <div className="h-px flex-1 bg-border" />
-              <span className="font-serif italic text-accent font-semibold">Hiểu ngọc</span>
+              <span className="font-serif text-accent font-bold text-xl">Hiểu ngọc</span>
             </div>
           </div>
         </div>
