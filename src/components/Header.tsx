@@ -40,10 +40,10 @@ const Header = () => {
           <Link
             to="/assessment"
             onClick={() => setMobileOpen(false)}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-gold px-4 py-2 text-base font-semibold"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-gold px-4 py-2 text-base font-semibold leading-none"
           >
-            Cốp ngọc của bạn
-            <img src={iconCopNgoc} alt="" className="h-7 w-7 object-contain" />
+            <span>Cốp ngọc của bạn</span>
+            <img src={iconCopNgoc} alt="" className="h-[1em] w-auto object-contain" />
           </Link>
         </nav>
       )}
