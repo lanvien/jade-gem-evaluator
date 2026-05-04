@@ -294,9 +294,19 @@ const Results = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="container mx-auto px-4 py-4 flex items-center justify-between border-b border-border">
-        <p className="font-serif text-lg font-bold text-[#13532e]">Hiểu ngọc <span className="text-muted-foreground">───</span></p>
-        <div className="flex items-center gap-2 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground bg-[#ffeba3]">
-          Mã Cốp: <span className="font-mono font-bold text-foreground">{copId}</span>
+        <Link to="/" className="font-serif text-lg font-bold text-[#13532e] hover:opacity-80 transition-opacity">
+          Hiểu ngọc <span className="text-muted-foreground">───</span>
+        </Link>
+        <div className="flex items-center gap-2 rounded-full border border-border pl-4 pr-2 py-1.5 text-sm text-muted-foreground bg-[#ffeba3]">
+          <span>Mã Cốp:</span>
+          <span className="font-mono font-bold text-foreground">{displayCode}</span>
+          <button
+            onClick={handleCopyCode}
+            aria-label="Copy mã cốp"
+            className="ml-1 inline-flex items-center justify-center h-7 w-7 rounded-full bg-foreground/90 text-primary-foreground hover:bg-gold hover:text-primary-foreground transition-colors"
+          >
+            {copied ? <Check className="h-4 w-4" strokeWidth={3} /> : <Copy className="h-4 w-4" strokeWidth={2.5} />}
+          </button>
         </div>
       </div>
 
