@@ -53,6 +53,9 @@ export interface JadeInput {
   chot: number;
   flaws: FlawType[];
   hasCertificate: boolean;
+  // === MERGED: thêm từ engine mới ===
+  sellerRedFlags?: number;          // 0-5, dùng cho FOMO discount
+  sellerProofLevel?: "video" | "photo_only" | "hidden";
 }
 
 export interface PricingResult {
@@ -69,9 +72,31 @@ export interface PricingResult {
   hasYellowSpots: boolean;
   xuanDaiTaiBonus: boolean;
   confidence: number;
+  fomoDiscount: number;             // MERGED: hệ số FOMO (1.0 = không giảm)
   warnings: string[];
   colorLabel: string;
   chungLabel: string;
+  // === MERGED: thêm để Result page dùng ===
+  aestheticGroup: AestheticGroup;
+  aestheticLabel: string;
+  aestheticDescription: string;
+  radarData: RadarData;
+}
+
+// MERGED: Aesthetic typology
+export type AestheticGroup =
+  | "classic_harmony"
+  | "bold_statement"
+  | "everyday_companion"
+  | "natures_canvas";
+
+// MERGED: Radar chart data
+export interface RadarData {
+  doTrong: number;    // 0-100
+  sacDien: number;
+  doLanhLan: number;
+  damTay: number;
+  thamMy: number;
 }
 
 // ─────────────────────────────────────────────
@@ -93,8 +118,9 @@ export const CHUNG_LABEL: Record<Chung, string> = {
   "Nếp Băng": "Hoàng Hậu – Chủng Nếp Băng",
 };
 
+// MERGED: Thêm "Đậu thô" vào hard cap
 export const HARD_CAP: Record<Chung, number> = {
-  "Đậu thô": 8_000_000,
+  "Đậu thô": 5_000_000,
   "Đậu mịn": 10_000_000,
   "Nếp Mịn": 35_000_000,
   "Nếp Hóa": 70_000_000,
@@ -208,6 +234,26 @@ const SHAPE_FACTOR: Record<Shape, number> = {
   "Khắc Hoa": 0.7,
 };
 
+// MERGED: Aesthetic group metadata
+const AESTHETIC_META: Record<AestheticGroup, { label: string; desc: string }> = {
+  classic_harmony: {
+    label: "VẺ ĐẸP CHUẨN MỰC (The Classic Harmony)",
+    desc: "Sự cân bằng hoàn hảo giữa Cốt và Sắc, một nền tảng vững chãi vượt thời gian.",
+  },
+  bold_statement: {
+    label: "DẤU ẤN ĐỘC BẢN (The Bold Statement)",
+    desc: "Vượt ra ngoài những quy chuẩn thông thường, sức hút nằm ở sắc độ đột phá, rực rỡ và duy nhất.",
+  },
+  everyday_companion: {
+    label: "BẠN ĐỒNG HÀNH (The Everyday Companion)",
+    desc: "Thanh thoát, nhẹ nhàng và mang tính ứng dụng cao. Tri kỷ để mang theo mỗi ngày.",
+  },
+  natures_canvas: {
+    label: "BỨC TRANH TỰ NHIÊN (The Nature's Canvas)",
+    desc: "Phóng khoáng và không theo quy tắc. Mỗi vệt loang màu là một nét vẽ ngẫu hứng không thể sao chép.",
+  },
+};
+
 // ─────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────
@@ -261,12 +307,77 @@ function roundToHundredK(n: number): number {
   return Math.round(n / 100_000) * 100_000;
 }
 
+// MERGED: FOMO discount (Behavioral Economics module)
+function calcFomoDiscount(redFlags: number): number {
+  const lambda = 0.15;
+  return Math.exp(-lambda * Math.min(redFlags, 5));
+}
+
+// MERGED: Confidence từ seller proof level
+function calcSellerConfidence(level?: "video" | "photo_only" | "hidden"): number {
+  if (level === "video") return 0;          // không trừ gì thêm
+  if (level === "photo_only") return 0.05;  // trừ thêm 5%
+  if (level === "hidden") return 0.15;      // trừ thêm 15% (scam alert)
+  return 0;
+}
+
+// MERGED: Aesthetic group classifier
+function classifyAestheticGroup(
+  qJade: number,
+  scoreSac: number,
+  isImperial: boolean,
+  chot: number,
+  shape: Shape,
+  accentColors: ColorName[],
+  baseColor: ColorName,
+): AestheticGroup {
+  const allColors = [baseColor, ...accentColors];
+  const hasMulticolor = allColors.length >= 3;
+  const isThin = chot < 10;
+  const isSmallShape = shape === "Bản Dẹt" || shape === "Bản Vuông";
+
+  if (hasMulticolor) return "natures_canvas";
+  if (isImperial && qJade < 60) return "bold_statement";
+  if (scoreSac > 70 && qJade < 50) return "bold_statement";
+  if ((isThin || isSmallShape) && qJade < 60 && !isImperial) return "everyday_companion";
+  return "classic_harmony";
+}
+
+// MERGED: Radar chart data builder
+function buildRadarData(
+  input: JadeInput,
+  qJade: number,
+  wRisk: number,
+): RadarData {
+  // Độ trong: map chung score 0-100 → 0-100
+  const doTrong = Math.min(100, Math.round((CHUNG_SCORE[input.chungPeak] / 82) * 100));
+
+  // Sắc diện: normalized score
+  const sacDien = Math.min(100, Math.round(qJade));
+
+  // Độ lành lặn: từ risk multiplier
+  const doLanhLan = Math.round(wRisk * 100);
+
+  // Đầm tay: ni to + chột dày
+  const niNorm = Math.min(100, Math.max(0, ((input.ni - 46) / 22) * 60));
+  const chotNorm = Math.min(100, Math.max(0, ((input.chot - 6) / 12) * 40));
+  const damTay = Math.round(niNorm + chotNorm);
+
+  // Thẩm mỹ: blend imperial + lành lặn
+  const thamMy = Math.round(
+    (doLanhLan * 0.5) + (sacDien * 0.3) + (doTrong * 0.2)
+  );
+
+  return { doTrong, sacDien, doLanhLan, damTay: Math.min(100, damTay), thamMy: Math.min(100, thamMy) };
+}
+
 // ─────────────────────────────────────────────
 // MAIN
 // ─────────────────────────────────────────────
 export function calculateJadePrice(input: JadeInput): PricingResult {
   const warnings: string[] = [];
 
+  // ── Cốt ngọc ──
   const peakScore = CHUNG_SCORE[input.chungPeak];
   const baseScore = CHUNG_SCORE[input.chungBase];
   const coverageRatio = COVERAGE_RATIO[input.coverageLevel];
@@ -274,6 +385,7 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
   const greyPenalty = input.baseColor === "Xám" ? 0.9 : 1.0;
   const scoreChung = rawChungScore * greyPenalty;
 
+  // ── Sắc diện ──
   const allColors: ColorName[] = [input.baseColor, ...input.accentColors];
   const hueScores = allColors.map(c => COLOR_HUE_SCORE[c] ?? 0);
   const maxHue = Math.max(...hueScores);
@@ -283,11 +395,11 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
   let scoreSac = maxHue * hTone * hArea;
 
   const hasLuc = allColors.some(c =>
-    ["Đế Vương Lục","Chính Dương Lục","Xanh Cay","Xanh Ngọt","Lục Táo",
-     "Đậu Lục","Thanh Thủy Lục"].includes(c)
+    ["Đế Vương Lục", "Chính Dương Lục", "Xanh Cay", "Xanh Ngọt", "Lục Táo",
+     "Đậu Lục", "Thanh Thủy Lục"].includes(c)
   );
   const hasTim = allColors.some(c =>
-    ["Tử La Lan","Tím Cà","Tím Lam"].includes(c)
+    ["Tử La Lan", "Tím Cà", "Tím Lam"].includes(c)
   );
   const xuanDaiTai = hasLuc && hasTim;
   if (xuanDaiTai) scoreSac += 15;
@@ -299,6 +411,7 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
   const isImperialCandidate =
     IMPERIAL_COLORS.has(maxColorName) && input.toneLevel >= 4;
 
+  // ── Dynamic weighting ──
   let wChung: number, wSac: number;
   if (isImperialCandidate) {
     wChung = 0.35; wSac = 0.65;
@@ -310,14 +423,15 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
 
   const qJade = (scoreChung * wChung) + (scoreSac * wSac);
 
+  // ── Physical multiplier ──
   const vFloor = getFloorPrice(qJade);
-
   const wNi = getNiFactor(input.ni);
   const wShape = SHAPE_FACTOR[input.shape];
   const wChot = getChotFactor(input.chot);
   const wVolume = getVolumeFactor(input.ni, input.chot);
   const wPhysic = wNi * wShape * wChot * wVolume;
 
+  // ── Risk multiplier (lấy lỗi nặng nhất) ──
   const riskFactors = input.flaws.length > 0
     ? input.flaws.map(f => FLAW_RISK[f] ?? 1.0)
     : [1.0];
@@ -328,24 +442,33 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
     wRisk = Math.max(wRisk - 0.1, 0.1);
   }
 
-  const vPre = vFloor * wPhysic * wRisk;
+  // MERGED: FOMO discount
+  const fomoDiscount = calcFomoDiscount(input.sellerRedFlags ?? 0);
+
+  // ── Hard cap ──
+  const vPre = vFloor * wPhysic * wRisk * fomoDiscount;
   const hardCap = HARD_CAP[input.chungPeak];
   const vFinal = Math.min(vPre, hardCap);
   const hardCapApplied = vPre > hardCap;
 
+  // ── Confidence / price band ──
+  // MERGED: kết hợp seller proof level vào confidence
   let confidence = 1.0;
-  if (!input.hasCertificate) confidence -= 0.1;
+  if (!input.hasCertificate) confidence -= 0.10;
   if (wRisk < 0.75) confidence -= 0.15;
   if (input.coverageLevel >= 3) confidence -= 0.05;
-  confidence = Math.max(confidence, 0.6);
+  confidence -= calcSellerConfidence(input.sellerProofLevel);
+  confidence = Math.max(confidence, 0.55);
 
   const spread = (1 - confidence);
   const minPrice = roundToHundredK(vFinal * (1 - spread * 1.5));
   const maxPrice = roundToHundredK(vFinal * (1 + spread * 0.8));
 
+  // ── Flags ──
   const hasLightEffect = allColors.some(c => LIGHT_EFFECT_COLORS.has(c));
   const hasYellowSpots = allColors.some(c => YELLOW_COLORS.has(c));
 
+  // ── Warnings ──
   if (hasLightEffect) {
     warnings.push(
       "⚠️ Ngọc ăn đèn: Sắc Tím/Lam qua livestream thường rực hơn thực tế 30–50%. " +
@@ -374,6 +497,29 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
       "Yêu cầu giấy từ SJC / GIV / Liulab trước khi chuyển tiền."
     );
   }
+  // MERGED: FOMO warning
+  if ((input.sellerRedFlags ?? 0) >= 2) {
+    warnings.push(
+      "🚨 Người bán có dấu hiệu thao túng tâm lý (giục chốt / ép giá). " +
+      "Hệ thống đã tự động điều chỉnh giá khuyên mua xuống thấp hơn. Hãy chậm lại!"
+    );
+  }
+  if (input.sellerProofLevel === "hidden") {
+    warnings.push(
+      "🔍 Seller lảng tránh cung cấp bằng chứng — Kích hoạt Scam Alert. " +
+      "Độ tin cậy định giá giảm đáng kể."
+    );
+  }
+
+  // MERGED: Aesthetic group
+  const aestheticGroup = classifyAestheticGroup(
+    qJade, scoreSac, isImperialCandidate,
+    input.chot, input.shape, input.accentColors, input.baseColor,
+  );
+  const { label: aestheticLabel, desc: aestheticDescription } = AESTHETIC_META[aestheticGroup];
+
+  // MERGED: Radar data
+  const radarData = buildRadarData(input, qJade, wRisk);
 
   return {
     scoreChung: Math.round(scoreChung * 10) / 10,
@@ -389,9 +535,14 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
     hasYellowSpots,
     xuanDaiTaiBonus: xuanDaiTai,
     confidence,
+    fomoDiscount,
     warnings,
     colorLabel: COLOR_LABEL[maxColorName] ?? maxColorName,
     chungLabel: CHUNG_LABEL[input.chungPeak],
+    aestheticGroup,
+    aestheticLabel,
+    aestheticDescription,
+    radarData,
   };
 }
 
@@ -400,7 +551,7 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
 // ─────────────────────────────────────────────
 export function formatVND(n: number): string {
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)} tỷ`;
-  if (n >= 1_000_000)     return `${(n / 1_000_000).toFixed(0)} triệu`;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(0)} triệu`;
   return n.toLocaleString("vi-VN") + "đ";
 }
 
@@ -410,7 +561,6 @@ export function getPriceRangeLabel(result: PricingResult): string {
 
 // ─────────────────────────────────────────────
 // SURVEY ADAPTER — map UI answers → JadeInput
-// (kept from previous version — used by Results page)
 // ─────────────────────────────────────────────
 
 function mapChung(ans: string | undefined): Chung {
@@ -479,6 +629,7 @@ function mapFlaws(answers: Record<string, string>, patternData: any): FlawType[]
   return flaws;
 }
 
+// MERGED: thêm sellerRedFlags và sellerProofLevel vào adapter
 export function buildJadeInputFromSurvey(data: any): JadeInput {
   const answers: Record<string, string> = data.answers || {};
   const numberInputs: Record<string, string> = data.numberInputs || {};
@@ -507,5 +658,8 @@ export function buildJadeInputFromSurvey(data: any): JadeInput {
     chot: parseFloat(numberInputs[11]) || 8,
     flaws: mapFlaws(answers, patternData),
     hasCertificate: legal === "12a",
+    // MERGED fields — map từ survey data nếu có
+    sellerRedFlags: data.sellerRedFlags ?? 0,
+    sellerProofLevel: data.sellerProofLevel ?? undefined,
   };
 }
