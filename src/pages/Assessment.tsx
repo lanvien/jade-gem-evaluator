@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions, SECTIONS } from "@/data/questions";
-import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn, Sparkles, Upload } from "lucide-react";
 import SectionDivider from "@/components/SectionDivider";
 import ColorRing, { ColorTone } from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
 import PatternStructure, { PatternData } from "@/components/assessment/PatternStructure";
 import ImageLightbox from "@/components/assessment/ImageLightbox";
+import { useJadeVision, type VisionResult } from "@/hooks/useJadeVision";
 
 const TOTAL = questions.length;
 
@@ -123,6 +124,101 @@ const Assessment = () => {
     return saved ? JSON.parse(saved) : EMPTY_PATTERN;
   });
   const [lightboxImg, setLightboxImg] = useState<{ src: string; caption: string } | null>(null);
+  const [prefilledFields, setPrefilledFields] = useState<Set<number>>(new Set());
+  const [prefillBanner, setPrefillBanner] = useState<string[] | null>(null);
+  const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const { analyze: analyzeJade, isLoading: aiLoading, error: aiError, confidence: aiConfidence } = useJadeVision();
+
+  // ─── AI Vision → form mapping ───
+  const chungToAnswer: Record<string, string> = {
+    "Đậu thô": "1a",
+    "Đậu mịn": "1a",
+    "Nếp Mịn": "1b",
+    "Nếp Hóa": "1b",
+    "Nếp Băng": "1c",
+  };
+  const coverageToAnswer: Record<number, string> = { 1: "3a", 2: "3b", 3: "3c", 4: "3d" };
+  const colorHexMap: Record<string, string> = {
+    "Đế Vương Lục": "#1b4332", "Chính Dương Lục": "#2d6a4f", "Lạt Dương Lục": "#388e3c",
+    "Táo Quả Lục": "#66bb6a", "Đậu Lục": "#7ab87a", "Thanh Thủy Lục": "#52b788",
+    "Du Thanh": "#2f4f3a", "Hồi Lục": "#7a8b7a", "Mặc Thúy": "#1a1a1a",
+    "Tử La Lan": "#c8a0d0", "Hoàng Gia Tử": "#6a3d8a", "Gia Tử": "#8a5dab", "Phấn Tử": "#e0c8e8",
+    "Thiên Không Lam": "#6ab4d8", "Lam Tinh": "#9bc7e0", "Hồ Thủy Lam": "#5a9fc7", "Lam Thủy": "#3a7a9f",
+    "Hồng": "#c0392b", "Tranh Hồng": "#d96a3a", "Hạc Hồng": "#a05a3a",
+    "Hoàng": "#e0a83a", "Tranh Hoàng": "#e8b85a", "Hạc Hoàng": "#d8c89a",
+    "Bạch Sắc": "#f0f0f0", "Vô Sắc": "#f5f5f0", "Ô Kê Chủng": "#a0a0a0",
+  };
+  const flawToAnswer: Record<string, string> = {
+    "Không lỗi": "5a", "Vân ngọc": "5a",
+    "Sớ bông / Gân già": "5b",
+    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "5b",
+    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "5c",
+    "Sớ dọc dài / Sớ lưỡi gà": "5c",
+    "Sớ chéo / Sớ ngang": "5d",
+    "Vết nứt (Crack)": "5d",
+  };
+  const shapeToAnswer: Record<string, string> = {
+    "Bản Đũa": "10a", "Bản Dẹt": "10b", "Bản Vuông": "10c", "Khắc Hoa": "10d",
+  };
+
+  const handleAiUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreviewImg(URL.createObjectURL(file));
+    const v = await analyzeJade(file);
+    e.target.value = "";
+    if (!v) return;
+
+    const newAnswers: Record<number, string> = { ...answers };
+    const filled = new Set<number>();
+
+    const a1 = chungToAnswer[v.chungPeak];
+    if (a1) { newAnswers[1] = a1; filled.add(1); }
+    const a3 = coverageToAnswer[v.coverageLevel];
+    if (a3) { newAnswers[3] = a3; filled.add(3); }
+    const a5 = v.flaws?.length ? flawToAnswer[v.flaws[0]] : "5a";
+    if (a5) { newAnswers[5] = a5; filled.add(5); }
+    const a10 = shapeToAnswer[v.shape];
+    if (a10) { newAnswers[10] = a10; filled.add(10); }
+
+    setAnswers(newAnswers);
+
+    // Ring colors from baseColor
+    const hex = colorHexMap[v.baseColor] ?? "#7ab87a";
+    setRingColors(Array(12).fill(hex));
+    const tone: ColorTone = v.toneLevel >= 4 ? "dark" : v.toneLevel <= 2 ? "light" : "medium";
+    setColorTones(Object.fromEntries(Array.from({ length: 12 }, (_, i) => [String(i), tone])));
+    filled.add(2); // color ring question id
+
+    setPrefilledFields(filled);
+
+    // Banner with maturity-priority (Già/Non) reasoning
+    const banner: string[] = [];
+    banner.push(`✅ AI đã điền ${filled.size} trường — kiểm tra lại trước khi tính giá!`);
+    banner.push(
+      v.vision_notes.crystalMaturity === "non"
+        ? "🌱 Nhận định: Ngọc NON (tinh thể lổn nhổn, không khít) — giá trị thấp hơn ngọc già cùng chủng."
+        : v.vision_notes.crystalMaturity === "già"
+        ? "💎 Nhận định: Ngọc GIÀ (tinh thể khít, mướt) — chất ngọc tốt."
+        : "❓ Không xác định được Già/Non rõ ràng từ ảnh."
+    );
+    if (v.vision_notes.opticalEffects?.length)
+      banner.push(`✨ Hiệu ứng quang học: ${v.vision_notes.opticalEffects.join(", ")}`);
+    if (v.vision_notes.lightingQuality === "artificial")
+      banner.push("⚡ Ảnh dưới đèn nhân tạo — màu có thể rực hơn 30-50% so với thực tế.");
+    if (v.vision_notes.hasPhieuHoa) banner.push("🌸 Phát hiện Phiêu Hoa — cộng giá trị đáng kể.");
+    if (v.vision_notes.overallConfidence < 0.6)
+      banner.push("⚠️ Độ tin cậy thấp — ảnh không đủ rõ, kết quả chỉ tham khảo.");
+    setPrefillBanner(banner);
+  };
+
+  const clearPrefillFor = (qId: number) => {
+    if (prefilledFields.has(qId)) {
+      const next = new Set(prefilledFields);
+      next.delete(qId);
+      setPrefilledFields(next);
+    }
+  };
 
   // Persist state
   useEffect(() => {
@@ -171,6 +267,7 @@ const Assessment = () => {
 
   const handleSelect = (optionId: string) => {
     setAnswers((prev) => ({ ...prev, [q.id]: optionId }));
+    clearPrefillFor(q.id);
 
     // Auto-advance
     if (isAutoAdvance) {
@@ -253,7 +350,82 @@ const Assessment = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in-up" key={stepIdx}>
-        <div className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-6">
+        {/* ── AI Vision panel ── */}
+        <div className="mb-6 rounded-xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-gold" />
+              <p className="font-serif font-bold text-foreground text-sm md:text-base">
+                Soi đèn AI — Tự điền form bằng ảnh
+              </p>
+            </div>
+            <label
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold cursor-pointer transition-colors ${
+                aiLoading
+                  ? "bg-muted text-muted-foreground cursor-wait"
+                  : "bg-gold text-primary-foreground hover:bg-gold-dark"
+              }`}
+            >
+              <Upload className="h-4 w-4" />
+              {aiLoading ? "Đang xử lý..." : "🤖 Soi đèn AI"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAiUpload}
+                disabled={aiLoading}
+              />
+            </label>
+          </div>
+
+          {previewImg && !aiLoading && (
+            <img
+              src={previewImg}
+              alt="Ảnh ngọc"
+              className="mt-3 w-full max-h-48 object-contain rounded-lg border border-border"
+            />
+          )}
+
+          {aiLoading && (
+            <div className="mt-4 flex items-center gap-3 text-gold animate-pulse">
+              <div className="h-2 w-2 rounded-full bg-gold animate-ping" />
+              <p className="font-serif italic text-sm md:text-base">
+                🔍 Đang soi tinh thể ngọc...
+              </p>
+            </div>
+          )}
+
+          {aiError && (
+            <p className="mt-3 text-sm text-destructive">⚠️ {aiError}</p>
+          )}
+
+          {prefillBanner && !aiLoading && (
+            <div className="mt-4 rounded-lg bg-gold/10 border border-gold/30 p-3 space-y-1.5">
+              {prefillBanner.map((line, i) => (
+                <p key={i} className="text-xs md:text-sm text-foreground leading-relaxed">
+                  {line}
+                </p>
+              ))}
+              {aiConfidence > 0 && (
+                <p className="text-xs text-muted-foreground italic pt-1">
+                  Độ tin cậy AI: {Math.round(aiConfidence * 100)}%
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className={`rounded-xl border bg-card p-6 md:p-8 shadow-sm space-y-6 transition-all ${
+          prefilledFields.has(q.id)
+            ? "border-gold border-2 ring-2 ring-gold/20"
+            : "border-border"
+        }`}>
+          {prefilledFields.has(q.id) && (
+            <div className="flex items-center gap-2 text-xs font-semibold text-gold bg-gold/10 rounded-md px-3 py-1.5 -mt-2">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI đã điền sẵn — kiểm tra lại nhé
+            </div>
+          )}
           <div className="text-center space-y-3">
             <span className="text-sm text-gold font-semibold">
               {questionNumber}/{TOTAL}

@@ -1,7 +1,44 @@
 // ─────────────────────────────────────────────────────────────
-// Thay toàn bộ hàm computeResults trong Results.tsx bằng đoạn này
-// Giữ nguyên mọi thứ khác trong file
+// TODO: Results.tsx hiện chỉ là snippet computeResults — cần dán
+// lại layout đầy đủ (preview + crown + tier timeline) như bản trước.
+// Stub default export để app build được.
 // ─────────────────────────────────────────────────────────────
+import { Link } from "react-router-dom";
+import { calculateJadePrice, buildJadeInputFromSurvey, formatVND } from "@/lib/pricingEngine";
+
+const TIERS = [
+  { key: "thuong-tai", name: "Thường Tại" },
+  { key: "quy-nhan", name: "Quý Nhân" },
+  { key: "phi-tan", name: "Phi Tần" },
+  { key: "quy-phi", name: "Quý Phi" },
+  { key: "hoang-hau", name: "Hoàng Hậu" },
+];
+
+export default function Results() {
+  const surveyData = JSON.parse(localStorage.getItem("jade-survey-data") || "{}");
+  let r: any = null;
+  try { r = computeResults(surveyData); } catch (e) { /* noop */ }
+
+  return (
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+      <Link to="/" className="font-serif text-2xl text-gold mb-6">← Hiểu Ngọc</Link>
+      <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">Kết quả định giá</h1>
+      {r ? (
+        <div className="space-y-3 max-w-md">
+          <p className="text-xl">Phẩm cấp: <strong className="text-gold">{r.tier?.name}</strong></p>
+          <p className="text-2xl font-bold">{formatVND(r.priceLow)} – {formatVND(r.priceHigh)}</p>
+          <p className="text-sm text-muted-foreground">{r.cotText}</p>
+          <p className="text-sm text-muted-foreground">{r.sacText}</p>
+          <p className="text-sm text-muted-foreground">{r.noiTaiText}</p>
+        </div>
+      ) : (
+        <p className="text-muted-foreground">Chưa có dữ liệu khảo sát.</p>
+      )}
+    </div>
+  );
+}
+
+
 
 function computeResults(data: any) {
   const numberInputs = data.numberInputs || {};
