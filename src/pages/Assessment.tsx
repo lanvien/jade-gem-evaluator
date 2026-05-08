@@ -124,6 +124,101 @@ const Assessment = () => {
     return saved ? JSON.parse(saved) : EMPTY_PATTERN;
   });
   const [lightboxImg, setLightboxImg] = useState<{ src: string; caption: string } | null>(null);
+  const [prefilledFields, setPrefilledFields] = useState<Set<number>>(new Set());
+  const [prefillBanner, setPrefillBanner] = useState<string[] | null>(null);
+  const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const { analyze: analyzeJade, isLoading: aiLoading, error: aiError, confidence: aiConfidence } = useJadeVision();
+
+  // ─── AI Vision → form mapping ───
+  const chungToAnswer: Record<string, string> = {
+    "Đậu thô": "1a",
+    "Đậu mịn": "1a",
+    "Nếp Mịn": "1b",
+    "Nếp Hóa": "1b",
+    "Nếp Băng": "1c",
+  };
+  const coverageToAnswer: Record<number, string> = { 1: "3a", 2: "3b", 3: "3c", 4: "3d" };
+  const colorHexMap: Record<string, string> = {
+    "Đế Vương Lục": "#1b4332", "Chính Dương Lục": "#2d6a4f", "Lạt Dương Lục": "#388e3c",
+    "Táo Quả Lục": "#66bb6a", "Đậu Lục": "#7ab87a", "Thanh Thủy Lục": "#52b788",
+    "Du Thanh": "#2f4f3a", "Hồi Lục": "#7a8b7a", "Mặc Thúy": "#1a1a1a",
+    "Tử La Lan": "#c8a0d0", "Hoàng Gia Tử": "#6a3d8a", "Gia Tử": "#8a5dab", "Phấn Tử": "#e0c8e8",
+    "Thiên Không Lam": "#6ab4d8", "Lam Tinh": "#9bc7e0", "Hồ Thủy Lam": "#5a9fc7", "Lam Thủy": "#3a7a9f",
+    "Hồng": "#c0392b", "Tranh Hồng": "#d96a3a", "Hạc Hồng": "#a05a3a",
+    "Hoàng": "#e0a83a", "Tranh Hoàng": "#e8b85a", "Hạc Hoàng": "#d8c89a",
+    "Bạch Sắc": "#f0f0f0", "Vô Sắc": "#f5f5f0", "Ô Kê Chủng": "#a0a0a0",
+  };
+  const flawToAnswer: Record<string, string> = {
+    "Không lỗi": "5a", "Vân ngọc": "5a",
+    "Sớ bông / Gân già": "5b",
+    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "5b",
+    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "5c",
+    "Sớ dọc dài / Sớ lưỡi gà": "5c",
+    "Sớ chéo / Sớ ngang": "5d",
+    "Vết nứt (Crack)": "5d",
+  };
+  const shapeToAnswer: Record<string, string> = {
+    "Bản Đũa": "10a", "Bản Dẹt": "10b", "Bản Vuông": "10c", "Khắc Hoa": "10d",
+  };
+
+  const handleAiUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPreviewImg(URL.createObjectURL(file));
+    const v = await analyzeJade(file);
+    e.target.value = "";
+    if (!v) return;
+
+    const newAnswers: Record<number, string> = { ...answers };
+    const filled = new Set<number>();
+
+    const a1 = chungToAnswer[v.chungPeak];
+    if (a1) { newAnswers[1] = a1; filled.add(1); }
+    const a3 = coverageToAnswer[v.coverageLevel];
+    if (a3) { newAnswers[3] = a3; filled.add(3); }
+    const a5 = v.flaws?.length ? flawToAnswer[v.flaws[0]] : "5a";
+    if (a5) { newAnswers[5] = a5; filled.add(5); }
+    const a10 = shapeToAnswer[v.shape];
+    if (a10) { newAnswers[10] = a10; filled.add(10); }
+
+    setAnswers(newAnswers);
+
+    // Ring colors from baseColor
+    const hex = colorHexMap[v.baseColor] ?? "#7ab87a";
+    setRingColors(Array(12).fill(hex));
+    const tone: ColorTone = v.toneLevel >= 4 ? "dark" : v.toneLevel <= 2 ? "light" : "medium";
+    setColorTones(Object.fromEntries(Array.from({ length: 12 }, (_, i) => [String(i), tone])));
+    filled.add(2); // color ring question id
+
+    setPrefilledFields(filled);
+
+    // Banner with maturity-priority (Già/Non) reasoning
+    const banner: string[] = [];
+    banner.push(`✅ AI đã điền ${filled.size} trường — kiểm tra lại trước khi tính giá!`);
+    banner.push(
+      v.vision_notes.crystalMaturity === "non"
+        ? "🌱 Nhận định: Ngọc NON (tinh thể lổn nhổn, không khít) — giá trị thấp hơn ngọc già cùng chủng."
+        : v.vision_notes.crystalMaturity === "già"
+        ? "💎 Nhận định: Ngọc GIÀ (tinh thể khít, mướt) — chất ngọc tốt."
+        : "❓ Không xác định được Già/Non rõ ràng từ ảnh."
+    );
+    if (v.vision_notes.opticalEffects?.length)
+      banner.push(`✨ Hiệu ứng quang học: ${v.vision_notes.opticalEffects.join(", ")}`);
+    if (v.vision_notes.lightingQuality === "artificial")
+      banner.push("⚡ Ảnh dưới đèn nhân tạo — màu có thể rực hơn 30-50% so với thực tế.");
+    if (v.vision_notes.hasPhieuHoa) banner.push("🌸 Phát hiện Phiêu Hoa — cộng giá trị đáng kể.");
+    if (v.vision_notes.overallConfidence < 0.6)
+      banner.push("⚠️ Độ tin cậy thấp — ảnh không đủ rõ, kết quả chỉ tham khảo.");
+    setPrefillBanner(banner);
+  };
+
+  const clearPrefillFor = (qId: number) => {
+    if (prefilledFields.has(qId)) {
+      const next = new Set(prefilledFields);
+      next.delete(qId);
+      setPrefilledFields(next);
+    }
+  };
 
   // Persist state
   useEffect(() => {
