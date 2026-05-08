@@ -350,7 +350,82 @@ const Assessment = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in-up" key={stepIdx}>
-        <div className="rounded-xl border border-border bg-card p-6 md:p-8 shadow-sm space-y-6">
+        {/* ── AI Vision panel ── */}
+        <div className="mb-6 rounded-xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 shadow-sm">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-gold" />
+              <p className="font-serif font-bold text-foreground text-sm md:text-base">
+                Soi đèn AI — Tự điền form bằng ảnh
+              </p>
+            </div>
+            <label
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold cursor-pointer transition-colors ${
+                aiLoading
+                  ? "bg-muted text-muted-foreground cursor-wait"
+                  : "bg-gold text-primary-foreground hover:bg-gold-dark"
+              }`}
+            >
+              <Upload className="h-4 w-4" />
+              {aiLoading ? "Đang xử lý..." : "🤖 Soi đèn AI"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAiUpload}
+                disabled={aiLoading}
+              />
+            </label>
+          </div>
+
+          {previewImg && !aiLoading && (
+            <img
+              src={previewImg}
+              alt="Ảnh ngọc"
+              className="mt-3 w-full max-h-48 object-contain rounded-lg border border-border"
+            />
+          )}
+
+          {aiLoading && (
+            <div className="mt-4 flex items-center gap-3 text-gold animate-pulse">
+              <div className="h-2 w-2 rounded-full bg-gold animate-ping" />
+              <p className="font-serif italic text-sm md:text-base">
+                🔍 Đang soi tinh thể ngọc...
+              </p>
+            </div>
+          )}
+
+          {aiError && (
+            <p className="mt-3 text-sm text-destructive">⚠️ {aiError}</p>
+          )}
+
+          {prefillBanner && !aiLoading && (
+            <div className="mt-4 rounded-lg bg-gold/10 border border-gold/30 p-3 space-y-1.5">
+              {prefillBanner.map((line, i) => (
+                <p key={i} className="text-xs md:text-sm text-foreground leading-relaxed">
+                  {line}
+                </p>
+              ))}
+              {aiConfidence > 0 && (
+                <p className="text-xs text-muted-foreground italic pt-1">
+                  Độ tin cậy AI: {Math.round(aiConfidence * 100)}%
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className={`rounded-xl border bg-card p-6 md:p-8 shadow-sm space-y-6 transition-all ${
+          prefilledFields.has(q.id)
+            ? "border-gold border-2 ring-2 ring-gold/20"
+            : "border-border"
+        }`}>
+          {prefilledFields.has(q.id) && (
+            <div className="flex items-center gap-2 text-xs font-semibold text-gold bg-gold/10 rounded-md px-3 py-1.5 -mt-2">
+              <Sparkles className="h-3.5 w-3.5" />
+              AI đã điền sẵn — kiểm tra lại nhé
+            </div>
+          )}
           <div className="text-center space-y-3">
             <span className="text-sm text-gold font-semibold">
               {questionNumber}/{TOTAL}
