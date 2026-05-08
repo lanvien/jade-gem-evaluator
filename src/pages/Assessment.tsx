@@ -267,6 +267,7 @@ const Assessment = () => {
 
   const handleSelect = (optionId: string) => {
     setAnswers((prev) => ({ ...prev, [q.id]: optionId }));
+    clearPrefillFor(q.id);
 
     // Auto-advance
     if (isAutoAdvance) {
