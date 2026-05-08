@@ -160,13 +160,17 @@ export default function Results() {
 
             <button
               onClick={() =>
-                saveToCop({
-                  copCode: ringCode,
-                  ownerName: null,
-                  pricing: r!.pricing,
-                  tier: r!.tier,
-                  surveyData,
-                } as any)
+                saveToCop(
+                  {
+                    nickname: ringCode,
+                    input: buildJadeInputFromSurvey(surveyData),
+                    result: r!.pricing,
+                  },
+                  {
+                    onSuccess: () => toast.success(`Đã cất ${ringCode} vào Cốp Ngọc!`),
+                    onError: (e: any) => toast.error(e?.message ?? "Lỗi khi lưu"),
+                  },
+                )
               }
               disabled={isPending}
               className="w-full rounded-full bg-gold py-3.5 font-bold text-primary-foreground hover:bg-gold-dark transition-colors disabled:opacity-50"
