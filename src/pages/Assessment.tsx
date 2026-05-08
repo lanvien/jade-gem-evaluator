@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions, SECTIONS } from "@/data/questions";
-import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn, Sparkles, Upload } from "lucide-react";
 import SectionDivider from "@/components/SectionDivider";
 import ColorRing, { ColorTone } from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
 import PatternStructure, { PatternData } from "@/components/assessment/PatternStructure";
 import ImageLightbox from "@/components/assessment/ImageLightbox";
+import { useJadeVision, type VisionResult } from "@/hooks/useJadeVision";
 
 const TOTAL = questions.length;
 
