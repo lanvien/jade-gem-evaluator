@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions, SECTIONS } from "@/data/questions";
-import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn, Sparkles, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn, Sparkles, Upload, RotateCcw } from "lucide-react";
+import { resetAssessmentSession } from "@/lib/resetAssessment";
 import SectionDivider from "@/components/SectionDivider";
 import ColorRing, { ColorTone } from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
@@ -563,6 +564,31 @@ const Assessment = () => {
           >
             {questionNumber === TOTAL ? "Hoàn thành" : "Tiếp theo"}{" "}
             <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Restart from beginning */}
+        <div className="mt-10 pt-6 border-t border-border flex justify-center">
+          <button
+            onClick={() => {
+              if (window.confirm("Bạn có chắc muốn làm lại từ đầu? Mọi câu trả lời hiện tại sẽ bị xoá.")) {
+                resetAssessmentSession();
+                setAnswers({});
+                setNumberInputs({});
+                setSubChecks({});
+                setRingColors(Array(12).fill("#e5e7eb"));
+                setColorTones({});
+                setPatternData(EMPTY_PATTERN);
+                setPrefilledFields(new Set());
+                setPrefillBanner(null);
+                setPreviewImg(null);
+                setStepIdx(0);
+              }
+            }}
+            className="inline-flex items-center gap-2 text-xs md:text-sm text-muted-foreground hover:text-gold transition-colors"
+          >
+            <RotateCcw className="h-4 w-4" />
+            Làm lại từ đầu
           </button>
         </div>
       </div>
