@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { questions, SECTIONS } from "@/data/questions";
-import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn, Sparkles, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn, Sparkles, Upload, RotateCcw } from "lucide-react";
+import { resetAssessmentSession } from "@/lib/resetAssessment";
 import SectionDivider from "@/components/SectionDivider";
 import ColorRing, { ColorTone } from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
