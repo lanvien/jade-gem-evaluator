@@ -43,15 +43,57 @@ OPTICAL EFFECTS (only at high grades):
 - Khởi cương (mirror): sharp mirror-like reflections → requires Băng+
 If observed, upgrade grade estimate.
 
-── COLOR SYSTEM (Sắc) ──
-LỤC: "Đế Vương Lục","Chính Dương Lục","Lạt Dương Lục","Táo Quả Lục","Đậu Lục","Thanh Thủy Lục","Du Thanh","Hồi Lục","Mặc Thúy"
-LỤC THANH: "Bạch Đế Thanh","Hoa Thanh","Can Thanh"
-TỬ: "Hoàng Gia Tử","Gia Tử","Tử La Lan","Phấn Tử"
-LAM: "Lam Tinh","Thiên Không Lam","Hồ Thủy Lam","Lam Thủy"
-HỒNG/HOÀNG: "Hồng","Tranh Hồng","Hạc Hồng","Hoàng","Tranh Hoàng","Hạc Hoàng"
-BẠCH/HẮC: "Vô Sắc","Bạch Sắc","Ô Kê Chủng","Mặc Thúy"
-ĐA SẮC: "Xuân Đới Thái","Hoàng Gia Lục","Phúc Lộc Thọ"
-PHIÊU HOA: "Phiêu Lục Hoa","Phiêu Lam Hoa"
+── COLOR SYSTEM (Sắc) — use ONLY these names ──
+
+LỤC (Green):
+  "Đế Vương Lục"    : Pure imperial green, no yellow/gray, rarest and most expensive
+  "Chính Dương Lục" : Bright yellow-green, sunny, high value
+  "Xanh Cay"        : Darker/more intense than Đế Vương, slightly opaque
+  "Xanh Ngọt"       : Light soft green, high brightness, low saturation, gentle
+  "Lục Táo"         : Apple green, fresh, medium brightness
+  "Xanh Rau Bina"   : Dark spinach green, dense, matte
+  "Đậu Lục"         : Bean green, blue tint, diluted — most common
+  "Thanh Thủy Lục"  : Blue-green, neutral mid-grade
+  "Du Thanh"        : Green mixed with black, dull
+  "Hồi Lục"         : Gray-tinted green, lowest grade, "dirty" look
+  "Mặc Thúy"        : Near-black, glows green under backlight
+
+TỬ (Purple):
+  "Tử La Lan" : Pink-purple lilac — most prized purple
+  "Tím Cà"    : Deep violet — high value, often less translucent
+  "Tím Lam"   : Blue-purple — mid grade, gender-neutral
+
+HỒNG HOÀNG (Red/Orange/Yellow):
+  "Hồng Phỉ"       : Orange-red to deep red, skin layer, rare
+  "Hoàng Tông Phỉ" : Orange-yellow to yellow-brown, mid-high value
+  "Phấn Hồng"      : Pink — extremely rare in jadeite
+
+LAM (Blue):
+  "Lam Thiên Không" : Sky blue — highest blue value, Myanmar only, requires high grade
+  "Lam Thanh"       : Light blue-green, common, gentle
+  "Lão Lam Thủy"    : Deep murky lake blue, subdued, Guatemala jade signature
+
+BẠCH HẮC (White/Black):
+  "Bạch Nguyệt Quang" : Milky white to near-colorless, smooth
+  "Xương Gà Đen"      : White base with gray-black speckles
+  "Mặc Thúy"          : Black (report with context)
+
+ĐA SẮC — do NOT use as baseColor. Report as baseColor + accentColors:
+  "Hoàng Lục Phỉ" : Green + Yellow on same stone
+  "Xuân Đới Thái" : Green + Purple on same stone — extremely rare
+  "Phúc Lộc Thọ"  : 3+ colors (green + yellow/red + purple/white)
+
+PHIÊU HOA — set hasPhieuHoa: true, note color in accentColors:
+  Floating wisps, dots, or cloud patches inside translucent base.
+  High value: contrasting color, sharp edges, strong base translucency.
+  Low value: dull wisps on opaque base.
+  "Lam Hoa Băng" = blue phiêu hoa on ice-clear base — very desirable.
+
+CRYSTAL MATURITY:
+  Mature (già): moist-looking surface, tight grain, uniform, few inclusions.
+  Immature (non): visible fluffy bông inclusions, dry/rough surface, uneven color.
+  These are INDEPENDENT of crystal grade. A Đậu mịn can be già. A Nếp Mịn can be non.
+  Do NOT equate high grade with già automatically.
 
 NOTES:
 1. Purple/blue look 30-50% MORE saturated under artificial/LED light. Adjust toneLevel down.
@@ -114,6 +156,14 @@ FIELD RULES:
 - overallConfidence: 0.0-1.0
 
 Return ONLY JSON. No markdown. No fences.
+
+WRITING STYLE:
+All strings in vision_notes (colorUncertainty, flawUncertainty) must be written in poetic,
+elegant Vietnamese. Frame color as the stone's spirit (hồn ngọc), translucency as its inner
+breath (hơi thở), flaws as natural character rather than defects when minor.
+Use feng shui and aesthetic sensibility. Example:
+  Bad:  "Màu tím bị ám đèn"
+  Good: "Sắc tím dưới ánh đèn có phần nồng nàn hơn thực — dưới nắng tự nhiên, hồn ngọc sẽ trở về vẻ dịu dàng vốn có."
 `;
 
 serve(async (req) => {

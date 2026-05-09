@@ -128,6 +128,13 @@ const Assessment = () => {
   const [prefilledFields, setPrefilledFields] = useState<Set<number>>(new Set());
   const [prefillBanner, setPrefillBanner] = useState<string[] | null>(null);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const [prefillUsed, setPrefillUsed] = useState<boolean>(
+    () => localStorage.getItem("jade-prefill-used") === "1",
+  );
+  const [aiVisionCtx, setAiVisionCtx] = useState<{ isMuna?: boolean; chungPeak?: string; hasBlackFlaw?: boolean } | undefined>(() => {
+    const saved = localStorage.getItem("jade-ai-vision-ctx");
+    return saved ? JSON.parse(saved) : undefined;
+  });
   const { analyze: analyzeJade, isLoading: aiLoading, error: aiError, confidence: aiConfidence } = useJadeVision();
 
   // ─── AI Vision → form mapping ───
@@ -211,6 +218,17 @@ const Assessment = () => {
     if (v.vision_notes.overallConfidence < 0.6)
       banner.push("⚠️ Độ tin cậy thấp — ảnh không đủ rõ, kết quả chỉ tham khảo.");
     setPrefillBanner(banner);
+
+    // Mark AI as used (one-shot per session) + persist vision context for ColorRing overlays
+    setPrefillUsed(true);
+    localStorage.setItem("jade-prefill-used", "1");
+    const ctx = {
+      isMuna: !!v.vision_notes?.isMuna,
+      chungPeak: v.chungPeak,
+      hasBlackFlaw: (v.flaws || []).some((f) => /Vết nứt|Sớ chéo|Sớ ngang|Mắt cát/i.test(f)),
+    };
+    setAiVisionCtx(ctx);
+    localStorage.setItem("jade-ai-vision-ctx", JSON.stringify(ctx));
   };
 
   const clearPrefillFor = (qId: number) => {
@@ -232,6 +250,41 @@ const Assessment = () => {
     localStorage.setItem("jade-pattern-data", JSON.stringify(patternData));
   }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, patternData]);
 
+  // Exit-count: if user leaves mid-flow >= 2 times, auto-reset on next mount
+  useEffect(() => {
+    const exitCount = parseInt(localStorage.getItem("jade-exit-count") || "0", 10);
+    const hasAnswers = Object.keys(answers).length > 0 || stepIdx > 0;
+    if (exitCount >= 2 && hasAnswers) {
+      resetAssessmentSession();
+      localStorage.removeItem("jade-exit-count");
+      localStorage.removeItem("jade-prefill-used");
+      localStorage.removeItem("jade-ai-vision-ctx");
+      setAnswers({});
+      setNumberInputs({});
+      setSubChecks({});
+      setRingColors(Array(12).fill("#e5e7eb"));
+      setColorTones({});
+      setPatternData(EMPTY_PATTERN);
+      setPrefilledFields(new Set());
+      setPrefillBanner(null);
+      setPreviewImg(null);
+      setPrefillUsed(false);
+      setAiVisionCtx(undefined);
+      setStepIdx(0);
+    }
+    const onLeave = () => {
+      const stillIncomplete = stepIdx < steps.length - 1;
+      if (stillIncomplete) {
+        const cur = parseInt(localStorage.getItem("jade-exit-count") || "0", 10);
+        localStorage.setItem("jade-exit-count", String(cur + 1));
+      }
+    };
+    window.addEventListener("beforeunload", onLeave);
+    return () => window.removeEventListener("beforeunload", onLeave);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   const handleDividerDone = useCallback(() => {
     setStepIdx((s) => Math.min(s + 1, steps.length - 1));
   }, [steps.length]);
@@ -245,6 +298,7 @@ const Assessment = () => {
     if (questionNumber === TOTAL) {
       const surveyData = { answers, ringColors, colorTones, numberInputs, subChecks, patternData };
       localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
+      localStorage.removeItem("jade-exit-count");
       navigate("/results");
       return;
     }
@@ -283,6 +337,7 @@ const Assessment = () => {
             patternData,
           };
           localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
+          localStorage.removeItem("jade-exit-count");
           navigate("/results");
         } else if (stepIdx < steps.length - 1) {
           setStepIdx((s) => s + 1);
@@ -351,70 +406,71 @@ const Assessment = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in-up" key={stepIdx}>
-        {/* ── AI Vision panel ── */}
-        <div className="mb-6 rounded-xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-gold" />
-              <p className="font-serif font-bold text-foreground text-sm md:text-base">
-                Soi đèn AI — Tự điền form bằng ảnh
-              </p>
+        {/* ── AI Vision panel — only shown on first question, and only until first successful prefill ── */}
+        {questionNumber === 1 && !prefillUsed && (
+          <div className="mb-6 rounded-xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-gold" />
+                <p className="font-serif font-bold text-foreground text-sm md:text-base">
+                  Soi đèn AI — Tự điền form bằng ảnh
+                </p>
+              </div>
+              <label
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold cursor-pointer transition-colors ${
+                  aiLoading
+                    ? "bg-muted text-muted-foreground cursor-wait"
+                    : "bg-gold text-primary-foreground hover:bg-gold-dark"
+                }`}
+              >
+                <Upload className="h-4 w-4" />
+                {aiLoading ? "Đang xử lý..." : "🤖 Soi đèn AI"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAiUpload}
+                  disabled={aiLoading}
+                />
+              </label>
             </div>
-            <label
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold cursor-pointer transition-colors ${
-                aiLoading
-                  ? "bg-muted text-muted-foreground cursor-wait"
-                  : "bg-gold text-primary-foreground hover:bg-gold-dark"
-              }`}
-            >
-              <Upload className="h-4 w-4" />
-              {aiLoading ? "Đang xử lý..." : "🤖 Soi đèn AI"}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAiUpload}
-                disabled={aiLoading}
+
+            {previewImg && !aiLoading && (
+              <img
+                src={previewImg}
+                alt="Ảnh ngọc"
+                className="mt-3 w-full max-h-48 object-contain rounded-lg border border-border"
               />
-            </label>
+            )}
+
+            {aiLoading && (
+              <div className="mt-4 flex items-center gap-3 text-gold animate-pulse">
+                <div className="h-2 w-2 rounded-full bg-gold animate-ping" />
+                <p className="font-serif italic text-sm md:text-base">
+                  🔍 Đang soi tinh thể ngọc...
+                </p>
+              </div>
+            )}
+
+            {aiError && <p className="mt-3 text-sm text-destructive">⚠️ {aiError}</p>}
           </div>
+        )}
 
-          {previewImg && !aiLoading && (
-            <img
-              src={previewImg}
-              alt="Ảnh ngọc"
-              className="mt-3 w-full max-h-48 object-contain rounded-lg border border-border"
-            />
-          )}
-
-          {aiLoading && (
-            <div className="mt-4 flex items-center gap-3 text-gold animate-pulse">
-              <div className="h-2 w-2 rounded-full bg-gold animate-ping" />
-              <p className="font-serif italic text-sm md:text-base">
-                🔍 Đang soi tinh thể ngọc...
+        {/* AI prefill banner — show once on the step the AI just filled */}
+        {prefillBanner && !aiLoading && questionNumber === 1 && (
+          <div className="mb-6 rounded-lg bg-gold/10 border border-gold/30 p-3 space-y-1.5">
+            {prefillBanner.map((line, i) => (
+              <p key={i} className="text-xs md:text-sm text-foreground leading-relaxed">
+                {line}
               </p>
-            </div>
-          )}
-
-          {aiError && (
-            <p className="mt-3 text-sm text-destructive">⚠️ {aiError}</p>
-          )}
-
-          {prefillBanner && !aiLoading && (
-            <div className="mt-4 rounded-lg bg-gold/10 border border-gold/30 p-3 space-y-1.5">
-              {prefillBanner.map((line, i) => (
-                <p key={i} className="text-xs md:text-sm text-foreground leading-relaxed">
-                  {line}
-                </p>
-              ))}
-              {aiConfidence > 0 && (
-                <p className="text-xs text-muted-foreground italic pt-1">
-                  Độ tin cậy AI: {Math.round(aiConfidence * 100)}%
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+            ))}
+            {aiConfidence > 0 && (
+              <p className="text-xs text-muted-foreground italic pt-1">
+                Độ tin cậy AI: {Math.round(aiConfidence * 100)}%
+              </p>
+            )}
+          </div>
+        )}
 
         <div className={`rounded-xl border bg-card p-6 md:p-8 shadow-sm space-y-6 transition-all ${
           prefilledFields.has(q.id)
@@ -448,6 +504,7 @@ const Assessment = () => {
                 onChange={setRingColors}
                 tones={colorTones}
                 onTonesChange={setColorTones}
+                aiContext={aiVisionCtx}
               />
               <ColorRingAlerts colors={ringColors} />
             </>
@@ -481,7 +538,7 @@ const Assessment = () => {
                   {/* Image - tap to open lightbox - only if image exists */}
                   {showImageSlot && opt.image && (
                     <div
-                      className="rounded-md bg-muted mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group h-80 sm:h-96 md:h-[28rem]"
+                      className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group py-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
@@ -490,7 +547,7 @@ const Assessment = () => {
                       <img
                         src={opt.image}
                         alt={opt.label}
-                        className="w-full h-full object-cover"
+                        className="object-contain w-auto max-h-[160px] mx-auto"
                       />
                       <div className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
                         <ZoomIn className="h-4 w-4 text-foreground" />
@@ -573,6 +630,9 @@ const Assessment = () => {
             onClick={() => {
               if (window.confirm("Bạn có chắc muốn làm lại từ đầu? Mọi câu trả lời hiện tại sẽ bị xoá.")) {
                 resetAssessmentSession();
+                localStorage.removeItem("jade-prefill-used");
+                localStorage.removeItem("jade-ai-vision-ctx");
+                localStorage.removeItem("jade-exit-count");
                 setAnswers({});
                 setNumberInputs({});
                 setSubChecks({});
@@ -582,6 +642,8 @@ const Assessment = () => {
                 setPrefilledFields(new Set());
                 setPrefillBanner(null);
                 setPreviewImg(null);
+                setPrefillUsed(false);
+                setAiVisionCtx(undefined);
                 setStepIdx(0);
               }
             }}

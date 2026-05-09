@@ -8,6 +8,9 @@ export const ASSESSMENT_KEYS = [
   "jade-color-tones",
   "jade-pattern-data",
   "jade-survey-data",
+  "jade-prefill-used",
+  "jade-ai-vision-ctx",
+  "jade-exit-count",
 ];
 
 export function resetAssessmentSession(): void {
