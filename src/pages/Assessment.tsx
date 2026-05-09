@@ -218,6 +218,17 @@ const Assessment = () => {
     if (v.vision_notes.overallConfidence < 0.6)
       banner.push("⚠️ Độ tin cậy thấp — ảnh không đủ rõ, kết quả chỉ tham khảo.");
     setPrefillBanner(banner);
+
+    // Mark AI as used (one-shot per session) + persist vision context for ColorRing overlays
+    setPrefillUsed(true);
+    localStorage.setItem("jade-prefill-used", "1");
+    const ctx = {
+      isMuna: !!v.vision_notes?.isMuna,
+      chungPeak: v.chungPeak,
+      hasBlackFlaw: (v.flaws || []).some((f) => /Vết nứt|Sớ chéo|Sớ ngang|Mắt cát/i.test(f)),
+    };
+    setAiVisionCtx(ctx);
+    localStorage.setItem("jade-ai-vision-ctx", JSON.stringify(ctx));
   };
 
   const clearPrefillFor = (qId: number) => {
