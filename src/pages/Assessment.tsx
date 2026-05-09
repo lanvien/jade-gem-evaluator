@@ -504,6 +504,7 @@ const Assessment = () => {
                 onChange={setRingColors}
                 tones={colorTones}
                 onTonesChange={setColorTones}
+                aiContext={aiVisionCtx}
               />
               <ColorRingAlerts colors={ringColors} />
             </>
