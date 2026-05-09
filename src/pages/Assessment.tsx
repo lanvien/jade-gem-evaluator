@@ -298,6 +298,7 @@ const Assessment = () => {
     if (questionNumber === TOTAL) {
       const surveyData = { answers, ringColors, colorTones, numberInputs, subChecks, patternData };
       localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
+      localStorage.removeItem("jade-exit-count");
       navigate("/results");
       return;
     }
