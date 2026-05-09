@@ -76,8 +76,8 @@ interface ColorRingProps {
   };
 }
 
-const findColorByHex = (hex: string): SwatchData | undefined =>
-  JADE_COLORS.find((c: any) => !c.special && c.hex?.toLowerCase() === hex.toLowerCase());
+const findColorByHex = (hex: string): any =>
+  (JADE_COLORS as readonly any[]).find((c) => !c.special && c.hex?.toLowerCase() === hex.toLowerCase());
 
 const ColorRing = ({ value, onChange, tones = {}, onTonesChange, aiContext }: ColorRingProps) => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
