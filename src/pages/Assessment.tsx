@@ -630,6 +630,9 @@ const Assessment = () => {
             onClick={() => {
               if (window.confirm("Bạn có chắc muốn làm lại từ đầu? Mọi câu trả lời hiện tại sẽ bị xoá.")) {
                 resetAssessmentSession();
+                localStorage.removeItem("jade-prefill-used");
+                localStorage.removeItem("jade-ai-vision-ctx");
+                localStorage.removeItem("jade-exit-count");
                 setAnswers({});
                 setNumberInputs({});
                 setSubChecks({});
@@ -639,6 +642,8 @@ const Assessment = () => {
                 setPrefilledFields(new Set());
                 setPrefillBanner(null);
                 setPreviewImg(null);
+                setPrefillUsed(false);
+                setAiVisionCtx(undefined);
                 setStepIdx(0);
               }
             }}
