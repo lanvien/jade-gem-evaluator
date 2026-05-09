@@ -406,70 +406,71 @@ const Assessment = () => {
       </div>
 
       <div className="container mx-auto px-4 py-8 max-w-2xl animate-fade-in-up" key={stepIdx}>
-        {/* ── AI Vision panel ── */}
-        <div className="mb-6 rounded-xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-gold" />
-              <p className="font-serif font-bold text-foreground text-sm md:text-base">
-                Soi đèn AI — Tự điền form bằng ảnh
-              </p>
+        {/* ── AI Vision panel — only shown on first question, and only until first successful prefill ── */}
+        {questionNumber === 1 && !prefillUsed && (
+          <div className="mb-6 rounded-xl border-2 border-dashed border-gold/40 bg-gradient-to-br from-gold/5 to-card p-5 shadow-sm">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-gold" />
+                <p className="font-serif font-bold text-foreground text-sm md:text-base">
+                  Soi đèn AI — Tự điền form bằng ảnh
+                </p>
+              </div>
+              <label
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold cursor-pointer transition-colors ${
+                  aiLoading
+                    ? "bg-muted text-muted-foreground cursor-wait"
+                    : "bg-gold text-primary-foreground hover:bg-gold-dark"
+                }`}
+              >
+                <Upload className="h-4 w-4" />
+                {aiLoading ? "Đang xử lý..." : "🤖 Soi đèn AI"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAiUpload}
+                  disabled={aiLoading}
+                />
+              </label>
             </div>
-            <label
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-bold cursor-pointer transition-colors ${
-                aiLoading
-                  ? "bg-muted text-muted-foreground cursor-wait"
-                  : "bg-gold text-primary-foreground hover:bg-gold-dark"
-              }`}
-            >
-              <Upload className="h-4 w-4" />
-              {aiLoading ? "Đang xử lý..." : "🤖 Soi đèn AI"}
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAiUpload}
-                disabled={aiLoading}
+
+            {previewImg && !aiLoading && (
+              <img
+                src={previewImg}
+                alt="Ảnh ngọc"
+                className="mt-3 w-full max-h-48 object-contain rounded-lg border border-border"
               />
-            </label>
+            )}
+
+            {aiLoading && (
+              <div className="mt-4 flex items-center gap-3 text-gold animate-pulse">
+                <div className="h-2 w-2 rounded-full bg-gold animate-ping" />
+                <p className="font-serif italic text-sm md:text-base">
+                  🔍 Đang soi tinh thể ngọc...
+                </p>
+              </div>
+            )}
+
+            {aiError && <p className="mt-3 text-sm text-destructive">⚠️ {aiError}</p>}
           </div>
+        )}
 
-          {previewImg && !aiLoading && (
-            <img
-              src={previewImg}
-              alt="Ảnh ngọc"
-              className="mt-3 w-full max-h-48 object-contain rounded-lg border border-border"
-            />
-          )}
-
-          {aiLoading && (
-            <div className="mt-4 flex items-center gap-3 text-gold animate-pulse">
-              <div className="h-2 w-2 rounded-full bg-gold animate-ping" />
-              <p className="font-serif italic text-sm md:text-base">
-                🔍 Đang soi tinh thể ngọc...
+        {/* AI prefill banner — show once on the step the AI just filled */}
+        {prefillBanner && !aiLoading && questionNumber === 1 && (
+          <div className="mb-6 rounded-lg bg-gold/10 border border-gold/30 p-3 space-y-1.5">
+            {prefillBanner.map((line, i) => (
+              <p key={i} className="text-xs md:text-sm text-foreground leading-relaxed">
+                {line}
               </p>
-            </div>
-          )}
-
-          {aiError && (
-            <p className="mt-3 text-sm text-destructive">⚠️ {aiError}</p>
-          )}
-
-          {prefillBanner && !aiLoading && (
-            <div className="mt-4 rounded-lg bg-gold/10 border border-gold/30 p-3 space-y-1.5">
-              {prefillBanner.map((line, i) => (
-                <p key={i} className="text-xs md:text-sm text-foreground leading-relaxed">
-                  {line}
-                </p>
-              ))}
-              {aiConfidence > 0 && (
-                <p className="text-xs text-muted-foreground italic pt-1">
-                  Độ tin cậy AI: {Math.round(aiConfidence * 100)}%
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+            ))}
+            {aiConfidence > 0 && (
+              <p className="text-xs text-muted-foreground italic pt-1">
+                Độ tin cậy AI: {Math.round(aiConfidence * 100)}%
+              </p>
+            )}
+          </div>
+        )}
 
         <div className={`rounded-xl border bg-card p-6 md:p-8 shadow-sm space-y-6 transition-all ${
           prefilledFields.has(q.id)
