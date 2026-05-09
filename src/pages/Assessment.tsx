@@ -250,6 +250,41 @@ const Assessment = () => {
     localStorage.setItem("jade-pattern-data", JSON.stringify(patternData));
   }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, patternData]);
 
+  // Exit-count: if user leaves mid-flow >= 2 times, auto-reset on next mount
+  useEffect(() => {
+    const exitCount = parseInt(localStorage.getItem("jade-exit-count") || "0", 10);
+    const hasAnswers = Object.keys(answers).length > 0 || stepIdx > 0;
+    if (exitCount >= 2 && hasAnswers) {
+      resetAssessmentSession();
+      localStorage.removeItem("jade-exit-count");
+      localStorage.removeItem("jade-prefill-used");
+      localStorage.removeItem("jade-ai-vision-ctx");
+      setAnswers({});
+      setNumberInputs({});
+      setSubChecks({});
+      setRingColors(Array(12).fill("#e5e7eb"));
+      setColorTones({});
+      setPatternData(EMPTY_PATTERN);
+      setPrefilledFields(new Set());
+      setPrefillBanner(null);
+      setPreviewImg(null);
+      setPrefillUsed(false);
+      setAiVisionCtx(undefined);
+      setStepIdx(0);
+    }
+    const onLeave = () => {
+      const stillIncomplete = stepIdx < steps.length - 1;
+      if (stillIncomplete) {
+        const cur = parseInt(localStorage.getItem("jade-exit-count") || "0", 10);
+        localStorage.setItem("jade-exit-count", String(cur + 1));
+      }
+    };
+    window.addEventListener("beforeunload", onLeave);
+    return () => window.removeEventListener("beforeunload", onLeave);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
   const handleDividerDone = useCallback(() => {
     setStepIdx((s) => Math.min(s + 1, steps.length - 1));
   }, [steps.length]);
