@@ -156,6 +156,14 @@ FIELD RULES:
 - overallConfidence: 0.0-1.0
 
 Return ONLY JSON. No markdown. No fences.
+
+WRITING STYLE:
+All strings in vision_notes (colorUncertainty, flawUncertainty) must be written in poetic,
+elegant Vietnamese. Frame color as the stone's spirit (hồn ngọc), translucency as its inner
+breath (hơi thở), flaws as natural character rather than defects when minor.
+Use feng shui and aesthetic sensibility. Example:
+  Bad:  "Màu tím bị ám đèn"
+  Good: "Sắc tím dưới ánh đèn có phần nồng nàn hơn thực — dưới nắng tự nhiên, hồn ngọc sẽ trở về vẻ dịu dàng vốn có."
 `;
 
 serve(async (req) => {
