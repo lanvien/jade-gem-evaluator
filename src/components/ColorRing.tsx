@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useId, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 const SEGMENTS = 12;
 const OUTER_R = 120;
@@ -6,28 +7,41 @@ const INNER_R = 75;
 const CX = 140;
 const CY = 140;
 
-const BASE_COLORS = [
-  { id: "bg1", color: "#2d6a4f", label: "Xanh đậm" },
-  { id: "bg2", color: "#40916c", label: "Xanh lá" },
-  { id: "bg3", color: "#52b788", label: "Xanh nhạt" },
-  { id: "bg4", color: "#74c69d", label: "Xanh pastel" },
-  { id: "bg5", color: "#95d5b2", label: "Xanh rất nhạt" },
-  { id: "bg6", color: "#b7e4c7", label: "Xanh mint" },
-  { id: "bg7", color: "#d8f3dc", label: "Trắng xanh" },
-  { id: "bg8", color: "#f0f7f4", label: "Trắng ngà" },
-  { id: "bg9", color: "#c7b8a1", label: "Nâu nhạt" },
-  { id: "bg10", color: "#8b7355", label: "Nâu" },
-];
+export type ColorTone = "light" | "medium" | "dark";
+const TONE_OPACITY: Record<ColorTone, number> = { light: 0.4, medium: 0.75, dark: 1 };
 
-const TOPPING_COLORS = [
-  { id: "tp1", color: "#1b4332", label: "Xanh rêu đậm" },
-  { id: "tp2", color: "#2d6a4f", label: "Xanh rêu" },
-  { id: "tp3", color: "#388e3c", label: "Xanh lá cây" },
-  { id: "tp4", color: "#66bb6a", label: "Xanh lá sáng" },
-  { id: "tp5", color: "#a5d6a7", label: "Xanh lá nhạt" },
-];
+const JADE_COLORS = [
+  { group: "Lục sắc hệ", name: "Đế Vương Lục", hex: "#1B5E20" },
+  { group: "Lục sắc hệ", name: "Chính Dương Lục", hex: "#2E7D32" },
+  { group: "Lục sắc hệ", name: "Xanh Cay", hex: "#1A3A0A" },
+  { group: "Lục sắc hệ", name: "Xanh Ngọt", hex: "#A5D6A7" },
+  { group: "Lục sắc hệ", name: "Lục Táo", hex: "#66BB6A" },
+  { group: "Lục sắc hệ", name: "Xanh Rau Bina", hex: "#2E5A1C" },
+  { group: "Lục sắc hệ", name: "Đậu Lục", hex: "#558B2F" },
+  { group: "Lục sắc hệ", name: "Thanh Thủy Lục", hex: "#26A69A" },
+  { group: "Lục sắc hệ", name: "Du Thanh", hex: "#33691E" },
+  { group: "Lục sắc hệ", name: "Hồi Lục", hex: "#78909C" },
+  { group: "Lục sắc hệ", name: "Mặc Thúy", hex: "#1B2B1B" },
+  { group: "Tử sắc hệ", name: "Tử La Lan", hex: "#CE93D8" },
+  { group: "Tử sắc hệ", name: "Tím Cà", hex: "#7B1FA2" },
+  { group: "Tử sắc hệ", name: "Tím Lam", hex: "#5C6BC0" },
+  { group: "Hồng Hoàng sắc hệ", name: "Hồng Phỉ", hex: "#E53935" },
+  { group: "Hồng Hoàng sắc hệ", name: "Hoàng Tông Phỉ", hex: "#FB8C00" },
+  { group: "Hồng Hoàng sắc hệ", name: "Phấn Hồng", hex: "#F48FB1" },
+  { group: "Lam sắc hệ", name: "Lam Thiên Không", hex: "#0277BD" },
+  { group: "Lam sắc hệ", name: "Lam Thanh", hex: "#4FC3F7" },
+  { group: "Lam sắc hệ", name: "Lão Lam Thủy", hex: "#1A3A5C" },
+  { group: "Bạch Hắc sắc hệ", name: "Bạch Nguyệt Quang", hex: "#F5F5F5", noTone: true },
+  { group: "Bạch Hắc sắc hệ", name: "Xương Gà Đen", hex: "#9E9E9E" },
+  { group: "Bạch Hắc sắc hệ", name: "Mặc Thúy (Hắc)", hex: "#212121" },
+  { group: "Đa sắc hệ", name: "Hoàng Lục Phỉ", special: true, colors: ["#F9A825", "#2E7D32"] },
+  { group: "Đa sắc hệ", name: "Xuân Đới Thái", special: true, colors: ["#2E7D32", "#CE93D8"] },
+  { group: "Đa sắc hệ", name: "Phúc Lộc Thọ", special: true, colors: ["#2E7D32", "#F9A825", "#CE93D8"] },
+] as const;
 
-const TONE_OPTIONS: { value: "light" | "medium" | "dark"; label: string }[] = [
+type SwatchData = (typeof JADE_COLORS)[number];
+
+const TONE_OPTIONS: { value: ColorTone; label: string }[] = [
   { value: "light", label: "Nhạt" },
   { value: "medium", label: "Vừa" },
   { value: "dark", label: "Đậm" },
@@ -48,108 +62,279 @@ function segmentPath(index: number) {
   return `M ${outerStart.x} ${outerStart.y} A ${OUTER_R} ${OUTER_R} 0 0 1 ${outerEnd.x} ${outerEnd.y} L ${innerEnd.x} ${innerEnd.y} A ${INNER_R} ${INNER_R} 0 0 0 ${innerStart.x} ${innerStart.y} Z`;
 }
 
-export type ColorTone = "light" | "medium" | "dark";
-
 interface ColorRingProps {
   value: string[];
   onChange: (colors: string[]) => void;
+  /** key: segment index ("0".."11"), value: tone */
   tones?: Record<string, ColorTone>;
   onTonesChange?: (tones: Record<string, ColorTone>) => void;
+  /** Optional AI context to drive overlays */
+  aiContext?: {
+    isMuna?: boolean;
+    chungPeak?: string;
+    hasBlackFlaw?: boolean;
+  };
 }
 
-const ColorRing = ({ value, onChange, tones = {}, onTonesChange }: ColorRingProps) => {
+const findColorByHex = (hex: string): SwatchData | undefined =>
+  JADE_COLORS.find((c: any) => !c.special && c.hex?.toLowerCase() === hex.toLowerCase());
+
+const ColorRing = ({ value, onChange, tones = {}, onTonesChange, aiContext }: ColorRingProps) => {
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [currentTone, setCurrentTone] = useState<ColorTone>("medium");
+  const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
+  const [phieuOn, setPhieuOn] = useState(false);
+  const [phieuSeed, setPhieuSeed] = useState<number>(() => Math.floor(Math.random() * 1000));
+  const filterIdBase = useId().replace(/[^a-zA-Z0-9]/g, "");
+
   const colors = value.length === SEGMENTS ? value : Array(SEGMENTS).fill("#e5e7eb");
 
-  const handleSegmentClick = (index: number) => {
-    if (!selectedColor) return;
+  const grouped = useMemo(() => {
+    const map = new Map<string, SwatchData[]>();
+    JADE_COLORS.forEach((c) => {
+      if (!map.has(c.group)) map.set(c.group, []);
+      map.get(c.group)!.push(c);
+    });
+    return Array.from(map.entries());
+  }, []);
+
+  const paintSegment = (idx: number, hex: string, tone: ColorTone) => {
     const next = [...colors];
-    next[index] = selectedColor;
+    next[idx] = hex;
     onChange(next);
-    // Initialize tone for this color if not set
-    if (onTonesChange && !tones[selectedColor]) {
-      onTonesChange({ ...tones, [selectedColor]: "medium" });
+    if (onTonesChange) onTonesChange({ ...tones, [String(idx)]: tone });
+  };
+
+  const handleSegmentClick = (idx: number) => {
+    if (selectedColor) {
+      const swatch = findColorByHex(selectedColor);
+      const tone: ColorTone = swatch?.noTone ? "dark" : currentTone;
+      paintSegment(idx, selectedColor, tone);
+      setSelectedSegment(idx);
+    } else if (colors[idx] !== "#e5e7eb") {
+      setSelectedSegment(idx);
+    }
+  };
+
+  const handleToneClick = (tone: ColorTone) => {
+    if (selectedSegment !== null && colors[selectedSegment] !== "#e5e7eb") {
+      const swatch = findColorByHex(colors[selectedSegment]);
+      if (swatch?.noTone) return;
+      if (onTonesChange) onTonesChange({ ...tones, [String(selectedSegment)]: tone });
+    } else {
+      setCurrentTone(tone);
     }
   };
 
   const fillAll = () => {
     if (!selectedColor) return;
+    const swatch = findColorByHex(selectedColor);
+    const tone: ColorTone = swatch?.noTone ? "dark" : currentTone;
     onChange(Array(SEGMENTS).fill(selectedColor));
-    if (onTonesChange && !tones[selectedColor]) {
-      onTonesChange({ ...tones, [selectedColor]: "medium" });
+    if (onTonesChange) {
+      const next: Record<string, ColorTone> = { ...tones };
+      for (let i = 0; i < SEGMENTS; i++) next[String(i)] = tone;
+      onTonesChange(next);
     }
   };
 
-  // Unique colors that have been applied (excluding default gray)
-  const appliedColors = Array.from(new Set(colors.filter((c) => c !== "#e5e7eb")));
-
-  const setTone = (color: string, tone: ColorTone) => {
-    if (!onTonesChange) return;
-    onTonesChange({ ...tones, [color]: tone });
+  const segmentOpacity = (idx: number) => {
+    const c = colors[idx];
+    if (c === "#e5e7eb") return 1;
+    const sw = findColorByHex(c);
+    if (sw?.noTone) return 1;
+    const t = tones[String(idx)] || "medium";
+    return TONE_OPACITY[t];
   };
 
-  const getColorLabel = (color: string) => {
-    const all = [...BASE_COLORS, ...TOPPING_COLORS];
-    return all.find((c) => c.color.toLowerCase() === color.toLowerCase())?.label || color;
+  // Phiêu hoa filter
+  const isMuna = !!aiContext?.isMuna;
+  const veinColor = isMuna ? "#3a4a3a" : "#1a4331";
+  const phieuFilterId = `phieu-${filterIdBase}`;
+  const clipId = `donut-clip-${filterIdBase}`;
+
+  // Bông inclusion overlay selection
+  const chungPeak = aiContext?.chungPeak || "";
+  const showBongTrangNon = /Đậu/i.test(chungPeak);
+  const showBongTuyetMuna = /Nếp Băng|Nếp Hóa/i.test(chungPeak) && isMuna;
+  const showBongDen = !!aiContext?.hasBlackFlaw;
+
+  const togglePhieu = () => {
+    setPhieuOn((on) => {
+      if (!on) setPhieuSeed(Math.floor(Math.random() * 10000));
+      return !on;
+    });
   };
 
-  // Tone → fill opacity (dark = full, medium = slight, light = more dim)
-  const toneOpacity = (color: string) => {
-    if (color === "#e5e7eb") return 1;
-    const t = tones[color] || "medium";
-    return t === "dark" ? 1 : t === "medium" ? 0.7 : 0.45;
+  const activeToneForControls: ColorTone = (() => {
+    if (selectedSegment !== null && colors[selectedSegment] !== "#e5e7eb") {
+      return tones[String(selectedSegment)] || "medium";
+    }
+    return currentTone;
+  })();
+
+  const renderSwatch = (c: SwatchData) => {
+    if ((c as any).special) {
+      const cols = (c as any).colors as string[];
+      const id = `grad-${filterIdBase}-${c.name.replace(/\s+/g, "")}`;
+      return (
+        <button
+          key={c.name}
+          type="button"
+          onClick={() =>
+            toast("Chọn từng màu riêng lẻ rồi tô vào các múi tương ứng", {
+              description: c.name,
+            })
+          }
+          title={c.name}
+          className="group flex flex-col items-center w-[58px]"
+        >
+          <svg viewBox="0 0 36 36" className="w-9 h-9 rounded-full border-2 border-border group-hover:border-gold transition-all">
+            <defs>
+              <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+                {cols.map((col, i) => (
+                  <stop key={i} offset={`${(i / cols.length) * 100}%`} stopColor={col} />
+                ))}
+                {cols.map((col, i) => (
+                  <stop key={`end${i}`} offset={`${((i + 1) / cols.length) * 100}%`} stopColor={col} />
+                ))}
+              </linearGradient>
+            </defs>
+            <circle cx="18" cy="18" r="17" fill={`url(#${id})`} />
+          </svg>
+          <span className="text-[10px] text-foreground mt-1 text-center leading-tight">{c.name}</span>
+        </button>
+      );
+    }
+    const hex = (c as any).hex as string;
+    const isSel = selectedColor === hex;
+    return (
+      <button
+        key={c.name}
+        type="button"
+        onClick={() => setSelectedColor(hex)}
+        title={c.name}
+        className="group flex flex-col items-center w-[58px]"
+      >
+        <span
+          className={`w-9 h-9 rounded-full border-2 transition-all ${
+            isSel ? "border-gold scale-110 shadow-md" : "border-border group-hover:border-gold/60"
+          }`}
+          style={{ backgroundColor: hex }}
+        />
+        <span className="text-[10px] text-foreground mt-1 text-center leading-tight">{c.name}</span>
+      </button>
+    );
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-10">
+      <div className="flex flex-col md:flex-row items-start gap-6 md:gap-10">
         {/* SVG Ring */}
-        <svg viewBox="0 0 280 280" className="w-56 h-56 md:w-64 md:h-64 shrink-0">
-          {Array.from({ length: SEGMENTS }).map((_, i) => (
-            <path
-              key={i}
-              d={segmentPath(i)}
-              fill={colors[i]}
-              fillOpacity={toneOpacity(colors[i])}
-              stroke="hsl(var(--foreground))"
-              strokeWidth="1.5"
-              className="cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => handleSegmentClick(i)}
-            />
-          ))}
-        </svg>
+        <div className="flex flex-col items-center mx-auto md:mx-0">
+          <svg viewBox="0 0 280 280" className="w-56 h-56 md:w-64 md:h-64 shrink-0">
+            <defs>
+              <clipPath id={clipId}>
+                <path
+                  d={`M ${CX - OUTER_R},${CY} a ${OUTER_R},${OUTER_R} 0 1,0 ${OUTER_R * 2},0 a ${OUTER_R},${OUTER_R} 0 1,0 -${OUTER_R * 2},0 M ${CX - INNER_R},${CY} a ${INNER_R},${INNER_R} 0 1,1 ${INNER_R * 2},0 a ${INNER_R},${INNER_R} 0 1,1 -${INNER_R * 2},0`}
+                  fillRule="evenodd"
+                />
+              </clipPath>
+
+              {/* Phiêu hoa filter — monochrome single-color */}
+              <filter id={phieuFilterId} x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.06 0.045" numOctaves={5} seed={phieuSeed} result="raw" />
+                <feColorMatrix
+                  in="raw"
+                  type="matrix"
+                  values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 0 0 0 -1.2"
+                  result="mask"
+                />
+                <feFlood floodColor={veinColor} floodOpacity="1" result="colorflood" />
+                <feComposite in="colorflood" in2="mask" operator="in" />
+              </filter>
+
+              {/* Bông trắng non */}
+              <filter id={`bong-non-${filterIdBase}`} x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.14" numOctaves={2} seed={phieuSeed + 1} result="raw" />
+                <feColorMatrix in="raw" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 0 0 0 -1.2" result="mask" />
+                <feFlood floodColor="#e8e8e8" floodOpacity="0.75" result="cf" />
+                <feComposite in="cf" in2="mask" operator="in" />
+              </filter>
+
+              {/* Bông tuyết Muna */}
+              <filter id={`bong-muna-${filterIdBase}`} x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves={1} seed={phieuSeed + 2} result="raw" />
+                <feColorMatrix in="raw" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  8 0 0 0 -5.5" result="mask" />
+                <feFlood floodColor="#ffffff" floodOpacity="0.9" result="cf" />
+                <feComposite in="cf" in2="mask" operator="in" />
+              </filter>
+
+              {/* Bông đen */}
+              <filter id={`bong-den-${filterIdBase}`} x="0" y="0" width="100%" height="100%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.18" numOctaves={2} seed={phieuSeed + 3} result="raw" />
+                <feColorMatrix in="raw" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 0 0 0 -1.2" result="mask" />
+                <feFlood floodColor="#1a1a1a" floodOpacity="0.6" result="cf" />
+                <feComposite in="cf" in2="mask" operator="in" />
+              </filter>
+            </defs>
+
+            {/* Base segments */}
+            {Array.from({ length: SEGMENTS }).map((_, i) => (
+              <path
+                key={i}
+                d={segmentPath(i)}
+                fill={colors[i]}
+                fillOpacity={segmentOpacity(i)}
+                stroke={selectedSegment === i ? "hsl(var(--gold, 45 78% 52%))" : "hsl(var(--foreground))"}
+                strokeWidth={selectedSegment === i ? 2.5 : 1.5}
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => handleSegmentClick(i)}
+              />
+            ))}
+
+            {/* Overlays clipped to donut */}
+            <g clipPath={`url(#${clipId})`} pointerEvents="none">
+              {phieuOn && (
+                <rect x="0" y="0" width="280" height="280" filter={`url(#${phieuFilterId})`} opacity={0.65} />
+              )}
+              {showBongTrangNon && (
+                <rect x="0" y="0" width="280" height="280" filter={`url(#bong-non-${filterIdBase})`} />
+              )}
+              {showBongTuyetMuna && (
+                <rect x="0" y="0" width="280" height="280" filter={`url(#bong-muna-${filterIdBase})`} />
+              )}
+              {showBongDen && (
+                <rect x="0" y="0" width="280" height="280" filter={`url(#bong-den-${filterIdBase})`} />
+              )}
+            </g>
+          </svg>
+
+          {/* Phiêu hoa toggle */}
+          <button
+            type="button"
+            onClick={togglePhieu}
+            className={`mt-3 inline-flex items-center gap-2 rounded-full border-2 px-4 py-1.5 text-xs font-semibold transition-all ${
+              phieuOn
+                ? "bg-gold text-primary-foreground border-gold"
+                : "bg-card text-foreground border-border hover:border-gold"
+            }`}
+          >
+            <span className={`w-2 h-2 rounded-full ${phieuOn ? "bg-primary-foreground" : "bg-muted-foreground"}`} />
+            🌸 Phiêu hoa {phieuOn ? "ON" : "OFF"}
+          </button>
+        </div>
 
         {/* Palette */}
-        <div className="space-y-4 flex-1 min-w-0">
-          <div>
-            <p className="text-sm font-semibold text-foreground mb-2">Màu nền &gt;</p>
-            <div className="flex flex-wrap gap-2">
-              {BASE_COLORS.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedColor(c.color)}
-                  className={`w-9 h-9 rounded-full border-2 transition-all ${selectedColor === c.color ? "border-gold scale-110 shadow-md" : "border-border"}`}
-                  style={{ backgroundColor: c.color }}
-                  title={c.label}
-                />
-              ))}
+        <div className="flex-1 min-w-0 space-y-4">
+          {grouped.map(([group, items]) => (
+            <div key={group}>
+              <p className="text-sm font-bold text-foreground mb-2">{group}</p>
+              <div className="flex flex-wrap gap-2">
+                {items.map(renderSwatch)}
+              </div>
             </div>
-          </div>
-
-          <div>
-            <p className="text-sm font-semibold text-foreground mb-2">Topping hoa bay &gt;</p>
-            <div className="flex flex-wrap gap-2">
-              {TOPPING_COLORS.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedColor(c.color)}
-                  className={`w-9 h-9 rounded border-2 transition-all ${selectedColor === c.color ? "border-gold scale-110 shadow-md" : "border-border"}`}
-                  style={{ backgroundColor: c.color }}
-                  title={c.label}
-                />
-              ))}
-            </div>
-          </div>
+          ))}
 
           <button
             onClick={fillAll}
@@ -161,48 +346,41 @@ const ColorRing = ({ value, onChange, tones = {}, onTonesChange }: ColorRingProp
         </div>
       </div>
 
-      {/* Per-color tone segmented controls */}
-      <div
-        className={`overflow-hidden transition-all duration-500 ease-in-out ${
-          appliedColors.length > 0 ? "max-h-[800px] opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="rounded-xl border border-border bg-card p-4 space-y-3">
-          <p className="text-sm font-semibold text-foreground">
-            🎨 Độ đậm/nhạt của từng sắc đã tô:
-          </p>
-          {appliedColors.map((color) => (
-            <div
-              key={color}
-              className="flex items-center justify-between gap-3 animate-fade-in-up"
+      {/* Tone controls — always visible */}
+      <div className="rounded-xl border border-border bg-card p-4 space-y-2">
+        <p className="text-sm font-semibold text-foreground">
+          🎨 Độ đậm/nhạt
+          {selectedSegment !== null && colors[selectedSegment] !== "#e5e7eb" ? (
+            <span className="text-xs text-muted-foreground ml-2">— áp dụng cho múi #{selectedSegment + 1}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground ml-2">— mặc định cho lần tô tiếp theo</span>
+          )}
+        </p>
+        <div className="flex rounded-lg border border-border overflow-hidden w-fit">
+          {TONE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => handleToneClick(opt.value)}
+              className={`px-4 py-1.5 text-xs font-semibold transition-colors ${
+                activeToneForControls === opt.value
+                  ? "bg-gold text-primary-foreground"
+                  : "bg-card text-muted-foreground hover:bg-muted"
+              }`}
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <span
-                  className="w-7 h-7 rounded-full border border-border shrink-0"
-                  style={{ backgroundColor: color }}
-                />
-                <span className="text-sm text-foreground truncate">
-                  {getColorLabel(color)}
-                </span>
-              </div>
-              <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
-                {TONE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setTone(color, opt.value)}
-                    className={`px-3 py-1 text-xs font-medium transition-colors ${
-                      (tones[color] || "medium") === opt.value
-                        ? "bg-gold text-primary-foreground"
-                        : "bg-card text-muted-foreground hover:bg-muted"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+              {opt.label}
+            </button>
           ))}
         </div>
+        {selectedSegment !== null && (
+          <button
+            type="button"
+            onClick={() => setSelectedSegment(null)}
+            className="text-xs text-muted-foreground underline hover:text-gold"
+          >
+            Bỏ chọn múi
+          </button>
+        )}
       </div>
     </div>
   );
