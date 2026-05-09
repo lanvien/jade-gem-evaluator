@@ -128,6 +128,13 @@ const Assessment = () => {
   const [prefilledFields, setPrefilledFields] = useState<Set<number>>(new Set());
   const [prefillBanner, setPrefillBanner] = useState<string[] | null>(null);
   const [previewImg, setPreviewImg] = useState<string | null>(null);
+  const [prefillUsed, setPrefillUsed] = useState<boolean>(
+    () => localStorage.getItem("jade-prefill-used") === "1",
+  );
+  const [aiVisionCtx, setAiVisionCtx] = useState<{ isMuna?: boolean; chungPeak?: string; hasBlackFlaw?: boolean } | undefined>(() => {
+    const saved = localStorage.getItem("jade-ai-vision-ctx");
+    return saved ? JSON.parse(saved) : undefined;
+  });
   const { analyze: analyzeJade, isLoading: aiLoading, error: aiError, confidence: aiConfidence } = useJadeVision();
 
   // ─── AI Vision → form mapping ───
