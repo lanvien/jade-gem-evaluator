@@ -337,6 +337,7 @@ const Assessment = () => {
             patternData,
           };
           localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
+          localStorage.removeItem("jade-exit-count");
           navigate("/results");
         } else if (stepIdx < steps.length - 1) {
           setStepIdx((s) => s + 1);
