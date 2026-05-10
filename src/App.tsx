@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import Assessment from "./pages/Assessment.tsx";
 import Results from "./pages/Results.tsx";
 import CopNgoc from "./pages/CopNgoc.tsx";
+import JadeVault from "./pages/JadeVault.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/results" element={<Results />} />
           <Route path="/cop-ngoc" element={<CopNgoc />} />
+          <Route path="/jade-vault" element={<JadeVault />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

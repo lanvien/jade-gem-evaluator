@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import iconCopNgoc from "@/assets/jade/icon_copngoc.png";
 import { hasAssessmentInProgress, resetAssessmentSession } from "@/lib/resetAssessment";
+import VaultIconButton from "@/components/jadevault/VaultIconButton";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -32,18 +33,24 @@ const Header = () => {
           <a href="#guides" className="text-foreground hover:text-accent transition-colors">Cẩm Nang</a>
         </nav>
 
-        <a
-          href="/assessment"
-          onClick={guardedGoToAssessment}
-          className="hidden md:inline-flex items-center gap-2 rounded-full border-2 border-gold bg-background px-5 py-2 text-base font-semibold leading-none text-foreground animate-pulse-gentle hover:bg-gold hover:text-primary-foreground transition-colors cursor-pointer"
-        >
-          <span>Cốp ngọc của bạn</span>
-          <img src={iconCopNgoc} alt="" className="h-[1em] w-auto object-contain" />
-        </a>
+        <div className="hidden md:flex items-center gap-3">
+          <a
+            href="/assessment"
+            onClick={guardedGoToAssessment}
+            className="inline-flex items-center gap-2 rounded-full border-2 border-gold bg-background px-5 py-2 text-base font-semibold leading-none text-foreground animate-pulse-gentle hover:bg-gold hover:text-primary-foreground transition-colors cursor-pointer"
+          >
+            <span>Định giá ngay</span>
+            <img src={iconCopNgoc} alt="" className="h-[1em] w-auto object-contain" />
+          </a>
+          <VaultIconButton />
+        </div>
 
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-foreground">
+        <div className="md:hidden flex items-center gap-2">
+          <VaultIconButton />
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="text-foreground">
           {mobileOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
+        </div>
       </div>
 
       {mobileOpen && (
