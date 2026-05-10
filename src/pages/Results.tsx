@@ -4,6 +4,8 @@ import { Copy, Check, RotateCcw } from "lucide-react";
 import { calculateJadePrice, buildJadeInputFromSurvey, formatVND } from "@/lib/pricingEngine";
 import { useSaveToCop } from "@/lib/copNgoc";
 import { resetAssessmentSession } from "@/lib/resetAssessment";
+import { addToVault, buildSegments, nanoId } from "@/lib/jadeVault";
+import { flyToVault } from "@/components/jadevault/flyToVault";
 import { toast } from "sonner";
 
 import rankThuongTai from "@/assets/jade/rank_thuongtai.png";
@@ -159,7 +161,8 @@ export default function Results() {
             </div>
 
             <button
-              onClick={() =>
+              onClick={() => {
+                // 1) Save to Supabase Cốp Ngọc (existing behavior)
                 saveToCop(
                   {
                     nickname: ringCode,
@@ -167,15 +170,53 @@ export default function Results() {
                     result: r!.pricing,
                   },
                   {
-                    onSuccess: () => toast.success(`Đã cất ${ringCode} vào Cốp Ngọc!`),
-                    onError: (e: any) => toast.error(e?.message ?? "Lỗi khi lưu"),
+                    onError: (e: any) => toast.error(e?.message ?? "Lỗi khi lưu cloud"),
                   },
-                )
-              }
+                );
+                // 2) Save to local Jade Vault + fly animation
+                const segments = buildSegments(
+                  surveyData.ringColors || [],
+                  surveyData.colorTones || {},
+                );
+                const aiCtx = (() => {
+                  try { return JSON.parse(localStorage.getItem("jade-ai-vision-ctx") || "{}"); }
+                  catch { return {}; }
+                })();
+                const existingCount = (() => {
+                  try { return (JSON.parse(localStorage.getItem("jadeVault") || "[]") || []).length; }
+                  catch { return 0; }
+                })();
+                const item = {
+                  id: nanoId(8),
+                  createdAt: new Date().toISOString(),
+                  name: `Vòng #${existingCount + 1}`,
+                  notes: "",
+                  segments,
+                  hasPhieuHoa: !!aiCtx?.hasPhieuHoa,
+                  isMuna: !!aiCtx?.isMuna,
+                  assessment: {
+                    chungPeak: aiCtx?.chungPeak || r!.pricing.chungLabel,
+                    chungBase: r!.pricing.chungLabel,
+                    baseColor: r!.pricing.colorLabel,
+                    toneLevel: r!.pricing.scoreSac,
+                    flaws: r!.pricing.warnings || [],
+                    shape: surveyData.answers?.[7] || "—",
+                    estimatedPrice: `${formatVND(r!.priceLow)} – ${formatVND(r!.priceHigh)}`,
+                    ringCode,
+                  },
+                };
+                addToVault(item);
+                flyToVault({
+                  segments,
+                  hasPhieuHoa: item.hasPhieuHoa,
+                  isMuna: item.isMuna,
+                  onArrive: () => toast.success("Đã cất vào Cốp Ngọc ✨"),
+                });
+              }}
               disabled={isPending}
               className="w-full rounded-full bg-gold py-3.5 font-bold text-primary-foreground hover:bg-gold-dark transition-colors disabled:opacity-50"
             >
-              {isPending ? "Đang lưu..." : "🪅 Cất vào Cốp Ngọc"}
+              🏺 Cất vào Cốp Ngọc
             </button>
           </div>
         ) : (
