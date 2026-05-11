@@ -28,9 +28,9 @@ const HeroSection = () => {
           <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
             <Link
               to="/assessment"
-              className="inline-flex items-center justify-center rounded-full bg-gold px-10 py-3 font-sans text-sm font-semibold tracking-wide text-primary-foreground shadow-md hover:bg-gold-dark transition-colors"
+              className="shimmer-cta relative overflow-hidden inline-flex items-center justify-center rounded-full bg-gold px-10 py-3 font-sans text-sm font-semibold tracking-wide text-primary-foreground shadow-md hover:bg-gold-dark transition-colors"
             >
-              Định giá Phỉ thuý
+              <span className="relative z-10">Định giá Phỉ thuý</span>
             </Link>
             <button className="inline-flex items-center justify-center rounded-full border border-border bg-secondary px-10 py-3 font-sans text-sm font-semibold tracking-wide text-secondary-foreground hover:bg-muted transition-colors">
               Kiểm tra Hạng ngọc (Type A/B/C)

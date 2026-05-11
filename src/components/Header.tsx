@@ -33,7 +33,7 @@ const Header = () => {
           <a href="#guides" className="text-foreground hover:text-accent transition-colors">Cẩm Nang</a>
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-4">
           <a
             href="/assessment"
             onClick={guardedGoToAssessment}
@@ -42,6 +42,12 @@ const Header = () => {
             <span>Định giá ngay</span>
             <img src={iconCopNgoc} alt="" className="h-[1em] w-auto object-contain" />
           </a>
+          <Link
+            to="/jade-vault"
+            className="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-accent transition-colors"
+          >
+            Cốp ngọc của tôi
+          </Link>
           <VaultIconButton />
         </div>
 

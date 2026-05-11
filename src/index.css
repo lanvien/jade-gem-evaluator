@@ -127,4 +127,21 @@
   .imperial-glow {
     animation: imperial-glow 3s ease-in-out infinite;
   }
+
+  /* Shimmer sweep on CTA */
+  @keyframes shimmer-sweep {
+    0%   { left: -75%; }
+    100% { left: 125%; }
+  }
+  .shimmer-cta::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -75%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.45), transparent);
+    animation: shimmer-sweep 3s infinite;
+    pointer-events: none;
+  }
 }
