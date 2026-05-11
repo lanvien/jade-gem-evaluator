@@ -216,8 +216,15 @@ export default function Results() {
               disabled={isPending}
               className="w-full rounded-full bg-gold py-3.5 font-bold text-primary-foreground hover:bg-gold-dark transition-colors disabled:opacity-50"
             >
-              🏺 Cất vào Cốp Ngọc
+              🏺 Lưu về Cốp Ngọc của bạn
             </button>
+
+            <Link
+              to="/jade-vault"
+              className="block text-center mt-3 text-sm font-semibold text-gold hover:text-gold-dark transition-colors"
+            >
+              Về Cốp Ngọc của bạn  »
+            </Link>
           </div>
         ) : (
           <p className="text-center text-muted-foreground">Chưa có dữ liệu khảo sát.</p>

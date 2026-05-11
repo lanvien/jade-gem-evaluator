@@ -66,21 +66,37 @@ const NumberInputQuestion = ({
   value,
   onChange,
   unit,
+  min,
+  max,
+  step,
 }: {
   value: string;
   onChange: (v: string) => void;
   unit: string;
+  min?: number;
+  max?: number;
+  step?: number;
 }) => (
-  <div className="flex items-center gap-3 justify-center">
-    <input
-      type="number"
-      inputMode="decimal"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="Nhập số..."
-      className="w-32 rounded-lg border-2 border-border bg-card px-4 py-3 text-center text-lg font-semibold text-foreground focus:border-gold focus:outline-none transition-colors"
-    />
-    <span className="text-lg font-semibold text-muted-foreground">{unit}</span>
+  <div className="flex flex-col items-center gap-2">
+    <div className="flex items-center gap-3 justify-center">
+      <input
+        type="number"
+        inputMode="decimal"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Nhập số..."
+        className="w-32 rounded-lg border-2 border-border bg-card px-4 py-3 text-center text-lg font-semibold text-foreground focus:border-gold focus:outline-none transition-colors"
+      />
+      <span className="text-lg font-semibold text-muted-foreground">{unit}</span>
+    </div>
+    {(min !== undefined || max !== undefined) && (
+      <p className="text-xs text-muted-foreground">
+        Phạm vi hợp lệ: {min ?? "—"} – {max ?? "—"} {unit}
+      </p>
+    )}
   </div>
 );
 
@@ -516,6 +532,9 @@ const Assessment = () => {
               value={numberInputs[q.id] || ""}
               onChange={(v) => setNumberInputs((prev) => ({ ...prev, [q.id]: v }))}
               unit={q.inputUnit || "mm"}
+              min={q.inputMin}
+              max={q.inputMax}
+              step={q.inputStep}
             />
           )}
 
