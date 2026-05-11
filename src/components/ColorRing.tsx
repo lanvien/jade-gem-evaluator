@@ -98,6 +98,23 @@ const ColorRing = ({ value, onChange, tones = {}, onTonesChange, aiContext }: Co
     return Array.from(map.entries());
   }, []);
 
+  // Accordion: only first group open by default
+  const [openGroups, setOpenGroups] = useState<Set<string>>(
+    () => new Set([grouped[0]?.[0] ?? "Lục sắc hệ"]),
+  );
+  const toggleGroup = (g: string) =>
+    setOpenGroups((prev) => {
+      const n = new Set(prev);
+      n.has(g) ? n.delete(g) : n.add(g);
+      return n;
+    });
+
+  // Representative color dot per group (first non-special swatch)
+  const groupDot = (items: SwatchData[]): string => {
+    const first = items.find((c) => !(c as any).special) as any;
+    return first?.hex ?? "#999";
+  };
+
   const paintSegment = (idx: number, hex: string, tone: ColorTone) => {
     const next = [...colors];
     next[idx] = hex;
@@ -325,16 +342,45 @@ const ColorRing = ({ value, onChange, tones = {}, onTonesChange, aiContext }: Co
           </button>
         </div>
 
-        {/* Palette */}
-        <div className="flex-1 min-w-0 space-y-4">
-          {grouped.map(([group, items]) => (
-            <div key={group}>
-              <p className="text-sm font-bold text-foreground mb-2">{group}</p>
-              <div className="flex flex-wrap gap-2">
-                {items.map(renderSwatch)}
+        {/* Palette — collapsible per group */}
+        <div className="flex-1 min-w-0 space-y-2">
+          {grouped.map(([group, items]) => {
+            const open = openGroups.has(group);
+            return (
+              <div key={group} className="rounded-lg border border-border bg-card overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group)}
+                  aria-expanded={open}
+                  className="w-full flex items-center justify-between gap-2 px-3 py-2 hover:bg-muted/50 transition-colors"
+                >
+                  <span className="flex items-center gap-2">
+                    <span
+                      className="w-4 h-4 rounded-full border border-border"
+                      style={{ backgroundColor: groupDot(items) }}
+                    />
+                    <span className="text-sm font-bold text-foreground">{group}</span>
+                    <span className="text-[11px] text-muted-foreground">({items.length})</span>
+                  </span>
+                  <span className={`text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
+                </button>
+                {open && (
+                  <div className="flex flex-wrap gap-2 p-3 pt-1 border-t border-border">
+                    {items.map(renderSwatch)}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            );
+          })}
+
+          <button
+            onClick={fillAll}
+            disabled={!selectedColor}
+            className="mt-3 rounded-lg bg-gold px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-30 hover:bg-gold-dark transition-colors"
+          >
+            Tô tất cả
+          </button>
+        </div>
 
           <button
             onClick={fillAll}
