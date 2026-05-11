@@ -381,15 +381,6 @@ const ColorRing = ({ value, onChange, tones = {}, onTonesChange, aiContext }: Co
             Tô tất cả
           </button>
         </div>
-
-          <button
-            onClick={fillAll}
-            disabled={!selectedColor}
-            className="mt-2 rounded-lg bg-gold px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-30 hover:bg-gold-dark transition-colors"
-          >
-            Tô tất cả
-          </button>
-        </div>
       </div>
 
       {/* Tone controls — always visible */}
