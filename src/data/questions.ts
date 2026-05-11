@@ -36,6 +36,9 @@ export interface Question {
   subCheckbox?: { label: string; triggeredByIds: string[] };
   inputUnit?: string;
   inputHelpText?: string;
+  inputMin?: number;
+  inputMax?: number;
+  inputStep?: number;
   conditionalText?: { triggeredByIds: string[]; text: string };
 }
 
@@ -43,7 +46,7 @@ export const SECTIONS = [
   { before: 1, label: "I. CỐT NGỌC (Kết cấu & Độ trong)" },
   { before: 4, label: "II. SẮC DIỆN (Màu sắc)" },
   { before: 7, label: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)" },
-  { before: 9, label: "IV. KÍCH THƯỚC & KIỂU DÁNG" },
+  { before: 10, label: "IV. KÍCH THƯỚC & KIỂU DÁNG" },
   { before: 12, label: "V. BỐI CẢNH GIAO DỊCH" },
 ];
 
@@ -121,16 +124,7 @@ export const questions: Question[] = [
   },
 
   // ===== IV. KÍCH THƯỚC & KIỂU DÁNG =====
-  {
-    id: 9,
-    category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
-    type: "number-input",
-    title: "Ni vòng (đường kính trong - mm)",
-    hint: "Dùng thước kẹp (tốt nhất). Hoặc dùng thước thẳng đặt ngang lòng vòng. Hoặc đo chu vi bằng dây rồi chia cho 3.14.",
-    inputUnit: "mm",
-    inputHelpText: "Dùng thước kẹp: mở rộng ra và đặt vào lòng vòng, đọc số trên thước.",
-    options: [],
-  },
+  // (Q7 in flow) Kiểu dáng vòng — placed BEFORE ni vòng per UX request
   {
     id: 10,
     category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
@@ -144,6 +138,20 @@ export const questions: Question[] = [
       { id: "10d", label: "Khắc hoa", description: "Có hoa văn chạm khắc" },
     ],
   },
+  // (Q8 in flow) Ni vòng
+  {
+    id: 9,
+    category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
+    type: "number-input",
+    title: "Ni vòng (đường kính trong - mm)",
+    hint: "Dùng thước kẹp (tốt nhất). Hoặc dùng thước thẳng đặt ngang lòng vòng. Hoặc đo chu vi bằng dây rồi chia cho 3.14.",
+    inputUnit: "mm",
+    inputHelpText: "Dùng thước kẹp: mở rộng ra và đặt vào lòng vòng, đọc số trên thước.",
+    inputMin: 47,
+    inputMax: 65,
+    inputStep: 0.5,
+    options: [],
+  },
   {
     id: 11,
     category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
@@ -152,6 +160,9 @@ export const questions: Question[] = [
     hint: "Đo phần mặt cắt ngang dày nhất của vòng.",
     inputUnit: "mm",
     inputHelpText: "Dùng thước kẹp kẹp vào phần dày nhất của thân vòng.",
+    inputMin: 6,
+    inputMax: 18,
+    inputStep: 0.5,
     options: [],
   },
 

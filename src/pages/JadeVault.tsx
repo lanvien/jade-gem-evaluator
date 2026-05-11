@@ -10,76 +10,98 @@ import {
 } from "@/lib/jadeVault";
 import JadeRingMini from "@/components/jadevault/JadeRingMini";
 
-const SESSION_OPENED_KEY = "jadeVault:openedThisSession";
+const SESSION_OPENED_KEY = "vaultOpened";
+const GOLD = "#C9A84C";
+const CREAM = "#E8D5A3";
+
+// Dark Rosewood
+const woodBg: React.CSSProperties = {
+  backgroundColor: "#1a0f0a",
+  backgroundImage: `
+    repeating-linear-gradient(
+      92deg,
+      transparent,
+      transparent 2px,
+      rgba(80,35,10,0.18) 2px,
+      rgba(80,35,10,0.18) 3px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      transparent,
+      transparent 40px,
+      rgba(60,20,5,0.12) 40px,
+      rgba(60,20,5,0.12) 41px
+    )`,
+};
 
 export default function JadeVault() {
   const navigate = useNavigate();
   const [items] = useVaultItems();
   const [selected, setSelected] = useState<JadeItem | null>(null);
-  const [opened, setOpened] = useState<boolean>(
+  const [lidGone, setLidGone] = useState<boolean>(
     () => sessionStorage.getItem(SESSION_OPENED_KEY) === "1",
   );
 
   useEffect(() => {
-    if (!opened) {
+    if (!lidGone) {
       const t = setTimeout(() => {
-        setOpened(true);
+        setLidGone(true);
         sessionStorage.setItem(SESSION_OPENED_KEY, "1");
-      }, 1100);
+      }, 950);
       return () => clearTimeout(t);
     }
-  }, [opened]);
+  }, [lidGone]);
 
   const isEmpty = items.length === 0;
 
-  // Wood grain background via CSS gradients only
-  const woodBg: React.CSSProperties = {
-    backgroundColor: "#2b1d12",
-    backgroundImage: `
-      repeating-linear-gradient(
-        90deg,
-        rgba(255,255,255,0.02) 0 2px,
-        rgba(0,0,0,0.05) 2px 6px,
-        rgba(255,255,255,0.015) 6px 14px
-      ),
-      repeating-linear-gradient(
-        180deg,
-        rgba(0,0,0,0.08) 0 1px,
-        transparent 1px 40px
-      ),
-      radial-gradient(ellipse at 30% 20%, #4a2f1c 0%, #2b1d12 60%, #1a1108 100%)
-    `,
-  };
-
-  const GOLD = "#C9A84C";
-
   return (
-    <div className="min-h-screen" style={woodBg}>
-      <header className="sticky top-0 z-30 backdrop-blur" style={{ backgroundColor: "rgba(20,12,6,0.85)", borderBottom: `1px solid ${GOLD}55` }}>
+    <div className="min-h-screen relative" style={woodBg}>
+      <header
+        className="sticky top-0 z-30 backdrop-blur"
+        style={{ backgroundColor: "rgba(10,6,3,0.85)", borderBottom: `1px solid ${GOLD}55` }}
+      >
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="font-serif text-xl md:text-2xl font-bold" style={{ color: GOLD }}>
+          <Link to="/" className="font-serif text-xl md:text-2xl font-bold" style={{ color: GOLD, fontFamily: "'Playfair Display', Georgia, serif" }}>
             ← Hiểu Ngọc
           </Link>
-          <h1 className="font-serif text-base md:text-xl font-bold" style={{ color: GOLD }}>
+          <h1 className="font-serif text-base md:text-xl font-bold" style={{ color: GOLD, fontFamily: "'Playfair Display', Georgia, serif" }}>
             🏺 Cốp Ngọc
           </h1>
           <div className="w-16" />
         </div>
       </header>
 
-      <main className="container mx-auto max-w-5xl px-4 py-10">
-        {/* Opening box animation */}
-        {!opened && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <BoxLid open={false} />
-            <p className="mt-4 text-sm" style={{ color: GOLD }}>Đang mở cốp...</p>
-          </div>
-        )}
+      {/* Lid overlay — slides up + fades out on first visit */}
+      {!lidGone && (
+        <div
+          className="fixed inset-0 z-40 pointer-events-none"
+          style={{ animation: "lidSlide 700ms ease-out forwards" }}
+        >
+          <svg viewBox="0 0 400 280" preserveAspectRatio="none" className="w-full h-[50vh]">
+            <defs>
+              <linearGradient id="lidGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#3a1d10" />
+                <stop offset="50%" stopColor="#2a140a" />
+                <stop offset="100%" stopColor="#1a0d06" />
+              </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="400" height="280" fill="url(#lidGrad)" />
+            <rect x="12" y="12" width="376" height="256" fill="none" stroke={GOLD} strokeWidth="2" opacity="0.85" />
+            <rect x="22" y="22" width="356" height="236" fill="none" stroke={GOLD} strokeWidth="0.8" opacity="0.5" />
+            <circle cx="200" cy="140" r="14" fill="#704a28" stroke={GOLD} strokeWidth="2" />
+            <circle cx="200" cy="140" r="4" fill={GOLD} />
+          </svg>
+        </div>
+      )}
 
-        {opened && isEmpty && (
+      <main
+        className="container mx-auto max-w-5xl px-4 py-10"
+        style={{ animation: lidGone ? "vaultFadeIn 300ms 0ms ease-out both" : undefined }}
+      >
+        {isEmpty && lidGone && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <BoxLid open={false} />
-            <p className="mt-6 text-lg max-w-sm" style={{ color: "#f5e8c8" }}>
+            <BoxIllustration />
+            <p className="mt-6 text-lg max-w-sm" style={{ color: CREAM, fontFamily: "'Playfair Display', Georgia, serif" }}>
               Cốp ngọc của bạn đang trống.
               <br />
               Hãy định giá một chiếc vòng và cất vào đây.
@@ -87,20 +109,20 @@ export default function JadeVault() {
             <button
               onClick={() => navigate("/assessment")}
               className="mt-6 rounded-full px-7 py-3 font-bold transition-opacity hover:opacity-90"
-              style={{ backgroundColor: GOLD, color: "#1a1108" }}
+              style={{ backgroundColor: GOLD, color: "#1a0f0a" }}
             >
               Định giá vòng mới
             </button>
           </div>
         )}
 
-        {opened && !isEmpty && (
+        {!isEmpty && lidGone && (
           <div
             className="rounded-2xl p-4 md:p-6"
             style={{
-              backgroundColor: "#3a1a14",
+              backgroundColor: "#2a1208",
               border: `2px solid ${GOLD}`,
-              boxShadow: `0 0 0 4px #2b1d12 inset, 0 10px 40px rgba(0,0,0,0.5)`,
+              boxShadow: `0 0 0 4px #1a0f0a inset, 0 12px 50px rgba(0,0,0,0.65)`,
             }}
           >
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-5">
@@ -108,26 +130,34 @@ export default function JadeVault() {
                 <button
                   key={it.id}
                   onClick={() => setSelected(it)}
-                  className="group relative rounded-xl p-4 flex flex-col items-center transition-transform hover:scale-[1.03]"
+                  className="vault-slot group relative rounded-xl flex flex-col items-center transition-transform hover:scale-[1.03]"
                   style={{
-                    backgroundColor: "#8B1A1A",
-                    boxShadow: "inset 0 4px 18px rgba(0,0,0,0.55), inset 0 -2px 8px rgba(0,0,0,0.4)",
-                    border: `1px solid ${GOLD}66`,
-                    animation: `vaultRise 420ms ease-out ${idx * 80}ms both`,
+                    backgroundColor: "#5c1010",
+                    boxShadow:
+                      "inset 0 4px 12px rgba(0,0,0,0.6), inset 0 1px 3px rgba(0,0,0,0.8)",
+                    border: `1.5px solid ${GOLD}`,
+                    padding: "16px 12px 12px",
+                    animation: `vaultRise 420ms ease-out ${idx * 70}ms both`,
                   }}
                 >
-                  <div className="rounded-full p-1" style={{ backgroundColor: "rgba(0,0,0,0.25)" }}>
+                  <div
+                    className="rounded-full"
+                    style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.7))" }}
+                  >
                     <JadeRingMini
                       segments={it.segments}
                       hasPhieuHoa={it.hasPhieuHoa}
                       isMuna={it.isMuna}
-                      size={92}
+                      size={90}
                     />
                   </div>
-                  <p className="font-serif text-sm md:text-base font-bold mt-2 truncate w-full" style={{ color: "#f9e6b8" }}>
+                  <p
+                    className="text-sm md:text-base font-bold mt-2 truncate w-full"
+                    style={{ color: CREAM, fontFamily: "'Playfair Display', Georgia, serif" }}
+                  >
                     {it.name}
                   </p>
-                  <p className="text-[11px]" style={{ color: "#f9e6b888" }}>
+                  <p className="text-[11px]" style={{ color: GOLD }}>
                     {formatVaultDate(it.createdAt)}
                   </p>
                 </button>
@@ -160,61 +190,59 @@ export default function JadeVault() {
           from { transform: translateY(20px); opacity: 0; }
           to   { transform: translateY(0);    opacity: 1; }
         }
-        @keyframes lidOpen {
-          0%   { transform: rotateX(0deg); }
-          100% { transform: rotateX(-110deg); }
+        @keyframes lidSlide {
+          0%   { transform: translateY(0);     opacity: 1; }
+          100% { transform: translateY(-100%); opacity: 0; }
         }
-        @keyframes innerGlow {
-          0%   { opacity: 0; }
-          100% { opacity: 1; }
+        @keyframes vaultFadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        /* Cloud pattern in compartment corners */
+        .vault-slot::before,
+        .vault-slot::after {
+          content: '';
+          position: absolute;
+          width: 28px; height: 28px;
+          border: 2px solid ${GOLD};
+          opacity: 0.18;
+          pointer-events: none;
+        }
+        .vault-slot::before {
+          top: 4px; left: 4px;
+          border-right: none; border-bottom: none;
+          border-top-left-radius: 14px;
+        }
+        .vault-slot::after {
+          bottom: 4px; right: 4px;
+          border-left: none; border-top: none;
+          border-bottom-right-radius: 14px;
         }
       `}</style>
     </div>
   );
 }
 
-// ─── Wooden box illustration ───
-function BoxLid({ open }: { open: boolean }) {
-  const GOLD = "#C9A84C";
+function BoxIllustration() {
   return (
-    <div className="relative" style={{ perspective: "800px", width: 220, height: 160 }}>
-      {/* Inner glow */}
-      <div
-        className="absolute inset-x-4 top-10 bottom-2 rounded"
-        style={{
-          background: "radial-gradient(ellipse at center, #f9d77a 0%, #d49a2c 40%, transparent 70%)",
-          opacity: open ? 1 : 0,
-          animation: open ? "innerGlow 600ms ease-out forwards" : undefined,
-        }}
-      />
-      {/* Box body */}
+    <div className="relative" style={{ width: 220, height: 160 }}>
       <div
         className="absolute left-2 right-2 bottom-0 h-24 rounded-md"
-        style={{
-          backgroundColor: "#5a3a20",
-          border: `2px solid ${GOLD}`,
-          boxShadow: "inset 0 6px 14px rgba(0,0,0,0.4)",
-        }}
+        style={{ backgroundColor: "#3a1d10", border: `2px solid ${GOLD}`, boxShadow: "inset 0 6px 14px rgba(0,0,0,0.6)" }}
       />
-      {/* Lid */}
       <div
-        className="absolute left-2 right-2 top-2 h-16 rounded-md origin-bottom"
-        style={{
-          backgroundColor: "#704a28",
-          border: `2px solid ${GOLD}`,
-          transformStyle: "preserve-3d",
-          animation: "lidOpen 600ms ease-out forwards",
-          animationPlayState: open ? "paused" : "running",
-        }}
+        className="absolute left-2 right-2 top-2 h-16 rounded-md"
+        style={{ backgroundColor: "#4d2814", border: `2px solid ${GOLD}` }}
       >
-        <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2"
-          style={{ borderColor: GOLD, backgroundColor: "#a07840" }} />
+        <div
+          className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border-2"
+          style={{ borderColor: GOLD, backgroundColor: "#704a28" }}
+        />
       </div>
     </div>
   );
 }
 
-// ─── Detail Sheet ───
 function DetailSheet({
   item,
   onClose,
@@ -228,20 +256,19 @@ function DetailSheet({
 }) {
   const [name, setName] = useState(item.name);
   const [notes, setNotes] = useState(item.notes);
-  const GOLD = "#C9A84C";
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
-      style={{ backgroundColor: "rgba(0,0,0,0.65)" }}
+      style={{ backgroundColor: "rgba(0,0,0,0.7)" }}
       onClick={onClose}
     >
       <div
         className="w-full md:max-w-lg max-h-[90vh] overflow-y-auto rounded-t-2xl md:rounded-2xl p-6 animate-fade-in-up"
-        style={{ backgroundColor: "#1a1108", border: `1px solid ${GOLD}`, color: "#f5e8c8" }}
+        style={{ ...woodBg, border: `1px solid ${GOLD}`, color: CREAM }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-center">
+        <div className="flex justify-center" style={{ filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.7))" }}>
           <JadeRingMini
             segments={item.segments}
             hasPhieuHoa={item.hasPhieuHoa}
@@ -254,22 +281,22 @@ function DetailSheet({
           value={name}
           onChange={(e) => setName(e.target.value)}
           onBlur={() => name.trim() && onSave({ name: name.trim() })}
-          className="mt-5 w-full bg-transparent text-center font-serif text-xl font-bold outline-none border-b"
-          style={{ borderColor: `${GOLD}66`, color: "#f9e6b8" }}
+          className="mt-5 w-full bg-transparent text-center text-xl font-bold outline-none border-b"
+          style={{ borderColor: `${GOLD}66`, color: CREAM, fontFamily: "'Playfair Display', Georgia, serif" }}
         />
 
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           onBlur={() => onSave({ notes })}
-          placeholder="Ghi chú cá nhân..."
+          placeholder="Ghi chú về chiếc vòng..."
           rows={3}
-          className="mt-4 w-full rounded-lg bg-transparent border p-3 text-sm outline-none focus:border-gold"
-          style={{ borderColor: `${GOLD}55`, color: "#f5e8c8" }}
+          className="mt-4 w-full rounded-lg bg-transparent border p-3 text-sm outline-none"
+          style={{ borderColor: `${GOLD}55`, color: CREAM }}
         />
 
-        <div className="mt-5 space-y-2 text-sm" style={{ color: "#f5e8c8" }}>
-          <Row k="ID" v={item.id} />
+        <div className="mt-5 space-y-2 text-sm">
+          <Row k="Mã vòng" v={item.assessment.ringCode || item.id} />
           <Row k="Ngày định giá" v={formatVaultDate(item.createdAt)} />
           <Row k="Chủng đỉnh / nền" v={`${item.assessment.chungPeak || "—"} / ${item.assessment.chungBase || "—"}`} />
           <Row k="Màu chủ" v={item.assessment.baseColor || "—"} />
@@ -282,7 +309,7 @@ function DetailSheet({
           <button
             onClick={onClose}
             className="flex-1 rounded-lg py-2.5 font-semibold"
-            style={{ border: `1px solid ${GOLD}`, color: "#f9e6b8" }}
+            style={{ border: `1px solid ${GOLD}`, color: CREAM }}
           >
             Đóng
           </button>
@@ -301,9 +328,9 @@ function DetailSheet({
 
 function Row({ k, v }: { k: string; v: string }) {
   return (
-    <div className="flex justify-between gap-3 border-b border-dashed py-1.5" style={{ borderColor: "#C9A84C33" }}>
-      <span className="opacity-70">{k}</span>
-      <span className="text-right font-medium">{v}</span>
+    <div className="flex justify-between gap-3 border-b border-dashed py-1.5" style={{ borderColor: `${GOLD}33` }}>
+      <span style={{ color: GOLD }}>{k}</span>
+      <span className="text-right font-medium" style={{ color: CREAM }}>{v}</span>
     </div>
   );
 }
