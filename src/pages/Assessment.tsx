@@ -173,13 +173,13 @@ const Assessment = () => {
     "Bạch Sắc": "#f0f0f0", "Vô Sắc": "#f5f5f0", "Ô Kê Chủng": "#a0a0a0",
   };
   const flawToAnswer: Record<string, string> = {
-    "Không lỗi": "5a", "Vân ngọc": "5a",
-    "Sớ bông / Gân già": "5b",
-    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "5b",
-    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "5c",
-    "Sớ dọc dài / Sớ lưỡi gà": "5c",
-    "Sớ chéo / Sớ ngang": "5d",
-    "Vết nứt (Crack)": "5d",
+    "Không lỗi": "7a", "Vân ngọc": "7a",
+    "Sớ bông / Gân già": "7b",
+    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "7b",
+    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "7b",
+    "Sớ dọc dài / Sớ lưỡi gà": "7c",
+    "Sớ chéo / Sớ ngang": "7c",
+    "Vết nứt (Crack)": "7c",
   };
   const shapeToAnswer: Record<string, string> = {
     "Bản Đũa": "10a", "Bản Dẹt": "10b", "Bản Vuông": "10c", "Khắc Hoa": "10d",
@@ -200,8 +200,8 @@ const Assessment = () => {
     if (a1) { newAnswers[1] = a1; filled.add(1); }
     const a3 = coverageToAnswer[v.coverageLevel];
     if (a3) { newAnswers[3] = a3; filled.add(3); }
-    const a5 = v.flaws?.length ? flawToAnswer[v.flaws[0]] : "5a";
-    if (a5) { newAnswers[5] = a5; filled.add(5); }
+    const a7 = v.flaws?.length ? flawToAnswer[v.flaws[0]] : "7a";
+    if (a7) { newAnswers[7] = a7; filled.add(7); }
     const a10 = shapeToAnswer[v.shape];
     if (a10) { newAnswers[10] = a10; filled.add(10); }
 
@@ -472,9 +472,12 @@ const Assessment = () => {
           </div>
         )}
 
-        {/* AI prefill banner — show once on the step the AI just filled */}
-        {prefillBanner && !aiLoading && questionNumber === 1 && (
+        {/* AI prefill banner — persists across all subsequent steps once AI fills */}
+        {prefillBanner && !aiLoading && (
           <div className="mb-6 rounded-lg bg-gold/10 border border-gold/30 p-3 space-y-1.5">
+            <p className="text-xs md:text-sm font-bold text-gold">
+              ✨ AI đã điền sẵn — kiểm tra lại trước khi tính giá nhé!
+            </p>
             {prefillBanner.map((line, i) => (
               <p key={i} className="text-xs md:text-sm text-foreground leading-relaxed">
                 {line}
