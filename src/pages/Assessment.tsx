@@ -560,7 +560,7 @@ const Assessment = () => {
                   {/* Image - tap to open lightbox - only if image exists */}
                   {showImageSlot && opt.image && (
                     <div
-                      className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group py-2"
+                      className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group bg-muted/30 aspect-square w-full"
                       onClick={(e) => {
                         e.stopPropagation();
                         openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
@@ -569,7 +569,7 @@ const Assessment = () => {
                       <img
                         src={opt.image}
                         alt={opt.label}
-                        className="object-contain w-auto max-h-[160px] mx-auto"
+                        className="object-contain w-full h-full p-2"
                       />
                       <div className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
                         <ZoomIn className="h-4 w-4 text-foreground" />

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
-import iconCopNgoc from "@/assets/jade/icon_copngoc.png";
 import { hasAssessmentInProgress, resetAssessmentSession } from "@/lib/resetAssessment";
 import VaultIconButton from "@/components/jadevault/VaultIconButton";
 
@@ -24,7 +23,7 @@ const Header = () => {
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         <Link to="/" className="font-serif text-2xl font-bold text-accent">
-          Hiểu ngọc
+          Hiểu Ngọc
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold uppercase tracking-wider">
@@ -33,15 +32,7 @@ const Header = () => {
           <a href="#guides" className="text-foreground hover:text-accent transition-colors">Cẩm Nang</a>
         </nav>
 
-        <div className="hidden md:flex items-center gap-4">
-          <a
-            href="/assessment"
-            onClick={guardedGoToAssessment}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-gold bg-background px-5 py-2 text-base font-semibold leading-none text-foreground animate-pulse-gentle hover:bg-gold hover:text-primary-foreground transition-colors cursor-pointer"
-          >
-            <span>Định giá ngay</span>
-            <img src={iconCopNgoc} alt="" className="h-[1em] w-auto object-contain" />
-          </a>
+        <div className="hidden md:flex items-center gap-3">
           <Link
             to="/jade-vault"
             className="text-sm font-semibold uppercase tracking-wider text-foreground hover:text-accent transition-colors"
@@ -53,9 +44,9 @@ const Header = () => {
 
         <div className="md:hidden flex items-center gap-2">
           <VaultIconButton />
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="text-foreground">
-          {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="text-foreground" aria-label="Mở menu">
+            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
 
@@ -64,14 +55,9 @@ const Header = () => {
           <a href="/assessment" onClick={guardedGoToAssessment} className="block text-sm font-semibold uppercase cursor-pointer">Định giá phỉ thúy</a>
           <a href="#mission" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Về Hiểu Ngọc</a>
           <a href="#guides" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Cẩm Nang</a>
-          <a
-            href="/assessment"
-            onClick={guardedGoToAssessment}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-gold px-4 py-2 text-base font-semibold leading-none cursor-pointer"
-          >
-            <span>Cốp ngọc của bạn</span>
-            <img src={iconCopNgoc} alt="" className="h-[1em] w-auto object-contain" />
-          </a>
+          <Link to="/jade-vault" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase text-accent">
+            Cốp ngọc của tôi
+          </Link>
         </nav>
       )}
     </header>
