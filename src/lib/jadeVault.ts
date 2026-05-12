@@ -34,6 +34,7 @@ export interface JadeItem {
   segments: VaultSegment[];
   hasPhieuHoa: boolean;
   isMuna: boolean;
+  userImage?: string; // base64 data URL — user's own bracelet photo (replaces SVG)
   assessment: {
     chungPeak: string;
     chungBase: string;

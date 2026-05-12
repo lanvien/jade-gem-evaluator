@@ -141,15 +141,19 @@ export default function JadeVault() {
                   }}
                 >
                   <div
-                    className="rounded-full"
-                    style={{ filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.7))" }}
+                    className="rounded-full overflow-hidden flex items-center justify-center"
+                    style={{ width: 90, height: 90, filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.7))" }}
                   >
-                    <JadeRingMini
-                      segments={it.segments}
-                      hasPhieuHoa={it.hasPhieuHoa}
-                      isMuna={it.isMuna}
-                      size={90}
-                    />
+                    {it.userImage ? (
+                      <img src={it.userImage} alt={it.name} className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      <JadeRingMini
+                        segments={it.segments}
+                        hasPhieuHoa={it.hasPhieuHoa}
+                        isMuna={it.isMuna}
+                        size={90}
+                      />
+                    )}
                   </div>
                   <p
                     className="text-sm md:text-base font-bold mt-2 truncate w-full"
@@ -268,13 +272,57 @@ function DetailSheet({
         style={{ ...woodBg, border: `1px solid ${GOLD}`, color: CREAM }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-center" style={{ filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.7))" }}>
-          <JadeRingMini
-            segments={item.segments}
-            hasPhieuHoa={item.hasPhieuHoa}
-            isMuna={item.isMuna}
-            size={160}
-          />
+        <div className="flex flex-col items-center gap-3" style={{ filter: "drop-shadow(0 6px 12px rgba(0,0,0,0.7))" }}>
+          {item.userImage ? (
+            <img
+              src={item.userImage}
+              alt={item.name}
+              className="w-40 h-40 rounded-full object-cover border-2"
+              style={{ borderColor: GOLD }}
+            />
+          ) : (
+            <JadeRingMini
+              segments={item.segments}
+              hasPhieuHoa={item.hasPhieuHoa}
+              isMuna={item.isMuna}
+              size={160}
+            />
+          )}
+          <label
+            className="cursor-pointer text-xs px-3 py-1.5 rounded-md transition-opacity hover:opacity-90"
+            style={{ border: `1px solid ${GOLD}`, color: GOLD }}
+          >
+            {item.userImage ? "📷 Đổi ảnh thật" : "📷 Tải ảnh thật của vòng"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (file.size > 4 * 1024 * 1024) {
+                  toast.error("Ảnh quá lớn (tối đa 4MB).");
+                  return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const dataUrl = reader.result as string;
+                  onSave({ userImage: dataUrl });
+                  toast.success("Đã lưu ảnh thật của vòng ✨");
+                };
+                reader.readAsDataURL(file);
+              }}
+            />
+          </label>
+          {item.userImage && (
+            <button
+              onClick={() => onSave({ userImage: undefined })}
+              className="text-[11px] underline"
+              style={{ color: `${CREAM}99` }}
+            >
+              Xoá ảnh, dùng lại hoạ tiết SVG
+            </button>
+          )}
         </div>
 
         <input
