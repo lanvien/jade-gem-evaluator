@@ -35,6 +35,7 @@ export interface JadeItem {
   hasPhieuHoa: boolean;
   isMuna: boolean;
   userImage?: string; // base64 data URL — user's own bracelet photo (replaces SVG)
+  isPublic?: boolean; // owner's choice to share via /vong/:id link
   assessment: {
     chungPeak: string;
     chungBase: string;
