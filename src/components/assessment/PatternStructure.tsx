@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Sparkles, Waves, Cloud, Stars, Minus, GitCommitVertical, MoveHorizontal, MoveDiagonal, AlertTriangle } from "lucide-react";
+import IntrinsicInfoIcon from "./IntrinsicInfoIcon";
 
 export interface PatternData {
   groupA: Record<string, { checked: boolean; density?: "low" | "medium" | "high" }>;
@@ -8,18 +10,18 @@ export interface PatternData {
 }
 
 const GROUP_A_ITEMS = [
-  { id: "van-ngoc", label: "Vân ngọc" },
-  { id: "gan-ngoc", label: "Gân ngọc" },
-  { id: "so-bong", label: "Sớ bông" },
-  { id: "mat-cat", label: "Mắt cát" },
+  { id: "van-ngoc", label: "Vân ngọc", Icon: Cloud },
+  { id: "gan-ngoc", label: "Gân ngọc", Icon: Waves },
+  { id: "so-bong", label: "Sớ bông", Icon: Sparkles },
+  { id: "mat-cat", label: "Mắt cát", Icon: Stars },
 ];
 
 const GROUP_B_ITEMS = [
-  { id: "so-am", label: "Sớ âm" },
-  { id: "so-luoi-ga", label: "Sớ lưỡi gà" },
-  { id: "so-doc", label: "Sớ dọc" },
-  { id: "so-ngang-cheo", label: "Sớ ngang/chéo" },
-  { id: "vet-nut", label: "Vết nứt" },
+  { id: "so-am", label: "Sớ âm", Icon: Minus },
+  { id: "so-luoi-ga", label: "Sớ lưỡi gà", Icon: GitCommitVertical },
+  { id: "so-doc", label: "Sớ dọc", Icon: GitCommitVertical },
+  { id: "so-ngang-cheo", label: "Sớ ngang/chéo", Icon: MoveDiagonal },
+  { id: "vet-nut", label: "Vết nứt", Icon: AlertTriangle },
 ];
 
 const FEEL_CONFIRM_IDS = ["so-doc", "so-luoi-ga", "vet-nut"];
@@ -63,32 +65,41 @@ const PatternStructure = ({ value, onChange, surfaceSmooth }: Props) => {
   const showGroupB = !surfaceSmooth;
 
   const renderCheckItem = (
-    item: { id: string; label: string },
+    item: { id: string; label: string; Icon: any },
     group: "groupA" | "groupB",
     data: PatternData["groupA"]
   ) => {
     const entry = data[item.id];
     const isChecked = entry?.checked || false;
+    const Icon = item.Icon;
 
     return (
       <div key={item.id} className="space-y-2">
-        <button
-          onClick={() => toggleItem(group, item.id)}
-          className={`w-full rounded-lg border-2 p-3 text-left transition-all ${
-            isChecked
-              ? "border-gold bg-gold/10"
-              : "border-border bg-card hover:border-gold/50"
+        <div
+          className={`w-full rounded-lg border-2 p-3 transition-all flex items-center gap-3 ${
+            isChecked ? "border-gold bg-gold/10" : "border-border bg-card hover:border-gold/50"
           }`}
         >
-          <span className="flex items-center gap-2">
-            <span className={`w-5 h-5 rounded border-2 flex items-center justify-center text-xs ${
-              isChecked ? "border-gold bg-gold text-primary-foreground" : "border-muted-foreground"
+          <button
+            onClick={() => toggleItem(group, item.id)}
+            className="flex flex-1 items-center gap-3 text-left"
+          >
+            <span className={`w-9 h-9 rounded-full border-2 flex items-center justify-center ${
+              isChecked ? "border-gold bg-gold/20 text-gold" : "border-border bg-muted text-muted-foreground"
             }`}>
-              {isChecked && "✓"}
+              <Icon className="h-5 w-5" />
             </span>
-            <span className="font-semibold text-foreground">{item.label}</span>
-          </span>
-        </button>
+            <span className="flex items-center gap-1.5">
+              <span className={`w-5 h-5 rounded border-2 flex items-center justify-center text-xs ${
+                isChecked ? "border-gold bg-gold text-primary-foreground" : "border-muted-foreground"
+              }`}>
+                {isChecked && "✓"}
+              </span>
+              <span className="font-semibold text-foreground">{item.label}</span>
+            </span>
+          </button>
+          <IntrinsicInfoIcon id={item.id} label={item.label} />
+        </div>
 
         {/* Density selector - animated */}
         <div
