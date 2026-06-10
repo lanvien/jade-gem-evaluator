@@ -8,6 +8,8 @@ import Assessment from "./pages/Assessment.tsx";
 import Results from "./pages/Results.tsx";
 import CopNgoc from "./pages/CopNgoc.tsx";
 import JadeVault from "./pages/JadeVault.tsx";
+import PublicBracelet from "./pages/PublicBracelet.tsx";
+import CongDongPlaceholder from "./pages/CongDongPlaceholder.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/results" element={<Results />} />
           <Route path="/cop-ngoc" element={<CopNgoc />} />
           <Route path="/jade-vault" element={<JadeVault />} />
+          <Route path="/vong/:id" element={<PublicBracelet />} />
+          <Route path="/phong-tra" element={<CongDongPlaceholder />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

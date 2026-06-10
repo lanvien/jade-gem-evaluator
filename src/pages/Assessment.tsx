@@ -374,6 +374,10 @@ const Assessment = () => {
         return ringColors.some((c) => c !== "#e5e7eb");
       case "number-input":
         return !!(numberInputs[q.id] && parseFloat(numberInputs[q.id]) > 0);
+      case "multi-number":
+        return (q.inputFields || []).every(
+          (f) => numberInputs[f.key] && parseFloat(numberInputs[f.key]) > 0,
+        );
       case "pattern-structure":
         return true;
       case "checkbox-legal":
@@ -541,6 +545,28 @@ const Assessment = () => {
             />
           )}
 
+          {/* Multi-number (Ni + Chột + Dày gộp) */}
+          {q.type === "multi-number" && q.inputFields && (
+            <div className="space-y-5">
+              {q.inputFields.map((f) => (
+                <div key={f.key} className="space-y-2">
+                  <label className="block text-sm font-semibold text-foreground">{f.label}</label>
+                  <NumberInputQuestion
+                    value={numberInputs[f.key] || ""}
+                    onChange={(v) => setNumberInputs((prev) => ({ ...prev, [f.key]: v }))}
+                    unit={f.unit}
+                    min={f.min}
+                    max={f.max}
+                    step={f.step}
+                  />
+                  {f.helpText && (
+                    <p className="text-xs text-muted-foreground text-center">{f.helpText}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Single Choice & Surface Check & Checkbox Legal */}
           {(q.type === "single-choice" || q.type === "checkbox-legal" || q.type === "surface-check") && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -560,7 +586,8 @@ const Assessment = () => {
                   {/* Image - tap to open lightbox - only if image exists */}
                   {showImageSlot && opt.image && (
                     <div
-                      className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group bg-muted/30 aspect-square w-full"
+                      className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group bg-muted/30 w-full"
+                      style={{ aspectRatio: "4 / 3" }}
                       onClick={(e) => {
                         e.stopPropagation();
                         openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
@@ -569,7 +596,7 @@ const Assessment = () => {
                       <img
                         src={opt.image}
                         alt={opt.label}
-                        className="object-contain w-full h-full p-2"
+                        className="object-cover w-full h-full"
                       />
                       <div className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
                         <ZoomIn className="h-4 w-4 text-foreground" />

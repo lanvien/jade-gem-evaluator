@@ -20,10 +20,21 @@ export type QuestionType =
   | "single-choice"
   | "color-ring"
   | "number-input"
+  | "multi-number"
   | "card-style"
   | "checkbox-legal"
   | "surface-check"
   | "pattern-structure";
+
+export interface NumberField {
+  key: number;
+  label: string;
+  unit: string;
+  min: number;
+  max: number;
+  step: number;
+  helpText?: string;
+}
 
 export interface Question {
   id: number;
@@ -39,6 +50,7 @@ export interface Question {
   inputMin?: number;
   inputMax?: number;
   inputStep?: number;
+  inputFields?: NumberField[];
   conditionalText?: { triggeredByIds: string[]; text: string };
 }
 
@@ -119,12 +131,11 @@ export const questions: Question[] = [
     category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
     type: "pattern-structure",
     title: "2. Kiểm tra Họa Tiết & Cấu Trúc (Soi đèn)",
-    hint: "Nếu thấy nhiều đường kẻ, hãy Zoom ảnh mẫu để đối chiếu chính xác nhất.",
+    hint: "Bấm vào từng biểu tượng để xem mô tả phong thuỷ — thẩm mỹ.",
     options: [],
   },
 
   // ===== IV. KÍCH THƯỚC & KIỂU DÁNG =====
-  // (Q7 in flow) Kiểu dáng vòng — placed BEFORE ni vòng per UX request
   {
     id: 10,
     category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
@@ -138,32 +149,19 @@ export const questions: Question[] = [
       { id: "10d", label: "Khắc hoa", description: "Có hoa văn chạm khắc" },
     ],
   },
-  // (Q8 in flow) Ni vòng
+  // MERGED: Ni + Chột + Dày in one step
   {
     id: 9,
     category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
-    type: "number-input",
-    title: "Ni vòng (đường kính trong - mm)",
-    hint: "Dùng thước kẹp (tốt nhất). Hoặc dùng thước thẳng đặt ngang lòng vòng. Hoặc đo chu vi bằng dây rồi chia cho 3.14.",
-    inputUnit: "mm",
-    inputHelpText: "Dùng thước kẹp: mở rộng ra và đặt vào lòng vòng, đọc số trên thước.",
-    inputMin: 47,
-    inputMax: 65,
-    inputStep: 0.5,
+    type: "multi-number",
+    title: "Kích thước vòng (mm)",
+    hint: "Dùng thước kẹp đo cả 3 thông số: đường kính trong, chiều rộng bản và độ dày.",
     options: [],
-  },
-  {
-    id: 11,
-    category: "IV. KÍCH THƯỚC & KIỂU DÁNG",
-    type: "number-input",
-    title: "Độ dày bản vòng - chột (mm)",
-    hint: "Đo phần mặt cắt ngang dày nhất của vòng.",
-    inputUnit: "mm",
-    inputHelpText: "Dùng thước kẹp kẹp vào phần dày nhất của thân vòng.",
-    inputMin: 6,
-    inputMax: 18,
-    inputStep: 0.5,
-    options: [],
+    inputFields: [
+      { key: 9, label: "Ni vòng (đường kính trong)", unit: "mm", min: 47, max: 65, step: 0.5, helpText: "Đo lòng vòng. Nữ thường 52–58mm." },
+      { key: 13, label: "Chột (chiều rộng bản)", unit: "mm", min: 6, max: 22, step: 0.5, helpText: "Bề ngang của bản vòng nhìn từ trên xuống." },
+      { key: 11, label: "Độ dày bản vòng", unit: "mm", min: 6, max: 18, step: 0.5, helpText: "Đo cạnh dày nhất của thân vòng." },
+    ],
   },
 
   // ===== V. BỐI CẢNH GIAO DỊCH =====

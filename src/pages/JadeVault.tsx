@@ -344,13 +344,62 @@ function DetailSheet({
         />
 
         <div className="mt-5 space-y-2 text-sm">
-          <Row k="Mã vòng" v={item.assessment.ringCode || item.id} />
+          <Row k="Mã định danh" v={item.id} />
           <Row k="Ngày định giá" v={formatVaultDate(item.createdAt)} />
           <Row k="Chủng đỉnh / nền" v={`${item.assessment.chungPeak || "—"} / ${item.assessment.chungBase || "—"}`} />
           <Row k="Màu chủ" v={item.assessment.baseColor || "—"} />
           <Row k="Hình dạng" v={item.assessment.shape || "—"} />
           <Row k="Tỳ vết" v={item.assessment.flaws?.length ? item.assessment.flaws.join(", ") : "Không có"} />
           <Row k="Giá ước tính" v={item.assessment.estimatedPrice || "—"} />
+        </div>
+
+        {/* Share block */}
+        <div
+          className="mt-5 rounded-lg p-4"
+          style={{ border: `1px solid ${GOLD}55`, backgroundColor: "rgba(201,168,76,0.06)" }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-wider" style={{ color: GOLD }}>
+              Chia sẻ / Truy cập
+            </span>
+            <label className="inline-flex items-center gap-2 text-xs cursor-pointer" style={{ color: CREAM }}>
+              <input
+                type="checkbox"
+                checked={item.isPublic !== false}
+                onChange={(e) => onSave({ isPublic: e.target.checked })}
+                className="accent-current"
+              />
+              Công khai bằng link
+            </label>
+          </div>
+          <p className="font-mono text-base font-bold mt-2 tracking-widest" style={{ color: GOLD }}>
+            {item.id}
+          </p>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(item.id);
+                toast.success("Đã copy mã code");
+              }}
+              className="flex-1 rounded-md py-1.5 text-xs font-semibold"
+              style={{ border: `1px solid ${GOLD}`, color: CREAM }}
+            >
+              📋 Copy Code
+            </button>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(`${window.location.origin}/vong/${item.id}`);
+                toast.success("Đã copy link chia sẻ");
+              }}
+              className="flex-1 rounded-md py-1.5 text-xs font-semibold"
+              style={{ border: `1px solid ${GOLD}`, color: CREAM }}
+            >
+              🔗 Copy Link
+            </button>
+          </div>
+          <p className="text-[10px] mt-2 italic" style={{ color: `${CREAM}88` }}>
+            * Hiện tại chỉ ai mở link trên cùng thiết bị mới xem được. Chia sẻ liên thiết bị sẽ có ở bước sau.
+          </p>
         </div>
 
         <div className="mt-6 flex gap-3">

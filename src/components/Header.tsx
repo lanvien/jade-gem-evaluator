@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { hasAssessmentInProgress, resetAssessmentSession } from "@/lib/resetAssessment";
 import VaultIconButton from "@/components/jadevault/VaultIconButton";
+import AppSidebarSheet from "@/components/AppSidebarSheet";
 
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -22,9 +23,12 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
-        <Link to="/" className="font-serif text-2xl font-bold text-accent">
-          Hiểu Ngọc
-        </Link>
+        <div className="flex items-center gap-3">
+          <AppSidebarSheet />
+          <Link to="/" className="font-serif text-2xl font-bold text-accent">
+            Hiểu Ngọc
+          </Link>
+        </div>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold uppercase tracking-wider">
           <a href="/assessment" onClick={guardedGoToAssessment} className="text-foreground hover:text-accent transition-colors cursor-pointer">Định giá phỉ thúy</a>

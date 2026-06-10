@@ -1,56 +1,85 @@
-# Đề xuất chia nhỏ công việc
+# Kế hoạch triển khai 6 yêu cầu
 
-Yêu cầu này rất lớn (chạm ~10 file + 2 bảng DB mới + 2 trang public mới). Để tránh "fix một cái sai một cái khác" như đã xảy ra, em đề xuất chia làm **3 đợt deploy**, mỗi đợt em làm xong → anh test → mới sang đợt sau.
-
----
-
-## ĐỢT 1 — Polish hiện tại (KHÔNG đụng backend)
-
-Làm trong 1 lần, không động đến design trang Results trừ 2 thứ anh dặn:
-
-1. **Trang Results** (chỉ thêm, không sửa layout):
-   - "cốp ngọc" trong nút "Lưu về cốp ngọc của bạn" và text "Về cốp ngọc của bạn >>>" → link sang `/jade-vault`
-   - Sau khi lưu: chạy `flyToVault` animation + toast "Đã cất vào Cốp Ngọc ✨"
-
-2. **FIX 1 — Navbar**: thêm lại link "Cốp ngọc của tôi" (text) bên cạnh icon 🏺 + giữ nút "Định giá ngay"
-
-3. **FIX 2 — Shimmer**: thêm hiệu ứng sheen chéo cho nút "Định giá Phỉ Thuý" trên homepage (chỉ CSS, không đổi màu/size)
-
-4. **FIX 3 — Assessment**:
-   - 3a: swap câu 7 ↔ 8 (shape ↔ ni vòng)
-   - 3b: ni 47–65mm step 0.5; chốt 6–18mm
-   - 3c: ảnh minh hoạ `object-contain max-h-[160px] w-auto`
-   - 3d: bảng màu collapse theo nhóm (chỉ Lục sắc hệ mở mặc định)
-
-5. **FIX 4 — AI prefill** thực sự điền form: map chungPeak/Base→Q1, coverage→Q3, baseColor→Q4 swatch, segments→12 ô vòng theo opacity của toneLevel, hasPhieuHoa→overlay, flaws→Q5, shape→Q7. Sau prefill ẩn upload ở các bước sau + banner vàng + warnings.
-
-6. **FIX 5 — Jade Vault redesign**: nền dark rosewood (CSS gradient), animation lid mở 1 lần/session, grid compartment crimson + viền vàng, slot có cloud pattern góc, ring SVG 90px + drop-shadow, detail sheet wood-grain + Playfair Display, chia sẻ chưa làm ở đợt này.
+Yêu cầu này lớn (chạm Assessment, Header, Vault, định tuyến mới + cần backend cho privacy code). Em đề xuất chia **2 đợt** làm liên tiếp, không chờ test giữa, nhưng tách rõ để dễ rollback nếu hỏng.
 
 ---
 
-## ĐỢT 2 — Bước 2: Public link `/vong/{id}`
+## ĐỢT A — Frontend-only (làm ngay)
 
-- Migration tạo table `public_bracelets` (id text PK, owner_session_id, name, segments jsonb, has_phieu_hoa, is_muna, assessment jsonb, is_public, created_at)
-- RLS: ai cũng SELECT được khi `is_public=true`; chỉ owner (match `owner_session_id` từ localStorage) mới UPSERT/UPDATE
-- Trong detail card vault: toggle "Công khai để chia sẻ" + nút "Chia sẻ" copy link
-- Trang `/vong/:id` read-only, nếu private/không tồn tại → "Chiếc vòng này chưa được chia sẻ công khai"
-- CTA "Tự định giá vòng của bạn →" cuối trang
+### 1. Khung ảnh câu hỏi (Assessment)
+- Khôi phục layout khung cũ: container vuông `aspect-square` với border + bg sang trọng như bản trước.
+- Ảnh vòng bên trong: đổi từ `object-contain p-2` → `object-cover w-full h-full` (fill kín khung), giữ `cursor-zoom-in` để mở Lightbox.
+- KHÔNG đổi cấu trúc grid câu hỏi.
+
+### 2. Vision AI khôi phục + prefill
+- Kiểm tra lại `useJadeVision` + nút upload ở Q1 còn hoạt động không (nếu bị ẩn do banner prefill thì bỏ điều kiện ẩn).
+- Đảm bảo prefill từ AI vẫn map đúng các câu hỏi (đã làm ở phase trước, chỉ verify).
+
+### 3. Nội tại — Icon thay vì ảnh nhỏ
+- File: `src/components/assessment/PatternStructure.tsx` (hoặc nơi đang render hình Vân/Sớ).
+- Thay mỗi item ảnh bằng 1 icon Lucide (vd: `Sparkles`, `Waves`, `GitBranch`...) trong khung tròn vàng.
+- Click icon → mở `Dialog` (shadcn) hiển thị "Information Card": tên đặc điểm + mô tả phong thủy/thẩm mỹ chi tiết.
+- Văn phong giữ nguyên giọng thanh nhã đã thiết lập.
+
+### 4. Gộp Ni + Chột + Dày thành 1 câu
+- File: `src/data/questions.ts` + `src/pages/Assessment.tsx`.
+- Tạo question type mới `multi-number` (hoặc reuse): 1 step duy nhất, render 3 input số cạnh nhau với label riêng.
+  - Ni vòng: 47–65, step 0.5
+  - Chột vòng (đường kính trong): khoảng hợp lý, step 0.5
+  - Độ dày: 6–18, step 0.5
+- Cập nhật `pricingEngine` đọc từ key mới (giữ backward compat).
+
+### 5. Hamburger Menu + Sidebar (Header)
+- Thêm icon `Menu` bên trái logo "Hiểu Ngọc".
+- Click → mở `Sheet` từ trái (shadcn `sheet` side="left").
+- Nội dung Sidebar (style "tabs & outlines" — viền vàng nhạt, divider, mỗi mục là 1 ô có outline):
+  - Input "Nhập code Cốp Ngọc..." + nút Mở.
+  - Link Trang chủ (`/`).
+  - Link Cộng đồng thẩm định (`/phong-tra` — sẽ tạo placeholder page "Sắp ra mắt" ở đợt này, hoàn thiện sau).
+  - Link Cẩm nang (`#guides`).
+- Khi nhập code hợp lệ → navigate `/vong/{code}`.
+
+### 6a. Trang `/vong/:id` (skeleton frontend)
+- Tạo `src/pages/PublicBracelet.tsx` đọc từ localStorage `jadeVault` trước (cho ring của chính mình).
+- Hiển thị: ảnh user upload (hoặc SVG ring), tên, đoạn assessment, ID + nút Copy Code + Copy Link.
+- Nếu không tìm thấy ID: "Chiếc vòng này chưa được chia sẻ công khai hoặc không tồn tại."
+- Trong Vault detail card: thêm khối "Mã định danh" với ID (8 ký tự từ nanoid đã có), nút Copy Code, nút Copy Link `https://.../vong/{id}`, toggle "Công khai" (lưu local field `isPublic` trên JadeItem).
 
 ---
 
-## ĐỢT 3 — Bước 3: Phòng Trà Thưởng Ngọc
+## ĐỢT B — Cross-device share (cần Lovable Cloud)
 
-- Trang `/phong-tra` masonry grid public bracelets, pagination 10/page
-- Trang chi tiết `/phong-tra/:id` + bình luận
-- Migration `bracelet_comments` (nickname, content, is_expert, is_hidden) + `bracelet_reports`
-- Badge "Giám định viên" vàng cho `is_expert=true`, comment expert pinned + viền vàng trái
-- Nút "⚑ Báo cáo" insert vào `bracelet_reports` rồi disable
-- Link "Phòng Trà" thêm vào navbar
+Hiện tại `jadeVault` chỉ ở localStorage máy của owner → người khác mở link sẽ KHÔNG thấy gì. Để link thật sự share được:
+
+- Bật **Lovable Cloud**, tạo bảng `public_bracelets` (id text PK, owner_session_id, name, payload jsonb, image_url text, is_public bool, created_at).
+- RLS: SELECT public khi `is_public=true`; INSERT/UPDATE chỉ owner (match `owner_session_id` lưu trong localStorage).
+- Khi bật toggle "Công khai" trong Vault → upsert lên Cloud.
+- `/vong/:id` query Cloud trước, fallback localStorage.
+- Storage bucket cho ảnh user upload (hiện đang base64 trong localStorage — sẽ upload file thật).
 
 ---
 
-## Em đề nghị
+## File sẽ tạo/sửa (Đợt A)
 
-Anh **OK đợt 1 trước** để em làm 1 lần dứt điểm rồi test. Đợt 2-3 cần tạo bảng + RLS, em sẽ làm sau khi đợt 1 đã ổn định.
+**Mới:**
+- `src/components/AppSidebarSheet.tsx` (Hamburger sidebar)
+- `src/components/assessment/IntrinsicIcons.tsx` (icon + dialog cho Nội tại)
+- `src/pages/PublicBracelet.tsx`
 
-Anh confirm "OK đợt 1" hay muốn em ghép tất cả vào 1 lượt (rủi ro cao)?
+**Sửa:**
+- `src/pages/Assessment.tsx` (khung ảnh, gộp Ni/Chột/Dày)
+- `src/data/questions.ts` (merge 3 câu)
+- `src/components/Header.tsx` (hamburger)
+- `src/components/assessment/PatternStructure.tsx` (icon hóa)
+- `src/pages/JadeVault.tsx` (block ID + copy + toggle public)
+- `src/lib/jadeVault.ts` (thêm `isPublic`, helper getById)
+- `src/App.tsx` (route `/vong/:id`)
+
+---
+
+## Em xin xác nhận
+
+- **OK đợt A trước** (em làm ngay, ~1 lượt) → anh test → confirm sang Đợt B (bật Cloud).
+- Hay anh muốn em **gộp luôn cả A+B** trong 1 lượt (rủi ro cao hơn, sẽ bật Cloud mà không hỏi lại).
+
+Anh trả lời "OK đợt A" hoặc "làm hết A+B".
