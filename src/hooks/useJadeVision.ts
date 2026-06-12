@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface VisionResult {
   chungPeak: string;
@@ -82,18 +82,11 @@ export function useJadeVision() {
         imageBase64 = canvas.toDataURL("image/jpeg", 0.85).split(",")[1];
       }
 
-      const resp = await fetch(`${SUPABASE_URL}/functions/v1/analyze-jade`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-          apikey: SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify({ imageBase64, mimeType: file.type || "image/jpeg" }),
+      const { data: json, error: fnError } = await supabase.functions.invoke("analyze-jade", {
+        body: { imageBase64, mimeType: file.type || "image/jpeg" },
       });
-
-      const json = await resp.json();
-      if (!json.success) throw new Error(json.error ?? "Edge Function failed");
+      if (fnError) throw new Error(fnError.message ?? "Edge Function failed");
+      if (!json?.success) throw new Error(json?.error ?? "Edge Function failed");
 
       const v: VisionResult = json.data;
       const w = buildWarnings(v);

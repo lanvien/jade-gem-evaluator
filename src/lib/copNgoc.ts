@@ -80,7 +80,7 @@ async function fetchCop(sessionId: string): Promise<CopData | null> {
     .eq("session_id", sessionId)
     .maybeSingle();
   if (error && error.code !== "PGRST116") throw error;
-  return data ? rowToData(data as CopRow) : null;
+  return data ? rowToData(data as unknown as CopRow) : null;
 }
 
 async function fetchCopByCode(copCode: string): Promise<CopData | null> {
@@ -90,7 +90,7 @@ async function fetchCopByCode(copCode: string): Promise<CopData | null> {
     .eq("cop_code", copCode.toUpperCase())
     .maybeSingle();
   if (error && error.code !== "PGRST116") throw error;
-  return data ? rowToData(data as CopRow) : null;
+  return data ? rowToData(data as unknown as CopRow) : null;
 }
 
 async function upsertCop(sessionId: string, items: CopItem[]): Promise<CopData> {
@@ -100,12 +100,12 @@ async function upsertCop(sessionId: string, items: CopItem[]): Promise<CopData> 
   if (existing) {
     const { data, error } = await supabase
       .from("cop_ngoc")
-      .update({ items, updated_at: now })
+      .update({ items: items as any, updated_at: now })
       .eq("session_id", sessionId)
       .select()
       .single();
     if (error) throw error;
-    return rowToData(data as CopRow);
+    return rowToData(data as unknown as CopRow);
   }
 
   const copCode = generateCopCode();
@@ -114,14 +114,14 @@ async function upsertCop(sessionId: string, items: CopItem[]): Promise<CopData> 
     .insert({
       session_id: sessionId,
       cop_code: copCode,
-      items,
+      items: items as any,
       created_at: now,
       updated_at: now,
     })
     .select()
     .single();
   if (error) throw error;
-  return rowToData(data as CopRow);
+  return rowToData(data as unknown as CopRow);
 }
 
 // ─────────────────────────────────────────────
