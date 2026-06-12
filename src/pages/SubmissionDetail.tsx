@@ -115,7 +115,7 @@ export default function SubmissionDetail() {
               <div className="flex items-center justify-between">
                 <span className="font-serif text-lg font-bold">{sub.guest_name}</span>
                 <span className="text-xs text-muted-foreground">
-                  {format(new Date(sub.created_at), "HH:mm — d MMM yyyy", { locale: vi })}
+                  {format(new Date(sub.created_at), "HH:mm '—' d MMM yyyy", { locale: vi })}
                 </span>
               </div>
               {sub.description && (
