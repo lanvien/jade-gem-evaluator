@@ -9,7 +9,9 @@ import Results from "./pages/Results.tsx";
 import CopNgoc from "./pages/CopNgoc.tsx";
 import JadeVault from "./pages/JadeVault.tsx";
 import PublicBracelet from "./pages/PublicBracelet.tsx";
-import CongDongPlaceholder from "./pages/CongDongPlaceholder.tsx";
+import CongDong from "./pages/CongDong.tsx";
+import SubmissionDetail from "./pages/SubmissionDetail.tsx";
+import SubmitJade from "./pages/SubmitJade.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -27,7 +29,10 @@ const App = () => (
           <Route path="/cop-ngoc" element={<CopNgoc />} />
           <Route path="/jade-vault" element={<JadeVault />} />
           <Route path="/vong/:id" element={<PublicBracelet />} />
-          <Route path="/phong-tra" element={<CongDongPlaceholder />} />
+          <Route path="/cong-dong" element={<CongDong />} />
+          <Route path="/cong-dong/dang" element={<SubmitJade />} />
+          <Route path="/cong-dong/:id" element={<SubmissionDetail />} />
+          <Route path="/phong-tra" element={<CongDong />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
