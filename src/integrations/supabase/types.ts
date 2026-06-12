@@ -14,7 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      comments: {
+        Row: {
+          content: string
+          created_at: string
+          guest_name: string
+          id: string
+          submission_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          guest_name: string
+          id?: string
+          submission_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          guest_name?: string
+          id?: string
+          submission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cop_ngoc: {
+        Row: {
+          cop_code: string
+          created_at: string
+          items: Json
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          cop_code: string
+          created_at?: string
+          items?: Json
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          cop_code?: string
+          created_at?: string
+          items?: Json
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          created_at: string
+          description: string | null
+          guest_name: string
+          id: string
+          image_urls: string[]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          guest_name: string
+          id?: string
+          image_urls?: string[]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          guest_name?: string
+          id?: string
+          image_urls?: string[]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
