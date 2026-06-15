@@ -13,6 +13,7 @@ import CongDong from "./pages/CongDong.tsx";
 import SubmissionDetail from "./pages/SubmissionDetail.tsx";
 import SubmitJade from "./pages/SubmitJade.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import ThamDinh from "./pages/ThamDinh.tsx";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/tham-dinh" element={<ThamDinh />} />
           <Route path="/cop-ngoc" element={<CopNgoc />} />
           <Route path="/jade-vault" element={<JadeVault />} />
           <Route path="/vong/:id" element={<PublicBracelet />} />
