@@ -523,12 +523,20 @@ const Assessment = () => {
           {/* Color Ring */}
           {q.type === "color-ring" && (
             <>
-              <ColorRing
-                value={ringColors}
-                onChange={setRingColors}
-                tones={colorTones}
-                onTonesChange={setColorTones}
-                aiContext={aiVisionCtx}
+              <JadeCanvas
+                onChange={(r: JadeCanvasResult) => {
+                  const HEX: Record<string, string> = {
+                    de_vuong_luc: "#2A7A2A", xanh_cay: "#3DAA3D", xanh_ngot: "#6DC46D",
+                    dau_luc: "#A8CCA8", tu_la_lan: "#9B45C8", tim_ca: "#7B3F9E",
+                    tim_lam: "#6060CC", lam: "#4A90D9", vang: "#E8B84B",
+                    hong_phi: "#E85D7A", den: "#2A2A2A", trang: "#F5F0E8", xam: "#9E9E9E",
+                  };
+                  const fill = Array.from({ length: 12 }, (_, i) => {
+                    const key = r.baseColors[i % r.baseColors.length] ?? "trang";
+                    return HEX[key] ?? "#e5e7eb";
+                  });
+                  setRingColors(fill);
+                }}
               />
               <ColorRingAlerts colors={ringColors} />
             </>
