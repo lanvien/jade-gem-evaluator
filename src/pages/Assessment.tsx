@@ -601,6 +601,33 @@ const Assessment = () => {
                   )}
                 </div>
               ))}
+
+              {/* Khối giải thích thuật ngữ + sơ đồ mặt cắt */}
+              <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+                <p className="text-sm font-semibold text-foreground">Gợi ý: Dùng thước kẹp (tốt nhất)</p>
+                <div className="flex items-start gap-4 flex-wrap">
+                  {/* Sơ đồ mặt cắt vòng */}
+                  <svg viewBox="0 0 160 120" className="w-40 h-28 text-foreground/70 shrink-0">
+                    {/* mặt cắt: hình donut chiếu cạnh */}
+                    <ellipse cx="80" cy="60" rx="60" ry="38" fill="none" stroke="currentColor" strokeWidth="2" />
+                    <ellipse cx="80" cy="60" rx="28" ry="18" fill="none" stroke="currentColor" strokeWidth="2" />
+                    {/* Ni vòng = đường kính trong */}
+                    <line x1="52" y1="60" x2="108" y2="60" stroke="#c0954c" strokeWidth="1.5" strokeDasharray="3 2" />
+                    <text x="80" y="56" textAnchor="middle" fontSize="9" fill="#c0954c">Ni</text>
+                    {/* Bản vòng = trên-dưới */}
+                    <line x1="20" y1="22" x2="20" y2="98" stroke="#2A7A2A" strokeWidth="1.5" strokeDasharray="3 2" />
+                    <text x="14" y="62" textAnchor="end" fontSize="9" fill="#2A7A2A">Bản</text>
+                    {/* Chột = độ dày thành */}
+                    <line x1="108" y1="60" x2="140" y2="60" stroke="#a04848" strokeWidth="1.5" strokeDasharray="3 2" />
+                    <text x="124" y="56" textAnchor="middle" fontSize="9" fill="#a04848">Chột</text>
+                  </svg>
+                  <ul className="text-xs md:text-sm text-foreground/80 space-y-1.5 flex-1 min-w-[180px]">
+                    <li><strong className="text-foreground">Ni vòng</strong> = đường kính trong (inner diameter).</li>
+                    <li><strong className="text-foreground">Chột</strong> = khoảng cách từ thành trong đến thành ngoài (độ dày thành).</li>
+                    <li><strong className="text-foreground">Bản vòng</strong> = khoảng cách từ mép trên đến mép dưới (chiều rộng thân vòng).</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           )}
 
