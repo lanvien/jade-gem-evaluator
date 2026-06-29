@@ -131,7 +131,7 @@ export const questions: Question[] = [
     category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
     type: "pattern-structure",
     title: "2. Kiểm tra Họa Tiết & Cấu Trúc (Soi đèn)",
-    hint: "Bấm vào từng biểu tượng để xem mô tả phong thuỷ — thẩm mỹ.",
+    hint: "Bấm vào (i) để xem thêm thông tin…",
     options: [],
   },
 
