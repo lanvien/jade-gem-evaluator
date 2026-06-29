@@ -1,20 +1,57 @@
 import { useRef, useState, useEffect } from "react";
 
-const COLORS = [
-  { key: "de_vuong_luc",  label: "Lục Đế Vương", hex: "#2A7A2A" },
-  { key: "xanh_cay",      label: "Lục Cay",       hex: "#3DAA3D" },
-  { key: "xanh_ngot",     label: "Lục Ngọt",      hex: "#6DC46D" },
-  { key: "dau_luc",       label: "Đậu Lục",       hex: "#A8CCA8" },
-  { key: "tu_la_lan",     label: "Tử La Lan",     hex: "#9B45C8" },
-  { key: "tim_ca",        label: "Tím Cà",        hex: "#7B3F9E" },
-  { key: "tim_lam",       label: "Tím Lam",       hex: "#6060CC" },
-  { key: "lam",           label: "Lam",           hex: "#4A90D9" },
-  { key: "vang",          label: "Vàng",          hex: "#E8B84B" },
-  { key: "hong_phi",      label: "Hồng Phỉ",      hex: "#E85D7A" },
-  { key: "den",           label: "Đen",           hex: "#2A2A2A" },
-  { key: "trang",         label: "Trắng",         hex: "#F5F0E8" },
-  { key: "xam",           label: "Xám",           hex: "#9E9E9E" },
+// 22 màu chuẩn, chia 5 nhóm
+const COLOR_GROUPS: { group: string; items: { key: string; label: string; hex: string }[] }[] = [
+  {
+    group: "Lục",
+    items: [
+      { key: "de_vuong_luc",    label: "Đế Vương Lục",    hex: "#1a5c2a" },
+      { key: "chinh_duong_luc", label: "Chính Dương Lục", hex: "#2d7a3a" },
+      { key: "xanh_cay",        label: "Xanh Cay",        hex: "#1e6b30" },
+      { key: "xanh_ngot",       label: "Xanh Ngọt",       hex: "#4a9e5c" },
+      { key: "luc_tao",         label: "Lục Táo",         hex: "#6ab87a" },
+      { key: "dau_luc",         label: "Đậu Lục",         hex: "#8bc99a" },
+      { key: "thanh_thuy_luc",  label: "Thanh Thủy Lục",  hex: "#7ab5a8" },
+      { key: "xanh_dau",        label: "Xanh Dầu",        hex: "#3d6b58" },
+      { key: "hoi_luc",         label: "Hồi Lục",         hex: "#8aaa94" },
+    ],
+  },
+  {
+    group: "Tử",
+    items: [
+      { key: "tu_la_lan", label: "Tử La Lan", hex: "#b088c4" },
+      { key: "tim_ca",    label: "Tím Cà",    hex: "#7a4fa0" },
+      { key: "tim_lam",   label: "Tím Lam",   hex: "#7080c0" },
+    ],
+  },
+  {
+    group: "Lam",
+    items: [
+      { key: "lam_thien_khong", label: "Lam Thiên Không", hex: "#4a7fc4" },
+      { key: "lam_thanh",       label: "Lam Thanh",       hex: "#7aaad4" },
+      { key: "lao_lam_thuy",    label: "Lão Lam Thủy",    hex: "#6090a8" },
+    ],
+  },
+  {
+    group: "Hồng / Hoàng",
+    items: [
+      { key: "hong_phi",       label: "Hồng Phỉ",       hex: "#c45a3a" },
+      { key: "hoang_tong_phi", label: "Hoàng Tông Phỉ", hex: "#c89040" },
+    ],
+  },
+  {
+    group: "Bạch hắc sắc",
+    items: [
+      { key: "mac_thuy",          label: "Mặc Thúy",          hex: "#1a1a2e" },
+      { key: "bach_nguyet_quang", label: "Bạch Nguyệt Quang", hex: "#f0ece4" },
+      { key: "trang_chao",        label: "Trắng Cháo",        hex: "#e8e2d8" },
+      { key: "ga_den",            label: "Gà Đen",            hex: "#c8c0b0" },
+      { key: "xam",               label: "Xám",               hex: "#a0a0a0" },
+    ],
+  },
 ];
+
+const COLORS = COLOR_GROUPS.flatMap((g) => g.items);
 
 const BRUSH_SIZES = [
   { label: "Chấm nhỏ", size: 12 },
@@ -23,10 +60,12 @@ const BRUSH_SIZES = [
 ];
 
 const COLOR_SCORE: Record<string, number> = {
-  de_vuong_luc: 100, xanh_cay: 92, xanh_ngot: 80, dau_luc: 45,
+  de_vuong_luc: 100, chinh_duong_luc: 95, xanh_cay: 92, xanh_ngot: 80,
+  luc_tao: 70, dau_luc: 45, thanh_thuy_luc: 65, xanh_dau: 55, hoi_luc: 40,
   tu_la_lan: 90, tim_ca: 82, tim_lam: 65,
-  lam: 75, vang: 60, hong_phi: 72,
-  den: 40, trang: 10, xam: 8,
+  lam_thien_khong: 75, lam_thanh: 60, lao_lam_thuy: 55,
+  hong_phi: 72, hoang_tong_phi: 68,
+  mac_thuy: 40, bach_nguyet_quang: 20, trang_chao: 15, ga_den: 12, xam: 8,
 };
 
 export interface JadeCanvasResult {
@@ -145,7 +184,7 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
     ctx.fillRect(0, 0, SIZE, SIZE);
     drawRingOutline(ctx);
     setHistory([]);
-    const empty: JadeCanvasResult = { baseColors: ["trang"], colorLayout: "solid", topColor: "trang" };
+    const empty: JadeCanvasResult = { baseColors: ["trang_chao"], colorLayout: "solid", topColor: "trang_chao" };
     setAnalysis(empty);
     onChange(empty);
   }
@@ -184,7 +223,7 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
     }
 
     if (totalColored < 50) {
-      const empty: JadeCanvasResult = { baseColors: ["trang"], colorLayout: "solid", topColor: "trang" };
+      const empty: JadeCanvasResult = { baseColors: ["trang_chao"], colorLayout: "solid", topColor: "trang_chao" };
       setAnalysis(empty);
       onChange(empty);
       return;
@@ -216,98 +255,135 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
   const topScore = analysis ? (COLOR_SCORE[analysis.topColor] ?? 0) : 0;
 
   return (
-    <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
-      <div>
-        <canvas
-          ref={canvasRef}
-          width={SIZE}
-          height={SIZE}
-          style={{ borderRadius: 8, touchAction: "none", cursor: "crosshair",
-            width: "min(260px, 90vw)", height: "min(260px, 90vw)" }}
-          onMouseDown={onStart}
-          onMouseMove={onMove}
-          onMouseUp={onEnd}
-          onMouseLeave={onEnd}
-          onTouchStart={onStart}
-          onTouchMove={onMove}
-          onTouchEnd={onEnd}
-        />
-        <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 4 }}>
-          Click hoặc kéo để tô màu lên vòng
-        </p>
-      </div>
-
-      <div style={{ flex: 1, minWidth: 200 }}>
-        <p style={{ fontWeight: 500, marginBottom: 6 }}>Kích thước cọ</p>
-        <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-          {BRUSH_SIZES.map(b => (
-            <button key={b.label} type="button"
-              onClick={() => setBrushSize(b)}
-              style={{
-                padding: "6px 12px", borderRadius: 8, border: "1.5px solid",
-                borderColor: brushSize.label === b.label ? "#2A7A2A" : "#ccc",
-                background: brushSize.label === b.label ? "#E8F5E8" : "white",
-                fontWeight: brushSize.label === b.label ? 500 : 400,
-                cursor: "pointer", fontSize: 13,
-              }}>
-              {b.label}
-            </button>
-          ))}
+    <div className="space-y-5">
+      {/* Hàng 1: Canvas + công cụ cọ */}
+      <div className="flex gap-6 flex-wrap items-start">
+        <div>
+          <canvas
+            ref={canvasRef}
+            width={SIZE}
+            height={SIZE}
+            style={{
+              borderRadius: 8, touchAction: "none", cursor: "crosshair",
+              width: "min(260px, 90vw)", height: "min(260px, 90vw)",
+            }}
+            onMouseDown={onStart}
+            onMouseMove={onMove}
+            onMouseUp={onEnd}
+            onMouseLeave={onEnd}
+            onTouchStart={onStart}
+            onTouchMove={onMove}
+            onTouchEnd={onEnd}
+          />
+          <p style={{ textAlign: "center", fontSize: 12, color: "#888", marginTop: 4 }}>
+            Click hoặc kéo để tô màu lên vòng
+          </p>
         </div>
 
-        <p style={{ fontWeight: 500, marginBottom: 6 }}>Chọn màu</p>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 16 }}>
-          {COLORS.map(c => (
-            <button key={c.key} type="button" onClick={() => setSelectedColor(c)}
-              title={c.label}
-              style={{
-                display: "flex", flexDirection: "column", alignItems: "center",
-                gap: 4, padding: "8px 4px", borderRadius: 10,
-                border: selectedColor.key === c.key ? "2.5px solid #2A7A2A" : "1.5px solid #ddd",
-                background: selectedColor.key === c.key ? "#E8F5E8" : "white",
-                cursor: "pointer",
-              }}>
-              <div style={{ width: 32, height: 32, borderRadius: 6,
-                background: c.hex, border: "1px solid #ccc" }} />
-              <span style={{ fontSize: 10, color: "#555", textAlign: "center", lineHeight: 1.2 }}>
-                {c.label}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-          <button type="button" onClick={undo} style={{ flex: 1, padding: "8px", borderRadius: 8,
-            border: "1.5px solid #ddd", background: "white", cursor: "pointer" }}>
-            ↩ Xóa bước
-          </button>
-          <button type="button" onClick={clear} style={{ flex: 1, padding: "8px", borderRadius: 8,
-            border: "1.5px solid #ddd", background: "white", cursor: "pointer" }}>
-            🗑 Xóa sạch
-          </button>
-        </div>
-
-        {analysis && (
-          <div style={{ background: "#F9F6F0", borderRadius: 10, padding: 14, fontSize: 13 }}>
-            <p style={{ fontWeight: 500, marginBottom: 8 }}>Phân tích màu sắc</p>
-            <Row label="Màu đắt nhất" value={COLORS.find(c => c.key === analysis.topColor)?.label ?? "—"} />
-            <Row label="Điểm Base Hue" value={topScore > 0 ? String(topScore) : "—"} />
-            <Row label="Layout tự phát hiện" value={LAYOUT_LABEL[analysis.colorLayout] ?? "—"} />
-            <Row label="Màu tìm thấy" value={analysis.baseColors
-              .map(k => COLORS.find(c => c.key === k)?.label ?? k).join(", ")} />
+        <div className="flex-1 min-w-[180px] space-y-3">
+          <div>
+            <p className="font-medium mb-1.5 text-sm">Kích thước cọ</p>
+            <div className="flex gap-2 flex-wrap">
+              {BRUSH_SIZES.map((b) => (
+                <button
+                  key={b.label}
+                  type="button"
+                  onClick={() => setBrushSize(b)}
+                  className="px-3 py-1.5 rounded-lg border-[1.5px] text-sm transition-colors"
+                  style={{
+                    borderColor: brushSize.label === b.label ? "#2A7A2A" : "#ccc",
+                    background: brushSize.label === b.label ? "#E8F5E8" : "white",
+                    fontWeight: brushSize.label === b.label ? 500 : 400,
+                  }}
+                >
+                  {b.label}
+                </button>
+              ))}
+            </div>
           </div>
-        )}
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={undo}
+              className="flex-1 py-2 rounded-lg border-[1.5px] border-border bg-card text-sm hover:bg-muted transition-colors"
+            >
+              ↩ Xóa bước
+            </button>
+            <button
+              type="button"
+              onClick={clear}
+              className="flex-1 py-2 rounded-lg border-[1.5px] border-border bg-card text-sm hover:bg-muted transition-colors"
+            >
+              🗑 Xóa sạch
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Hàng 2: Lưới màu chia 5 nhóm */}
+      <div className="space-y-4">
+        {COLOR_GROUPS.map((g) => (
+          <div key={g.group}>
+            <p className="text-sm font-semibold text-foreground/80 mb-2">{g.group}</p>
+            <div
+              className="grid gap-2"
+              style={{ gridTemplateColumns: "repeat(auto-fill, minmax(76px, 1fr))" }}
+            >
+              {g.items.map((c) => {
+                const active = selectedColor.key === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    type="button"
+                    onClick={() => setSelectedColor(c)}
+                    title={c.label}
+                    className="flex flex-col items-center gap-1 p-2 rounded-lg cursor-pointer transition-colors"
+                    style={{
+                      border: active ? "2.5px solid #2A7A2A" : "1.5px solid #ddd",
+                      background: active ? "#E8F5E8" : "white",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 32, height: 32, borderRadius: 6,
+                        background: c.hex, border: "1px solid #ccc",
+                      }}
+                    />
+                    <span className="text-[10px] text-foreground/70 text-center leading-tight">
+                      {c.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Hàng 3: Kết quả phân tích (dưới lưới màu, KHÔNG còn tiêu đề "Phân tích màu sắc") */}
+      {analysis && (
+        <div className="bg-[#F9F6F0] rounded-xl p-4 text-sm">
+          <Row label="Màu đắt nhất" value={COLORS.find((c) => c.key === analysis.topColor)?.label ?? "—"} />
+          <Row label="Điểm Base Hue" value={topScore > 0 ? String(topScore) : "—"} />
+          <Row label="Layout tự phát hiện" value={LAYOUT_LABEL[analysis.colorLayout] ?? "—"} />
+          <Row
+            label="Màu tìm thấy"
+            value={analysis.baseColors
+              .map((k) => COLORS.find((c) => c.key === k)?.label ?? k)
+              .join(", ")}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between",
-      padding: "4px 0", borderBottom: "1px solid #EEE" }}>
-      <span style={{ color: "#666" }}>{label}</span>
-      <span style={{ fontWeight: 500 }}>{value}</span>
+    <div className="flex justify-between py-1 border-b border-[#EEE] last:border-0">
+      <span className="text-foreground/60">{label}</span>
+      <span className="font-medium text-foreground">{value}</span>
     </div>
   );
 }
