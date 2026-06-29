@@ -512,10 +512,33 @@ const Assessment = () => {
               {questionNumber}/{TOTAL}
             </span>
             <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground">{q.title}</h3>
-            <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-              <Lightbulb className="h-4 w-4 text-gold" />
-              {q.hint}
-            </p>
+            {q.hint && (
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                <Lightbulb className="h-4 w-4 text-gold" />
+                {q.hint}
+              </p>
+            )}
+            {/* SVG minh hoạ Q3 — vòng nhìn từ nhiều góc */}
+            {q.id === 3 && (
+              <div className="flex justify-center gap-3 pt-2">
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <ellipse cx="32" cy="32" rx="24" ry="24" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <ellipse cx="32" cy="32" rx="14" ry="14" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <ellipse cx="32" cy="32" rx="24" ry="14" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <ellipse cx="32" cy="32" rx="14" ry="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <ellipse cx="32" cy="32" rx="24" ry="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <ellipse cx="32" cy="32" rx="14" ry="4" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <path d="M 8 32 Q 32 8 56 32" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <path d="M 14 32 Q 32 18 50 32" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-border" />
@@ -526,13 +549,18 @@ const Assessment = () => {
               <JadeCanvas
                 onChange={(r: JadeCanvasResult) => {
                   const HEX: Record<string, string> = {
-                    de_vuong_luc: "#2A7A2A", xanh_cay: "#3DAA3D", xanh_ngot: "#6DC46D",
-                    dau_luc: "#A8CCA8", tu_la_lan: "#9B45C8", tim_ca: "#7B3F9E",
-                    tim_lam: "#6060CC", lam: "#4A90D9", vang: "#E8B84B",
-                    hong_phi: "#E85D7A", den: "#2A2A2A", trang: "#F5F0E8", xam: "#9E9E9E",
+                    de_vuong_luc: "#1a5c2a", chinh_duong_luc: "#2d7a3a",
+                    xanh_cay: "#1e6b30", xanh_ngot: "#4a9e5c",
+                    luc_tao: "#6ab87a", dau_luc: "#8bc99a",
+                    thanh_thuy_luc: "#7ab5a8", xanh_dau: "#3d6b58", hoi_luc: "#8aaa94",
+                    tu_la_lan: "#b088c4", tim_ca: "#7a4fa0", tim_lam: "#7080c0",
+                    lam_thien_khong: "#4a7fc4", lam_thanh: "#7aaad4", lao_lam_thuy: "#6090a8",
+                    hong_phi: "#c45a3a", hoang_tong_phi: "#c89040",
+                    mac_thuy: "#1a1a2e", bach_nguyet_quang: "#f0ece4",
+                    trang_chao: "#e8e2d8", ga_den: "#c8c0b0", xam: "#a0a0a0",
                   };
                   const fill = Array.from({ length: 12 }, (_, i) => {
-                    const key = r.baseColors[i % r.baseColors.length] ?? "trang";
+                    const key = r.baseColors[i % r.baseColors.length] ?? "trang_chao";
                     return HEX[key] ?? "#e5e7eb";
                   });
                   setRingColors(fill);
@@ -573,6 +601,33 @@ const Assessment = () => {
                   )}
                 </div>
               ))}
+
+              {/* Khối giải thích thuật ngữ + sơ đồ mặt cắt */}
+              <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
+                <p className="text-sm font-semibold text-foreground">Gợi ý: Dùng thước kẹp (tốt nhất)</p>
+                <div className="flex items-start gap-4 flex-wrap">
+                  {/* Sơ đồ mặt cắt vòng */}
+                  <svg viewBox="0 0 160 120" className="w-40 h-28 text-foreground/70 shrink-0">
+                    {/* mặt cắt: hình donut chiếu cạnh */}
+                    <ellipse cx="80" cy="60" rx="60" ry="38" fill="none" stroke="currentColor" strokeWidth="2" />
+                    <ellipse cx="80" cy="60" rx="28" ry="18" fill="none" stroke="currentColor" strokeWidth="2" />
+                    {/* Ni vòng = đường kính trong */}
+                    <line x1="52" y1="60" x2="108" y2="60" stroke="#c0954c" strokeWidth="1.5" strokeDasharray="3 2" />
+                    <text x="80" y="56" textAnchor="middle" fontSize="9" fill="#c0954c">Ni</text>
+                    {/* Bản vòng = trên-dưới */}
+                    <line x1="20" y1="22" x2="20" y2="98" stroke="#2A7A2A" strokeWidth="1.5" strokeDasharray="3 2" />
+                    <text x="14" y="62" textAnchor="end" fontSize="9" fill="#2A7A2A">Bản</text>
+                    {/* Chột = độ dày thành */}
+                    <line x1="108" y1="60" x2="140" y2="60" stroke="#a04848" strokeWidth="1.5" strokeDasharray="3 2" />
+                    <text x="124" y="56" textAnchor="middle" fontSize="9" fill="#a04848">Chột</text>
+                  </svg>
+                  <ul className="text-xs md:text-sm text-foreground/80 space-y-1.5 flex-1 min-w-[180px]">
+                    <li><strong className="text-foreground">Ni vòng</strong> = đường kính trong (inner diameter).</li>
+                    <li><strong className="text-foreground">Chột</strong> = khoảng cách từ thành trong đến thành ngoài (độ dày thành).</li>
+                    <li><strong className="text-foreground">Bản vòng</strong> = khoảng cách từ mép trên đến mép dưới (chiều rộng thân vòng).</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           )}
 
@@ -622,7 +677,7 @@ const Assessment = () => {
             </div>
           )}
 
-          {/* Card Style */}
+          {/* Card Style — bản đũa / hẹ / vuông / khắc hoa */}
           {q.type === "card-style" && (
             <div className="grid grid-cols-2 gap-4">
               {q.options.map((opt) => (
@@ -635,7 +690,35 @@ const Assessment = () => {
                       : "border-border bg-card hover:border-gold/50"
                   }`}
                 >
-                  <div className="w-16 h-16 mx-auto rounded-full bg-muted mb-3" />
+                  {/* SVG minh hoạ mặt cắt */}
+                  <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center text-foreground/70">
+                    {opt.id === "10a" && (
+                      // Bản đũa — tròn đều
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <circle cx="32" cy="32" r="22" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    )}
+                    {opt.id === "10b" && (
+                      // Bản hẹ/dẹt — vòm ngoài, phẳng trong
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <path d="M 10 40 Q 32 14 54 40 L 54 44 L 10 44 Z" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    )}
+                    {opt.id === "10c" && (
+                      // Bản vuông — cạnh sắc
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <rect x="12" y="16" width="40" height="32" rx="2" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    )}
+                    {opt.id === "10d" && (
+                      // Khắc hoa — vòm có hoa văn
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <path d="M 10 40 Q 32 14 54 40 L 54 44 L 10 44 Z" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                        <path d="M 22 30 Q 26 26 30 30 Q 34 34 38 30 Q 42 26 46 30" fill="none" stroke="#c0954c" strokeWidth="1.5" />
+                        <circle cx="32" cy="36" r="1.5" fill="#c0954c" />
+                      </svg>
+                    )}
+                  </div>
                   <p className="text-sm font-bold text-foreground">{opt.label}</p>
                   {opt.description && (
                     <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
@@ -647,11 +730,24 @@ const Assessment = () => {
 
           {/* Pattern Structure */}
           {q.type === "pattern-structure" && (
-            <PatternStructure
-              value={patternData}
-              onChange={setPatternData}
-              surfaceSmooth={isSurfaceSmooth}
-            />
+            <div className="space-y-3">
+              {/* Hint icon ngón tay chỉ tới (i) */}
+              <div className="flex items-center justify-center gap-2 text-xs text-foreground/60 italic">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-gold" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 11V6a2 2 0 1 1 4 0v5" />
+                  <path d="M13 11V4a2 2 0 1 1 4 0v9" />
+                  <path d="M17 13V6a2 2 0 1 1 4 0v10a6 6 0 0 1-6 6H9a6 6 0 0 1-5-2.6L1 14l2-2 4 3V6a2 2 0 1 1 4 0v5" />
+                </svg>
+                <span>Bấm vào biểu tượng</span>
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-gold/60 text-gold font-bold text-[10px]">i</span>
+                <span>để xem thông tin chi tiết</span>
+              </div>
+              <PatternStructure
+                value={patternData}
+                onChange={setPatternData}
+                surfaceSmooth={isSurfaceSmooth}
+              />
+            </div>
           )}
 
           {/* Conditional text */}

@@ -94,7 +94,7 @@ export const questions: Question[] = [
     category: "I. CỐT NGỌC (Kết cấu & Độ trong)",
     type: "single-choice",
     title: "Phần chất ngọc trong nhất/đẹp nhất bạn vừa đánh giá ở trên chiếm khoảng bao nhiêu diện tích chiếc vòng?",
-    hint: "Xoay vòng 360° quan sát tổng thể.",
+    hint: "",
     options: [
       { id: "3a", label: "[A] Đều tăm tắp 100%", description: "Cả vòng đều đẹp như vậy.", multiplier: 1.0 },
       { id: "3b", label: "[B] Đa số (Hơn 70%)", description: "Phần lớn chiếc vòng đạt chất lượng đó, còn lại đục hơn một chút.", multiplier: 0.85 },
@@ -131,7 +131,7 @@ export const questions: Question[] = [
     category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
     type: "pattern-structure",
     title: "2. Kiểm tra Họa Tiết & Cấu Trúc (Soi đèn)",
-    hint: "Bấm vào từng biểu tượng để xem mô tả phong thuỷ — thẩm mỹ.",
+    hint: "Bấm vào (i) để xem thêm thông tin…",
     options: [],
   },
 
@@ -158,7 +158,7 @@ export const questions: Question[] = [
     hint: "Dùng thước kẹp đo cả 3 thông số: đường kính trong, chiều rộng bản và độ dày.",
     options: [],
     inputFields: [
-      { key: 9, label: "Ni vòng (đường kính trong)", unit: "mm", min: 47, max: 65, step: 0.5, helpText: "Đo lòng vòng. Nữ thường 52–58mm." },
+      { key: 9, label: "Ni vòng (đường kính trong)", unit: "mm", min: 47, max: 65, step: 0.5 },
       { key: 13, label: "Chột (chiều rộng bản)", unit: "mm", min: 6, max: 22, step: 0.5, helpText: "Bề ngang của bản vòng nhìn từ trên xuống." },
       { key: 11, label: "Độ dày bản vòng", unit: "mm", min: 6, max: 18, step: 0.5, helpText: "Đo cạnh dày nhất của thân vòng." },
     ],
