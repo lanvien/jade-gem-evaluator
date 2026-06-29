@@ -677,7 +677,7 @@ const Assessment = () => {
             </div>
           )}
 
-          {/* Card Style */}
+          {/* Card Style — bản đũa / hẹ / vuông / khắc hoa */}
           {q.type === "card-style" && (
             <div className="grid grid-cols-2 gap-4">
               {q.options.map((opt) => (
@@ -690,7 +690,35 @@ const Assessment = () => {
                       : "border-border bg-card hover:border-gold/50"
                   }`}
                 >
-                  <div className="w-16 h-16 mx-auto rounded-full bg-muted mb-3" />
+                  {/* SVG minh hoạ mặt cắt */}
+                  <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center text-foreground/70">
+                    {opt.id === "10a" && (
+                      // Bản đũa — tròn đều
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <circle cx="32" cy="32" r="22" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    )}
+                    {opt.id === "10b" && (
+                      // Bản hẹ/dẹt — vòm ngoài, phẳng trong
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <path d="M 10 40 Q 32 14 54 40 L 54 44 L 10 44 Z" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    )}
+                    {opt.id === "10c" && (
+                      // Bản vuông — cạnh sắc
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <rect x="12" y="16" width="40" height="32" rx="2" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                      </svg>
+                    )}
+                    {opt.id === "10d" && (
+                      // Khắc hoa — vòm có hoa văn
+                      <svg viewBox="0 0 64 64" className="w-16 h-16">
+                        <path d="M 10 40 Q 32 14 54 40 L 54 44 L 10 44 Z" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
+                        <path d="M 22 30 Q 26 26 30 30 Q 34 34 38 30 Q 42 26 46 30" fill="none" stroke="#c0954c" strokeWidth="1.5" />
+                        <circle cx="32" cy="36" r="1.5" fill="#c0954c" />
+                      </svg>
+                    )}
+                  </div>
                   <p className="text-sm font-bold text-foreground">{opt.label}</p>
                   {opt.description && (
                     <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
@@ -702,11 +730,24 @@ const Assessment = () => {
 
           {/* Pattern Structure */}
           {q.type === "pattern-structure" && (
-            <PatternStructure
-              value={patternData}
-              onChange={setPatternData}
-              surfaceSmooth={isSurfaceSmooth}
-            />
+            <div className="space-y-3">
+              {/* Hint icon ngón tay chỉ tới (i) */}
+              <div className="flex items-center justify-center gap-2 text-xs text-foreground/60 italic">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-gold" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 11V6a2 2 0 1 1 4 0v5" />
+                  <path d="M13 11V4a2 2 0 1 1 4 0v9" />
+                  <path d="M17 13V6a2 2 0 1 1 4 0v10a6 6 0 0 1-6 6H9a6 6 0 0 1-5-2.6L1 14l2-2 4 3V6a2 2 0 1 1 4 0v5" />
+                </svg>
+                <span>Bấm vào biểu tượng</span>
+                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-gold/60 text-gold font-bold text-[10px]">i</span>
+                <span>để xem thông tin chi tiết</span>
+              </div>
+              <PatternStructure
+                value={patternData}
+                onChange={setPatternData}
+                surfaceSmooth={isSurfaceSmooth}
+              />
+            </div>
           )}
 
           {/* Conditional text */}
