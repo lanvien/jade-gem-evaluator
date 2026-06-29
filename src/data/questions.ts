@@ -158,7 +158,7 @@ export const questions: Question[] = [
     hint: "Dùng thước kẹp đo cả 3 thông số: đường kính trong, chiều rộng bản và độ dày.",
     options: [],
     inputFields: [
-      { key: 9, label: "Ni vòng (đường kính trong)", unit: "mm", min: 47, max: 65, step: 0.5, helpText: "Đo lòng vòng. Nữ thường 52–58mm." },
+      { key: 9, label: "Ni vòng (đường kính trong)", unit: "mm", min: 47, max: 65, step: 0.5 },
       { key: 13, label: "Chột (chiều rộng bản)", unit: "mm", min: 6, max: 22, step: 0.5, helpText: "Bề ngang của bản vòng nhìn từ trên xuống." },
       { key: 11, label: "Độ dày bản vòng", unit: "mm", min: 6, max: 18, step: 0.5, helpText: "Đo cạnh dày nhất của thân vòng." },
     ],
