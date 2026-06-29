@@ -512,10 +512,33 @@ const Assessment = () => {
               {questionNumber}/{TOTAL}
             </span>
             <h3 className="font-serif text-xl md:text-2xl font-bold text-foreground">{q.title}</h3>
-            <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
-              <Lightbulb className="h-4 w-4 text-gold" />
-              {q.hint}
-            </p>
+            {q.hint && (
+              <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                <Lightbulb className="h-4 w-4 text-gold" />
+                {q.hint}
+              </p>
+            )}
+            {/* SVG minh hoạ Q3 — vòng nhìn từ nhiều góc */}
+            {q.id === 3 && (
+              <div className="flex justify-center gap-3 pt-2">
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <ellipse cx="32" cy="32" rx="24" ry="24" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <ellipse cx="32" cy="32" rx="14" ry="14" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <ellipse cx="32" cy="32" rx="24" ry="14" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <ellipse cx="32" cy="32" rx="14" ry="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <ellipse cx="32" cy="32" rx="24" ry="8" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <ellipse cx="32" cy="32" rx="14" ry="4" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+                <svg viewBox="0 0 64 64" className="w-14 h-14 text-foreground/60">
+                  <path d="M 8 32 Q 32 8 56 32" fill="none" stroke="currentColor" strokeWidth="2" />
+                  <path d="M 14 32 Q 32 18 50 32" fill="none" stroke="currentColor" strokeWidth="2" />
+                </svg>
+              </div>
+            )}
           </div>
 
           <div className="border-t border-border" />
