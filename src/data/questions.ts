@@ -94,7 +94,7 @@ export const questions: Question[] = [
     category: "I. CỐT NGỌC (Kết cấu & Độ trong)",
     type: "single-choice",
     title: "Phần chất ngọc trong nhất/đẹp nhất bạn vừa đánh giá ở trên chiếm khoảng bao nhiêu diện tích chiếc vòng?",
-    hint: "Xoay vòng 360° quan sát tổng thể.",
+    hint: "",
     options: [
       { id: "3a", label: "[A] Đều tăm tắp 100%", description: "Cả vòng đều đẹp như vậy.", multiplier: 1.0 },
       { id: "3b", label: "[B] Đa số (Hơn 70%)", description: "Phần lớn chiếc vòng đạt chất lượng đó, còn lại đục hơn một chút.", multiplier: 0.85 },
