@@ -64,6 +64,10 @@ export default function Results() {
     () => buildSegments(surveyData.ringColors || [], surveyData.colorTones || {}),
     [surveyData],
   );
+  const canvasSnapshot = useMemo(
+    () => localStorage.getItem("jade-canvas-snapshot"),
+    [],
+  );
   const aiCtx = useMemo(() => {
     try { return JSON.parse(localStorage.getItem("jade-ai-vision-ctx") || "{}"); }
     catch { return {}; }
@@ -170,12 +174,21 @@ export default function Results() {
             />
             <div className="aspect-square w-full rounded-lg border border-gold/40 bg-gradient-to-br from-card to-background p-6 md:p-8 relative">
               <div className="w-full h-full flex items-center justify-center">
-                <JadeRingMini
-                  segments={segments}
-                  size={300}
-                  hasPhieuHoa={!!aiCtx?.hasPhieuHoa}
-                  isMuna={!!aiCtx?.isMuna}
-                />
+                {canvasSnapshot ? (
+                  <img
+                    src={canvasSnapshot}
+                    alt="Vòng ngọc bạn đã vẽ"
+                    className="max-w-full max-h-full object-contain rounded-full"
+                    style={{ width: 300, height: 300 }}
+                  />
+                ) : (
+                  <JadeRingMini
+                    segments={segments}
+                    size={300}
+                    hasPhieuHoa={!!aiCtx?.hasPhieuHoa}
+                    isMuna={!!aiCtx?.isMuna}
+                  />
+                )}
               </div>
               <Camera className="absolute bottom-3 right-3 h-5 w-5 text-foreground/30" />
             </div>
