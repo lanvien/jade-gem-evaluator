@@ -564,6 +564,7 @@ const Assessment = () => {
                     return HEX[key] ?? "#e5e7eb";
                   });
                   setRingColors(fill);
+                  if (r.snapshot) localStorage.setItem("jade-canvas-snapshot", r.snapshot);
                 }}
               />
               <ColorRingAlerts colors={ringColors} />
