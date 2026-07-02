@@ -7,6 +7,10 @@ import q2_bang from "@/assets/jade/q2_bang.png";
 import q2_nbang from "@/assets/jade/q2_nbang.png";
 import q5_san_lom from "@/assets/jade/q5_san_lom.png";
 import q5_vet_nut from "@/assets/jade/q5_vet_nut.png";
+import shape_dua from "@/assets/jade/shape_dua.png";
+import shape_he from "@/assets/jade/shape_he.png";
+import shape_vuong from "@/assets/jade/shape_vuong.png";
+import shape_khac_hoa from "@/assets/jade/shape_khac_hoa.png";
 
 export interface QuestionOption {
   id: string;
@@ -143,10 +147,10 @@ export const questions: Question[] = [
     title: "Kiểu dáng vòng ngọc?",
     hint: "So sánh mặt cắt ngang của vòng.",
     options: [
-      { id: "10a", label: "Bản đũa", description: "Thân tròn, nhỏ gọn" },
-      { id: "10b", label: "Bản hẹ", description: "Thân dẹp, bề mặt phẳng" },
-      { id: "10c", label: "Bản vuông", description: "Thân vuông vức, dày dặn" },
-      { id: "10d", label: "Khắc hoa", description: "Có hoa văn chạm khắc" },
+      { id: "10a", label: "Bản đũa", description: "Tròn đều, bo tròn toàn bộ các cạnh.", image: shape_dua },
+      { id: "10b", label: "Bản hẹ", description: "Mặt ngoài vòm, mặt trong phẳng hoặc cong rất nhẹ.", image: shape_he },
+      { id: "10c", label: "Bản vuông", description: "Vòng đúc vuông cạnh, dày dặn và cầm chắc tay.", image: shape_vuong },
+      { id: "10d", label: "Khắc hoa", description: "Vòng được chạm trổ hoa văn, long phụng chìm nổi tỉ mỉ.", image: shape_khac_hoa },
     ],
   },
   // MERGED: Ni + Chột + Dày in one step
