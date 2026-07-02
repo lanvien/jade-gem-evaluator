@@ -604,20 +604,20 @@ const Assessment = () => {
 
               {/* Khối giải thích thuật ngữ + sơ đồ mặt cắt */}
               <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 space-y-3">
-                <p className="text-sm font-semibold text-foreground">Gợi ý: Dùng thước kẹp (tốt nhất)</p>
-                <div className="flex items-start gap-4 flex-wrap">
+                <div className="text-sm text-foreground space-y-1">
+                  <p className="font-semibold">Gợi ý: Dùng thước kẹp (tốt nhất)</p>
+                  <p>Hoặc đo chu vi bằng thước dây, rồi chia cho 3.14 (để đo ni vòng)</p>
+                  <p>Hoặc dùng thước thẳng đặt ngang phần cần đo</p>
+                </div>
+                <div className="flex items-start gap-4 flex-wrap pt-2 border-t border-border/50">
                   {/* Sơ đồ mặt cắt vòng */}
                   <svg viewBox="0 0 160 120" className="w-40 h-28 text-foreground/70 shrink-0">
-                    {/* mặt cắt: hình donut chiếu cạnh */}
                     <ellipse cx="80" cy="60" rx="60" ry="38" fill="none" stroke="currentColor" strokeWidth="2" />
                     <ellipse cx="80" cy="60" rx="28" ry="18" fill="none" stroke="currentColor" strokeWidth="2" />
-                    {/* Ni vòng = đường kính trong */}
                     <line x1="52" y1="60" x2="108" y2="60" stroke="#c0954c" strokeWidth="1.5" strokeDasharray="3 2" />
                     <text x="80" y="56" textAnchor="middle" fontSize="9" fill="#c0954c">Ni</text>
-                    {/* Bản vòng = trên-dưới */}
                     <line x1="20" y1="22" x2="20" y2="98" stroke="#2A7A2A" strokeWidth="1.5" strokeDasharray="3 2" />
                     <text x="14" y="62" textAnchor="end" fontSize="9" fill="#2A7A2A">Bản</text>
-                    {/* Chột = độ dày thành */}
                     <line x1="108" y1="60" x2="140" y2="60" stroke="#a04848" strokeWidth="1.5" strokeDasharray="3 2" />
                     <text x="124" y="56" textAnchor="middle" fontSize="9" fill="#a04848">Chột</text>
                   </svg>
@@ -679,46 +679,32 @@ const Assessment = () => {
 
           {/* Card Style — bản đũa / hẹ / vuông / khắc hoa */}
           {q.type === "card-style" && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {q.options.map((opt) => (
                 <button
                   key={opt.id}
                   onClick={() => handleSelect(opt.id)}
-                  className={`rounded-xl border-2 p-5 text-center transition-all hover:shadow-md ${
+                  className={`rounded-xl border-2 p-4 text-left transition-all hover:shadow-md ${
                     selectedAnswer === opt.id
                       ? "border-gold bg-gold/10 shadow-md"
                       : "border-border bg-card hover:border-gold/50"
                   }`}
                 >
-                  {/* SVG minh hoạ mặt cắt */}
-                  <div className="w-16 h-16 mx-auto mb-3 flex items-center justify-center text-foreground/70">
-                    {opt.id === "10a" && (
-                      // Bản đũa — tròn đều
-                      <svg viewBox="0 0 64 64" className="w-16 h-16">
-                        <circle cx="32" cy="32" r="22" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
-                      </svg>
-                    )}
-                    {opt.id === "10b" && (
-                      // Bản hẹ/dẹt — vòm ngoài, phẳng trong
-                      <svg viewBox="0 0 64 64" className="w-16 h-16">
-                        <path d="M 10 40 Q 32 14 54 40 L 54 44 L 10 44 Z" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
-                      </svg>
-                    )}
-                    {opt.id === "10c" && (
-                      // Bản vuông — cạnh sắc
-                      <svg viewBox="0 0 64 64" className="w-16 h-16">
-                        <rect x="12" y="16" width="40" height="32" rx="2" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
-                      </svg>
-                    )}
-                    {opt.id === "10d" && (
-                      // Khắc hoa — vòm có hoa văn
-                      <svg viewBox="0 0 64 64" className="w-16 h-16">
-                        <path d="M 10 40 Q 32 14 54 40 L 54 44 L 10 44 Z" fill="#e6dcc8" stroke="currentColor" strokeWidth="2" />
-                        <path d="M 22 30 Q 26 26 30 30 Q 34 34 38 30 Q 42 26 46 30" fill="none" stroke="#c0954c" strokeWidth="1.5" />
-                        <circle cx="32" cy="36" r="1.5" fill="#c0954c" />
-                      </svg>
-                    )}
-                  </div>
+                  {opt.image && (
+                    <div
+                      className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group bg-muted/30 w-full"
+                      style={{ aspectRatio: "4 / 3" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
+                      }}
+                    >
+                      <img src={opt.image} alt={opt.label} className="object-cover w-full h-full" />
+                      <div className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <ZoomIn className="h-4 w-4 text-foreground" />
+                      </div>
+                    </div>
+                  )}
                   <p className="text-sm font-bold text-foreground">{opt.label}</p>
                   {opt.description && (
                     <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
