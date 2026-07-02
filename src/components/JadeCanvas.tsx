@@ -72,6 +72,7 @@ export interface JadeCanvasResult {
   baseColors: string[];
   colorLayout: "solid" | "hoa_bay" | "loang" | "multi";
   topColor: string;
+  snapshot?: string;
 }
 
 interface JadeCanvasProps {
