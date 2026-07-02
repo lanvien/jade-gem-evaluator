@@ -241,7 +241,8 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
     else if (topPct < 50) colorLayout = "loang";
     else colorLayout = "solid";
 
-    const result: JadeCanvasResult = { baseColors, colorLayout, topColor };
+    const snapshot = canvasRef.current!.toDataURL("image/png");
+    const result: JadeCanvasResult = { baseColors, colorLayout, topColor, snapshot };
     setAnalysis(result);
     onChange(result);
   }
