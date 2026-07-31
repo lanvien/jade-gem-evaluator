@@ -653,10 +653,12 @@ export function buildJadeInputFromSurvey(data: any): JadeInput {
     accentColors: [],
     toneLevel: mapTone(tones),
     valuableSegments,
-    ni: parseFloat(numberInputs[9]) || 56,
+    ni: data.ni ?? (parseFloat(numberInputs[9]) || 56),
     shape: mapShape(answers[10]),
-    chot: parseFloat(numberInputs[11]) || 8,
+    chot: data.chot ?? (parseFloat(numberInputs[11]) || 8),
     flaws: mapFlaws(answers, patternData),
+
+
     hasCertificate: legal === "12a",
     // MERGED fields — map từ survey data nếu có
     sellerRedFlags: data.sellerRedFlags ?? 0,
