@@ -351,8 +351,13 @@ export default function Results() {
 function computeResults(data: any) {
   const numberInputs = data.numberInputs || {};
 
-  const jadeInput = buildJadeInputFromSurvey(data);
+  const jadeInput = buildJadeInputFromSurvey({
+    ...data,
+    ni: parseFloat(data.numberInputs?.[9] || data.numberInputs?.[11]) || 56,
+    chot: parseFloat(data.numberInputs?.[11] || data.numberInputs?.[13]) || 8,
+  });
   const pricing = calculateJadePrice(jadeInput);
+
 
   let tierIndex = 0;
   if (pricing.qJade >= 92)      tierIndex = 4;
