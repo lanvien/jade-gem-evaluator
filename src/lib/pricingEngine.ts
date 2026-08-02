@@ -656,6 +656,7 @@ function mapBaseColor(ringColors: string[]): ColorName {
   }
   // Tím
   if (r > 100 && b > 100 && b > g + 20 && r > g + 10) return "Tử La Lan";
+  if (r > 80 && b > r && b > g && Math.abs(r - b) < 80 && g < b - 10) return "Tím Lam";
   // Lam
   if (b > r + 40 && b > g + 20) return "Lam Thiên Không";
   if (b > g + 20 && b > r) return "Lam Thanh";
