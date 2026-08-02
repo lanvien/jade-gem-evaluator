@@ -353,17 +353,24 @@ function computeResults(data: any) {
 
   const jadeInput = buildJadeInputFromSurvey({
     ...data,
-    ni: parseFloat(data.numberInputs?.[9] || data.numberInputs?.[11]) || 56,
-    chot: parseFloat(data.numberInputs?.[11] || data.numberInputs?.[13]) || 8,
+    ni: parseFloat(data.numberInputs?.[9]) || 56,    // key 9 = ni vòng
+    chot: parseFloat(data.numberInputs?.[11]) || 8,  // key 11 = chột
   });
   const pricing = calculateJadePrice(jadeInput);
 
+  const chungToTier: Record<string, number> = {
+    "Đậu thô": 0,
+    "Đậu mịn": 0,
+    "Nếp Mịn": 1,
+    "Nếp Hóa": 2,
+    "Nếp Băng": 3, 
+    "Băng": 3,
+    "Băng Thủy": 4,
+    "Thủy tinh": 4,
+};
+  };
 
-  let tierIndex = 0;
-  if (pricing.qJade >= 92)      tierIndex = 4;
-  else if (pricing.qJade >= 82) tierIndex = 3;
-  else if (pricing.qJade >= 70) tierIndex = 2;
-  else if (pricing.qJade >= 55) tierIndex = 1;
+  const tierIndex = chungToTier[jadeInput.chungPeak] ?? 0;
 
   const tier = TIERS[tierIndex];
 
@@ -393,7 +400,7 @@ function computeResults(data: any) {
   const quotes: Record<string, string> = {
     "thuong-tai": "Nhan sắc thanh tú, an phận thủ thường, phù hợp để đeo cày deadline mỗi ngày.",
     "quy-nhan":   "Ôn nhu hiền thục, sắc ngọc đoan trang — xứng danh người biết chọn ngọc.",
-    "phi-tan":    "Nhan sắc thanh tú, an phận thủ thường, phù hợp để đeo cày deadline mỗi ngày.",
+    "phi-tan":    "Sắc ngọc yêu kiều, phong thái kiêu sa — thu hút mọi ánh nhìn từ cái nhìn đầu tiên.",
     "quy-phi":    "Quý phái tựa ngọc trong sương, sắc đẹp khiến người ta phải ngoái nhìn.",
     "hoang-hau":  "Mẫu nghi thiên hạ, ngọc quý hiếm có — xứng danh bảo vật truyền đời.",
   };
