@@ -564,8 +564,17 @@ export function getPriceRangeLabel(result: PricingResult): string {
 // ─────────────────────────────────────────────
 
 function mapChung(ans: string | undefined): Chung {
-  if (ans === "1c") return "Nếp Băng";
-  if (ans === "1b") return "Nếp Mịn";
+  if (!ans) return "Đậu mịn";
+  if (ans === "1a") return "Đậu thô";
+  if (ans === "1b") return "Đậu mịn";
+  if (ans === "1c") return "Nếp Mịn";
+  if (ans === "1d") return "Nếp Hóa";
+  if (ans === "1e") return "Nếp Băng";
+  if (ans === "2a") return "Đậu thô";
+  if (ans === "2b") return "Đậu mịn";
+  if (ans === "2c") return "Nếp Mịn";
+  if (ans === "2d") return "Nếp Hóa";
+  if (ans === "2e") return "Nếp Băng";
   return "Đậu mịn";
 }
 
@@ -638,7 +647,7 @@ export function buildJadeInputFromSurvey(data: any): JadeInput {
   const patternData = data.patternData || {};
   const legal = data.legal || answers[12];
 
-  const chungPeak = mapChung(answers[1]);
+  const chungPeak = mapChung(answers[1] || answers[2]);  
   const coverage = mapCoverage(answers[3]);
   const chungBase: Chung = coverage >= 3 ? "Đậu mịn" : chungPeak;
 
@@ -657,8 +666,6 @@ export function buildJadeInputFromSurvey(data: any): JadeInput {
     shape: mapShape(answers[10]),
     chot: data.chot ?? (parseFloat(numberInputs[11]) || 8),
     flaws: mapFlaws(answers, patternData),
-
-
     hasCertificate: legal === "12a",
     // MERGED fields — map từ survey data nếu có
     sellerRedFlags: data.sellerRedFlags ?? 0,
