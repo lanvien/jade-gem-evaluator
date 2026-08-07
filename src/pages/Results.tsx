@@ -367,7 +367,6 @@ function computeResults(data: any) {
     "Băng": 3,
     "Băng Thủy": 4,
     "Thủy tinh": 4,
-};
   };
 
   const tierIndex = chungToTier[jadeInput.chungPeak] ?? 0;
