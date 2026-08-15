@@ -6,12 +6,16 @@
 // ─────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────
-export type Chung =
-  | "Đậu thô"
-  | "Đậu mịn"
-  | "Nếp Mịn"
-  | "Nếp Hóa"
-  | "Nếp Băng";
+import {
+  classifyChung,
+  FEATURES,
+  type ChungName,
+  type GrainCode,
+  type TranslucencyCode,
+} from "@/content/jadeContent";
+
+/** Chủng = 9 chủng v2 (nguồn duy nhất: jadeContent.CLASSIFICATION_MATRIX) */
+export type Chung = ChungName;
 
 export type ToneLevel = 1 | 2 | 3 | 4 | 5;
 
