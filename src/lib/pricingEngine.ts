@@ -6,12 +6,16 @@
 // ─────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────
-export type Chung =
-  | "Đậu thô"
-  | "Đậu mịn"
-  | "Nếp Mịn"
-  | "Nếp Hóa"
-  | "Nếp Băng";
+import {
+  classifyChung,
+  FEATURES,
+  type ChungName,
+  type GrainCode,
+  type TranslucencyCode,
+} from "@/content/jadeContent";
+
+/** Chủng = 9 chủng v2 (nguồn duy nhất: jadeContent.CLASSIFICATION_MATRIX) */
+export type Chung = ChungName;
 
 export type ToneLevel = 1 | 2 | 3 | 4 | 5;
 
@@ -99,36 +103,52 @@ export interface RadarData {
 // DICTIONARIES
 // ─────────────────────────────────────────────
 export const CHUNG_SCORE: Record<Chung, number> = {
-  "Đậu thô": 15,
-  "Đậu mịn": 28,
-  "Nếp Mịn": 58,   // mịn như sứ, underrated — nâng lên đúng vị trí
+  "Đậu": 12,
+  "Đậu Mịn": 28,
+  "Nếp": 45,
+  "Nếp Mịn": 58,
   "Nếp Hóa": 68,
   "Nếp Băng": 82,
+  "Băng": 90,
+  "Cao Băng": 95,
+  "Thuỷ Tinh": 100,
 };
 
 export const CHUNG_LABEL: Record<Chung, string> = {
-  "Đậu thô": "Thường Tại – Chủng Đậu",
-  "Đậu mịn": "Quý Nhân – Chủng Đậu Mịn",
-  "Nếp Mịn": "Phi Tần – Chủng Nếp Mịn",
-  "Nếp Hóa": "Quý Phi – Chủng Nếp Hóa",
-  "Nếp Băng": "Hoàng Hậu – Chủng Nếp Băng",
+  "Đậu": "Chủng Đậu",
+  "Đậu Mịn": "Chủng Đậu Mịn",
+  "Nếp": "Chủng Nếp",
+  "Nếp Mịn": "Chủng Nếp Mịn",
+  "Nếp Hóa": "Chủng Nếp Hóa",
+  "Nếp Băng": "Chủng Nếp Băng",
+  "Băng": "Chủng Băng",
+  "Cao Băng": "Chủng Cao Băng",
+  "Thuỷ Tinh": "Chủng Thuỷ Tinh",
 };
 
 export const HARD_CAP: Record<Chung, number> = {
-  "Đậu thô":  3_000_000,
-  "Đậu mịn":  8_000_000,
-  "Nếp Mịn":  40_000_000,
-  "Nếp Hóa":  80_000_000,
+  "Đậu": 3_000_000,
+  "Đậu Mịn": 8_000_000,
+  "Nếp": 25_000_000,
+  "Nếp Mịn": 40_000_000,
+  "Nếp Hóa": 80_000_000,
   "Nếp Băng": 300_000_000,
+  "Băng": 800_000_000,
+  "Cao Băng": 1_500_000_000,
+  "Thuỷ Tinh": 3_000_000_000,
 };
 
 // V_BASE: giá sàn khi trắng trơn, lành lặn, ni54 chuẩn
 const V_BASE: Record<Chung, number> = {
-  "Đậu thô":  400_000,
-  "Đậu mịn":  1_000_000,
-  "Nếp Mịn":  3_000_000,   // bạch ngọc Nếp Mịn đẹp = 2-5 triệu
-  "Nếp Hóa":  10_000_000,
+  "Đậu": 400_000,
+  "Đậu Mịn": 1_000_000,
+  "Nếp": 2_000_000,
+  "Nếp Mịn": 3_000_000,
+  "Nếp Hóa": 10_000_000,
   "Nếp Băng": 35_000_000,
+  "Băng": 80_000_000,
+  "Cao Băng": 150_000_000,
+  "Thuỷ Tinh": 250_000_000,
 };
 
 const COVERAGE_RATIO: Record<1 | 2 | 3 | 4, number> = {
@@ -374,7 +394,7 @@ function classifyAestheticGroup(
 }
 
 function buildRadarData(input: JadeInput, qJade: number, wRisk: number): RadarData {
-  const doTrong = Math.min(100, Math.round((CHUNG_SCORE[input.chungPeak] / 82) * 100));
+  const doTrong = Math.min(100, Math.round((CHUNG_SCORE[input.chungPeak] / 100) * 100));
   const sacDien = Math.min(100, Math.round(qJade));
   const doLanhLan = Math.round(wRisk * 100);
   const niNorm = Math.min(100, Math.max(0, ((input.ni - 46) / 22) * 60));
@@ -578,19 +598,46 @@ export function getPriceRangeLabel(result: PricingResult): string {
 // ─────────────────────────────────────────────
 // SURVEY ADAPTER
 // ─────────────────────────────────────────────
-function mapChung(ans: string | undefined): Chung {
-  if (!ans) return "Đậu mịn";
-  if (ans === "1a") return "Đậu thô";
-  if (ans === "1b") return "Đậu mịn";
-  if (ans === "1c") return "Nếp Mịn";
-  if (ans === "1d") return "Nếp Hóa";
-  if (ans === "1e") return "Nếp Băng";
-  if (ans === "2a") return "Đậu thô";
-  if (ans === "2b") return "Đậu mịn";
-  if (ans === "2c") return "Nếp Mịn";
-  if (ans === "2d") return "Nếp Hóa";
-  if (ans === "2e") return "Nếp Băng";
-  return "Đậu mịn";
+/**
+ * Pipeline duy nhất: translucency (T1-T5) + grain (TE1-TE5)
+ * → CLASSIFICATION_MATRIX → chủng.
+ */
+export function resolveChung(
+  t: TranslucencyCode | undefined,
+  te: GrainCode | undefined,
+): Chung {
+  return classifyChung(t, te) ?? "Đậu";
+}
+
+/** Feature code (jadeContent.FEATURES) → FlawType của engine giá */
+const FEATURE_TO_FLAW: Record<string, FlawType> = {
+  hoa_bay: "Vân ngọc",
+  chi_mau: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  gan_non: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  gan_gia: "Sớ bông / Gân già",
+  so_bong: "Sớ bông / Gân già",
+  so_ngan: "Sớ bông / Gân già",
+  so_am: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  so_doc: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  so_am_dai: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  so_can: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  mat_cat: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  vet_san_lom_nhe: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  vet_san_lom_vua: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  vet_san_lom_ro: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  so_doc_dai: "Sớ dọc dài / Sớ lưỡi gà",
+  so_luoi_ga: "Sớ dọc dài / Sớ lưỡi gà",
+  so_cheo: "Sớ chéo / Sớ ngang",
+  so_ngang: "Sớ chéo / Sớ ngang",
+  vet_nut: "Vết nứt (Crack)",
+};
+
+export function mapFeatureCodesToFlaws(codes: string[]): FlawType[] {
+  const flaws = codes
+    .filter((c) => FEATURES[c])
+    .map((c) => FEATURE_TO_FLAW[c])
+    .filter(Boolean) as FlawType[];
+  return flaws.length ? Array.from(new Set(flaws)) : ["Không lỗi"];
 }
 
 function mapCoverage(ans: string | undefined): 1 | 2 | 3 | 4 {
@@ -695,31 +742,17 @@ function mapAccentColors(ringColors: string[], baseColor: ColorName): ColorName[
   return accents;
 }
 
-function mapFlaws(answers: Record<string, string>, patternData: any): FlawType[] {
-  const flaws: FlawType[] = [];
-  const surf = answers[7];
-  if (surf === "7b") flaws.push("Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm");
-  if (surf === "7c") flaws.push("Vết nứt (Crack)");
-  if (patternData?.types?.length) {
-    if (patternData.types.includes("crack")) flaws.push("Vết nứt (Crack)");
-    if (patternData.types.includes("luoiga")) flaws.push("Sớ dọc dài / Sớ lưỡi gà");
-    if (patternData.types.includes("ngang")) flaws.push("Sớ chéo / Sớ ngang");
-  }
-  if (flaws.length === 0) flaws.push("Không lỗi");
-  return flaws;
-}
-
 export function buildJadeInputFromSurvey(data: any): JadeInput {
   const answers: Record<string, string> = data.answers || {};
   const numberInputs: Record<string, string> = data.numberInputs || {};
   const tones: Record<string, string> = data.colorTones || {};
   const ringColors: string[] = data.ringColors || [];
-  const patternData = data.patternData || {};
   const legal = data.legal || answers[12];
+  const featureCodes: string[] = data.features || [];
 
-  const chungPeak = mapChung(answers[1] || answers[2]);
+  const chungPeak = resolveChung(data.translucency, data.grain);
   const coverage = mapCoverage(answers[3]);
-  const chungBase: Chung = coverage >= 3 ? "Đậu mịn" : chungPeak;
+  const chungBase: Chung = coverage >= 3 ? "Đậu Mịn" : chungPeak;
 
   const baseColor = mapBaseColor(ringColors);
   const accentColors = mapAccentColors(ringColors, baseColor);
@@ -737,8 +770,8 @@ export function buildJadeInputFromSurvey(data: any): JadeInput {
     valuableSegments,
     ni: data.ni ?? (parseFloat(numberInputs[9]) || 56),
     shape: mapShape(answers[10]),
-    chot: data.chot ?? (parseFloat(numberInputs[11]) || 8),
-    flaws: mapFlaws(answers, patternData),
+    chot: data.chot ?? (parseFloat(numberInputs[13]) || parseFloat(numberInputs[11]) || 8),
+    flaws: mapFeatureCodesToFlaws(featureCodes),
     hasCertificate: legal === "12a",
     sellerRedFlags: data.sellerRedFlags ?? 0,
     sellerProofLevel: data.sellerProofLevel ?? undefined,
