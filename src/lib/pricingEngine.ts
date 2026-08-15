@@ -394,7 +394,7 @@ function classifyAestheticGroup(
 }
 
 function buildRadarData(input: JadeInput, qJade: number, wRisk: number): RadarData {
-  const doTrong = Math.min(100, Math.round((CHUNG_SCORE[input.chungPeak] / 82) * 100));
+  const doTrong = Math.min(100, Math.round((CHUNG_SCORE[input.chungPeak] / 100) * 100));
   const sacDien = Math.min(100, Math.round(qJade));
   const doLanhLan = Math.round(wRisk * 100);
   const niNorm = Math.min(100, Math.max(0, ((input.ni - 46) / 22) * 60));
