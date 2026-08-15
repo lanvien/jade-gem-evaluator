@@ -742,31 +742,17 @@ function mapAccentColors(ringColors: string[], baseColor: ColorName): ColorName[
   return accents;
 }
 
-function mapFlaws(answers: Record<string, string>, patternData: any): FlawType[] {
-  const flaws: FlawType[] = [];
-  const surf = answers[7];
-  if (surf === "7b") flaws.push("Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm");
-  if (surf === "7c") flaws.push("Vết nứt (Crack)");
-  if (patternData?.types?.length) {
-    if (patternData.types.includes("crack")) flaws.push("Vết nứt (Crack)");
-    if (patternData.types.includes("luoiga")) flaws.push("Sớ dọc dài / Sớ lưỡi gà");
-    if (patternData.types.includes("ngang")) flaws.push("Sớ chéo / Sớ ngang");
-  }
-  if (flaws.length === 0) flaws.push("Không lỗi");
-  return flaws;
-}
-
 export function buildJadeInputFromSurvey(data: any): JadeInput {
   const answers: Record<string, string> = data.answers || {};
   const numberInputs: Record<string, string> = data.numberInputs || {};
   const tones: Record<string, string> = data.colorTones || {};
   const ringColors: string[] = data.ringColors || [];
-  const patternData = data.patternData || {};
   const legal = data.legal || answers[12];
+  const featureCodes: string[] = data.features || [];
 
-  const chungPeak = mapChung(answers[1] || answers[2]);
+  const chungPeak = resolveChung(data.translucency, data.grain);
   const coverage = mapCoverage(answers[3]);
-  const chungBase: Chung = coverage >= 3 ? "Đậu mịn" : chungPeak;
+  const chungBase: Chung = coverage >= 3 ? "Đậu Mịn" : chungPeak;
 
   const baseColor = mapBaseColor(ringColors);
   const accentColors = mapAccentColors(ringColors, baseColor);
@@ -784,8 +770,8 @@ export function buildJadeInputFromSurvey(data: any): JadeInput {
     valuableSegments,
     ni: data.ni ?? (parseFloat(numberInputs[9]) || 56),
     shape: mapShape(answers[10]),
-    chot: data.chot ?? (parseFloat(numberInputs[11]) || 8),
-    flaws: mapFlaws(answers, patternData),
+    chot: data.chot ?? (parseFloat(numberInputs[13]) || parseFloat(numberInputs[11]) || 8),
+    flaws: mapFeatureCodesToFlaws(featureCodes),
     hasCertificate: legal === "12a",
     sellerRedFlags: data.sellerRedFlags ?? 0,
     sellerProofLevel: data.sellerProofLevel ?? undefined,
