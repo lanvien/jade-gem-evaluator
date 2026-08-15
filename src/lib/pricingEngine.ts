@@ -103,36 +103,52 @@ export interface RadarData {
 // DICTIONARIES
 // ─────────────────────────────────────────────
 export const CHUNG_SCORE: Record<Chung, number> = {
-  "Đậu thô": 15,
-  "Đậu mịn": 28,
-  "Nếp Mịn": 58,   // mịn như sứ, underrated — nâng lên đúng vị trí
+  "Đậu": 12,
+  "Đậu Mịn": 28,
+  "Nếp": 45,
+  "Nếp Mịn": 58,
   "Nếp Hóa": 68,
   "Nếp Băng": 82,
+  "Băng": 90,
+  "Cao Băng": 95,
+  "Thuỷ Tinh": 100,
 };
 
 export const CHUNG_LABEL: Record<Chung, string> = {
-  "Đậu thô": "Thường Tại – Chủng Đậu",
-  "Đậu mịn": "Quý Nhân – Chủng Đậu Mịn",
-  "Nếp Mịn": "Phi Tần – Chủng Nếp Mịn",
-  "Nếp Hóa": "Quý Phi – Chủng Nếp Hóa",
-  "Nếp Băng": "Hoàng Hậu – Chủng Nếp Băng",
+  "Đậu": "Chủng Đậu",
+  "Đậu Mịn": "Chủng Đậu Mịn",
+  "Nếp": "Chủng Nếp",
+  "Nếp Mịn": "Chủng Nếp Mịn",
+  "Nếp Hóa": "Chủng Nếp Hóa",
+  "Nếp Băng": "Chủng Nếp Băng",
+  "Băng": "Chủng Băng",
+  "Cao Băng": "Chủng Cao Băng",
+  "Thuỷ Tinh": "Chủng Thuỷ Tinh",
 };
 
 export const HARD_CAP: Record<Chung, number> = {
-  "Đậu thô":  3_000_000,
-  "Đậu mịn":  8_000_000,
-  "Nếp Mịn":  40_000_000,
-  "Nếp Hóa":  80_000_000,
+  "Đậu": 3_000_000,
+  "Đậu Mịn": 8_000_000,
+  "Nếp": 25_000_000,
+  "Nếp Mịn": 40_000_000,
+  "Nếp Hóa": 80_000_000,
   "Nếp Băng": 300_000_000,
+  "Băng": 800_000_000,
+  "Cao Băng": 1_500_000_000,
+  "Thuỷ Tinh": 3_000_000_000,
 };
 
 // V_BASE: giá sàn khi trắng trơn, lành lặn, ni54 chuẩn
 const V_BASE: Record<Chung, number> = {
-  "Đậu thô":  400_000,
-  "Đậu mịn":  1_000_000,
-  "Nếp Mịn":  3_000_000,   // bạch ngọc Nếp Mịn đẹp = 2-5 triệu
-  "Nếp Hóa":  10_000_000,
+  "Đậu": 400_000,
+  "Đậu Mịn": 1_000_000,
+  "Nếp": 2_000_000,
+  "Nếp Mịn": 3_000_000,
+  "Nếp Hóa": 10_000_000,
   "Nếp Băng": 35_000_000,
+  "Băng": 80_000_000,
+  "Cao Băng": 150_000_000,
+  "Thuỷ Tinh": 250_000_000,
 };
 
 const COVERAGE_RATIO: Record<1 | 2 | 3 | 4, number> = {
