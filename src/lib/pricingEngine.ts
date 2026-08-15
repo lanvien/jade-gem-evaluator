@@ -598,19 +598,46 @@ export function getPriceRangeLabel(result: PricingResult): string {
 // ─────────────────────────────────────────────
 // SURVEY ADAPTER
 // ─────────────────────────────────────────────
-function mapChung(ans: string | undefined): Chung {
-  if (!ans) return "Đậu mịn";
-  if (ans === "1a") return "Đậu thô";
-  if (ans === "1b") return "Đậu mịn";
-  if (ans === "1c") return "Nếp Mịn";
-  if (ans === "1d") return "Nếp Hóa";
-  if (ans === "1e") return "Nếp Băng";
-  if (ans === "2a") return "Đậu thô";
-  if (ans === "2b") return "Đậu mịn";
-  if (ans === "2c") return "Nếp Mịn";
-  if (ans === "2d") return "Nếp Hóa";
-  if (ans === "2e") return "Nếp Băng";
-  return "Đậu mịn";
+/**
+ * Pipeline duy nhất: translucency (T1-T5) + grain (TE1-TE5)
+ * → CLASSIFICATION_MATRIX → chủng.
+ */
+export function resolveChung(
+  t: TranslucencyCode | undefined,
+  te: GrainCode | undefined,
+): Chung {
+  return classifyChung(t, te) ?? "Đậu";
+}
+
+/** Feature code (jadeContent.FEATURES) → FlawType của engine giá */
+const FEATURE_TO_FLAW: Record<string, FlawType> = {
+  hoa_bay: "Vân ngọc",
+  chi_mau: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  gan_non: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  gan_gia: "Sớ bông / Gân già",
+  so_bong: "Sớ bông / Gân già",
+  so_ngan: "Sớ bông / Gân già",
+  so_am: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  so_doc: "Chỉ màu / Gân non / Sớ âm / Sớ dọc",
+  so_am_dai: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  so_can: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  mat_cat: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  vet_san_lom_nhe: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  vet_san_lom_vua: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  vet_san_lom_ro: "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm",
+  so_doc_dai: "Sớ dọc dài / Sớ lưỡi gà",
+  so_luoi_ga: "Sớ dọc dài / Sớ lưỡi gà",
+  so_cheo: "Sớ chéo / Sớ ngang",
+  so_ngang: "Sớ chéo / Sớ ngang",
+  vet_nut: "Vết nứt (Crack)",
+};
+
+export function mapFeatureCodesToFlaws(codes: string[]): FlawType[] {
+  const flaws = codes
+    .filter((c) => FEATURES[c])
+    .map((c) => FEATURE_TO_FLAW[c])
+    .filter(Boolean) as FlawType[];
+  return flaws.length ? Array.from(new Set(flaws)) : ["Không lỗi"];
 }
 
 function mapCoverage(ans: string | undefined): 1 | 2 | 3 | 4 {
