@@ -165,12 +165,19 @@ const Assessment = () => {
   const { analyze: analyzeJade, isLoading: aiLoading, error: aiError, confidence: aiConfidence } = useJadeVision();
 
   // ─── AI Vision → form mapping ───
-  const chungToAnswer: Record<string, string> = {
-    "Đậu thô": "1a",
-    "Đậu mịn": "1a",
-    "Nếp Mịn": "1b",
-    "Nếp Hóa": "1b",
-    "Nếp Băng": "1c",
+  // AI chung → cặp (translucency, grain) của pipeline v2
+  const chungToTE: Record<string, [TranslucencyCode, GrainCode]> = {
+    "Đậu thô": ["T5", "TE5"],
+    "Đậu": ["T5", "TE5"],
+    "Đậu mịn": ["T5", "TE2"],
+    "Đậu Mịn": ["T5", "TE2"],
+    "Nếp": ["T4", "TE4"],
+    "Nếp Mịn": ["T4", "TE2"],
+    "Nếp Hóa": ["T3", "TE3"],
+    "Nếp Băng": ["T3", "TE2"],
+    "Băng": ["T2", "TE2"],
+    "Cao Băng": ["T2", "TE1"],
+    "Thuỷ Tinh": ["T1", "TE1"],
   };
   const coverageToAnswer: Record<number, string> = { 1: "3a", 2: "3b", 3: "3c", 4: "3d" };
   const colorHexMap: Record<string, string> = {
@@ -183,14 +190,15 @@ const Assessment = () => {
     "Hoàng": "#e0a83a", "Tranh Hoàng": "#e8b85a", "Hạc Hoàng": "#d8c89a",
     "Bạch Sắc": "#f0f0f0", "Vô Sắc": "#f5f5f0", "Ô Kê Chủng": "#a0a0a0",
   };
-  const flawToAnswer: Record<string, string> = {
-    "Không lỗi": "7a", "Vân ngọc": "7a",
-    "Sớ bông / Gân già": "7b",
-    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "7b",
-    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "7b",
-    "Sớ dọc dài / Sớ lưỡi gà": "7c",
-    "Sớ chéo / Sớ ngang": "7c",
-    "Vết nứt (Crack)": "7c",
+  // AI flaw label → feature code v2
+  const flawToFeature: Record<string, string> = {
+    "Vân ngọc": "hoa_bay",
+    "Sớ bông / Gân già": "so_bong",
+    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "so_am",
+    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "so_am_dai",
+    "Sớ dọc dài / Sớ lưỡi gà": "so_luoi_ga",
+    "Sớ chéo / Sớ ngang": "so_ngang",
+    "Vết nứt (Crack)": "vet_nut",
   };
   const shapeToAnswer: Record<string, string> = {
     "Bản Đũa": "10a", "Bản Dẹt": "10b", "Bản Vuông": "10c", "Khắc Hoa": "10d",
@@ -207,14 +215,20 @@ const Assessment = () => {
     const newAnswers: Record<number, string> = { ...answers };
     const filled = new Set<number>();
 
-    const a1 = chungToAnswer[v.chungPeak];
-    if (a1) { newAnswers[1] = a1; filled.add(1); }
+    const te = chungToTE[v.chungPeak];
+    if (te) { setTranslucency(te[0]); setGrain(te[1]); filled.add(1); filled.add(2); }
     const a3 = coverageToAnswer[v.coverageLevel];
     if (a3) { newAnswers[3] = a3; filled.add(3); }
-    const a7 = v.flaws?.length ? flawToAnswer[v.flaws[0]] : "7a";
-    if (a7) { newAnswers[7] = a7; filled.add(7); }
     const a10 = shapeToAnswer[v.shape];
     if (a10) { newAnswers[10] = a10; filled.add(10); }
+
+    const aiFeatures = (v.flaws || [])
+      .map((f) => flawToFeature[f])
+      .filter(Boolean);
+    if (aiFeatures.length) {
+      setFeatures((prev) => Array.from(new Set([...prev, ...aiFeatures])));
+      filled.add(20);
+    }
 
     setAnswers(newAnswers);
 
