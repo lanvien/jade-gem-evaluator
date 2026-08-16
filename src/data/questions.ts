@@ -1,12 +1,10 @@
-import q1_dau from "@/assets/jade/q1_dau.png";
-import q1_nep from "@/assets/jade/q1_nep.png";
-import q1_nbang from "@/assets/jade/q1_nbang.png";
-import q2_dau from "@/assets/jade/q2_dau.png";
-import q2_nep from "@/assets/jade/q2_nep.png";
-import q2_bang from "@/assets/jade/q2_bang.png";
-import q2_nbang from "@/assets/jade/q2_nbang.png";
-import q5_san_lom from "@/assets/jade/q5_san_lom.png";
-import q5_vet_nut from "@/assets/jade/q5_vet_nut.png";
+import {
+  TRANSLUCENCY_OPTIONS,
+  TRANSLUCENCY_QUESTION,
+  GRAIN_OPTIONS,
+  GRAIN_QUESTION,
+  FEATURE_GROUPS,
+} from "@/content/jadeContent";
 import shape_dua from "@/assets/jade/shape_dua.png";
 import shape_he from "@/assets/jade/shape_he.png";
 import shape_vuong from "@/assets/jade/shape_vuong.png";
