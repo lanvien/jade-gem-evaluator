@@ -734,25 +734,115 @@ const Assessment = () => {
             </div>
           )}
 
-          {/* Pattern Structure */}
-          {q.type === "pattern-structure" && (
+          {/* v2 — Độ xuyên sáng (T1-T5) */}
+          {q.type === "translucency" && (
             <div className="space-y-3">
-              {/* Hint icon ngón tay chỉ tới (i) */}
-              <div className="flex items-center justify-center gap-2 text-xs text-foreground/60 italic">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-gold" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 11V6a2 2 0 1 1 4 0v5" />
-                  <path d="M13 11V4a2 2 0 1 1 4 0v9" />
-                  <path d="M17 13V6a2 2 0 1 1 4 0v10a6 6 0 0 1-6 6H9a6 6 0 0 1-5-2.6L1 14l2-2 4 3V6a2 2 0 1 1 4 0v5" />
-                </svg>
-                <span>Bấm vào biểu tượng</span>
-                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-gold/60 text-gold font-bold text-[10px]">i</span>
-                <span>để xem thông tin chi tiết</span>
-              </div>
-              <PatternStructure
-                value={patternData}
-                onChange={setPatternData}
-                surfaceSmooth={isSurfaceSmooth}
-              />
+              {q.options.map((opt) => {
+                const active = translucency === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      setTranslucency(opt.id as TranslucencyCode);
+                      if (grain && !classifyChung(opt.id as TranslucencyCode, grain)) setGrain(undefined);
+                      clearPrefillFor(q.id);
+                    }}
+                    className={`w-full rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
+                      active ? "border-gold bg-gold/10 shadow-md" : "border-border bg-card hover:border-gold/50"
+                    }`}
+                  >
+                    <p className="text-sm font-bold text-foreground">{opt.label}</p>
+                    {opt.short && <p className="text-xs text-muted-foreground mt-1">{opt.short}</p>}
+                    {active && opt.description && (
+                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{opt.description}</p>
+                    )}
+                  </button>
+                );
+              })}
+              {q.note && <p className="text-xs italic text-muted-foreground">{q.note}</p>}
+            </div>
+          )}
+
+          {/* v2 — Cấu trúc vi hạt (TE1-TE5), chặn tổ hợp không hợp lệ */}
+          {q.type === "grain" && (
+            <div className="space-y-3">
+              {q.options.map((opt) => {
+                const disabled = invalidGrainCodes(translucency).includes(opt.id as GrainCode);
+                const active = grain === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    disabled={disabled}
+                    onClick={() => { setGrain(opt.id as GrainCode); clearPrefillFor(q.id); }}
+                    className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
+                      disabled
+                        ? "border-border bg-muted/40 opacity-40 cursor-not-allowed"
+                        : active
+                        ? "border-gold bg-gold/10 shadow-md"
+                        : "border-border bg-card hover:border-gold/50 hover:shadow-md"
+                    }`}
+                  >
+                    <p className="text-sm font-bold text-foreground">{opt.label}</p>
+                    {opt.short && <p className="text-xs text-muted-foreground mt-1">{opt.short}</p>}
+                    {disabled && (
+                      <p className="text-xs text-muted-foreground mt-1 italic">
+                        Không phù hợp với độ xuyên sáng đã chọn
+                      </p>
+                    )}
+                    {active && opt.description && (
+                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{opt.description}</p>
+                    )}
+                  </button>
+                );
+              })}
+              {translucency && grain && classifyChung(translucency, grain) && (
+                <div className="rounded-lg border border-gold/40 bg-gold/10 p-3 text-center">
+                  <p className="text-sm text-foreground">
+                    Chủng xác định: <strong className="text-gold">{classifyChung(translucency, grain)}</strong>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* v2 — Đặc điểm nội tại (multi-select) */}
+          {q.type === "multi-feature" && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground text-center italic">
+                Có thể chọn nhiều đặc điểm, hoặc bỏ qua nếu không ghi nhận đặc điểm nào.
+              </p>
+              {(q.featureCodes || []).map((code) => {
+                const f = FEATURES[code];
+                if (!f) return null;
+                const active = features.includes(code);
+                return (
+                  <button
+                    key={code}
+                    onClick={() =>
+                      setFeatures((prev) =>
+                        prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+                      )
+                    }
+                    className={`w-full rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
+                      active ? "border-gold bg-gold/10 shadow-md" : "border-border bg-card hover:border-gold/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                          active ? "border-gold bg-gold text-primary-foreground" : "border-border"
+                        }`}
+                      >
+                        {active ? "✓" : ""}
+                      </span>
+                      <p className="text-sm font-bold text-foreground">{f.name}</p>
+                    </div>
+                    {active && (
+                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{f.description}</p>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
