@@ -20,13 +20,14 @@ export interface QuestionOption {
 
 export type QuestionType =
   | "single-choice"
+  | "translucency"
+  | "grain"
+  | "multi-feature"
   | "color-ring"
   | "number-input"
   | "multi-number"
   | "card-style"
-  | "checkbox-legal"
-  | "surface-check"
-  | "pattern-structure";
+  | "checkbox-legal";
 
 export interface NumberField {
   key: number;
