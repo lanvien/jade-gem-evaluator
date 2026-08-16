@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Copy, Check, RotateCcw, Pencil, Download, Share2, Camera } from "lucide-react";
-import { calculateJadePrice, buildJadeInputFromSurvey, formatVND } from "@/lib/pricingEngine";
+import { buildJadeInputFromSurvey, formatVND } from "@/lib/pricingEngine";
+import { buildResultV2 } from "@/lib/jadeResultV2";
 import { useSaveToCop } from "@/lib/copNgoc";
 import { resetAssessmentSession } from "@/lib/resetAssessment";
 import { addToVault, buildSegments, nanoId } from "@/lib/jadeVault";
@@ -50,13 +51,11 @@ export default function Results() {
     () => JSON.parse(localStorage.getItem("jade-survey-data") || "{}"),
     [],
   );
-  let r: ReturnType<typeof computeResults> | null = null;
-  try { r = computeResults(surveyData); } catch { /* noop */ }
+  const r = useMemo(() => {
+    try { return buildResultV2(surveyData); } catch { return null; }
+  }, [surveyData]);
 
-  const ringCode = useMemo(
-    () => String(Math.floor(10000 + Math.random() * 90000)),
-    [],
-  );
+  const ringCode = r?.resultId ?? "00000";
   const [copied, setCopied] = useState(false);
   const { mutate: saveToCop, isPending } = useSaveToCop();
 
@@ -116,12 +115,12 @@ export default function Results() {
       hasPhieuHoa: !!aiCtx?.hasPhieuHoa,
       isMuna: !!aiCtx?.isMuna,
       assessment: {
-        chungPeak: aiCtx?.chungPeak || r.pricing.chungLabel,
-        chungBase: r.pricing.chungLabel,
+        chungPeak: aiCtx?.chungPeak || r.chung,
+        chungBase: r.chung,
         baseColor: r.pricing.colorLabel,
         toneLevel: r.pricing.scoreSac,
-        flaws: r.pricing.warnings || [],
-        shape: surveyData.answers?.[7] || "—",
+        flaws: r.attentionFeatures.map((f) => f.name),
+        shape: surveyData.answers?.[10] || "—",
         estimatedPrice: `${formatVND(r.priceLow)} – ${formatVND(r.priceHigh)}`,
         ringCode,
       },
@@ -142,7 +141,8 @@ export default function Results() {
     );
   }
 
-  const title = TITLES[r.tier.key] ?? TITLES["phi-tan"];
+  const tier = TIERS[r.tierIndex] ?? TIERS[0];
+  const title = TITLES[r.tierKey] ?? TITLES["phi-tan"];
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,8 +168,8 @@ export default function Results() {
           <div className="relative">
             {/* Crown badge overlay */}
             <img
-              src={r.tier.icon}
-              alt={r.tier.name}
+              src={tier.icon}
+              alt={tier.name}
               className="absolute -top-6 -left-6 w-24 md:w-28 h-auto object-contain -rotate-[18deg] drop-shadow-[0_4px_12px_rgba(192,149,76,0.4)] z-10"
             />
             <div className="aspect-square w-full rounded-lg border border-gold/40 bg-gradient-to-br from-card to-background p-6 md:p-8 relative">
@@ -196,7 +196,7 @@ export default function Results() {
             <div className="mt-5 text-center">
               <p className="text-sm text-foreground/60">Danh xưng hiện tại</p>
               <p className="font-serif font-bold tracking-wider text-foreground mt-1">
-                {r.tier.name.toUpperCase()} – {r.tier.sub.toUpperCase()}
+                {tier.name.toUpperCase()} – {tier.sub.toUpperCase()}
               </p>
             </div>
 
@@ -210,7 +210,7 @@ export default function Results() {
             <div className="mt-6 rounded-md border border-gold/40 bg-gold/10 p-4">
               <p className="text-sm leading-relaxed text-foreground/85 text-center">
                 <span className="font-semibold">Ngự phê:</span>{" "}
-                <span className="italic">"{r.quote.replace(/[😊😀😉🙂✨]/g, "").trim()}"</span>
+                <span className="italic">"{r.nguPhe}"</span>
               </p>
             </div>
           </div>
@@ -224,12 +224,15 @@ export default function Results() {
             </h1>
 
             <div className="flex flex-wrap gap-2 mt-3">
-              <span className="px-3 py-1 rounded-md bg-gold/15 border border-gold/40 text-xs md:text-sm text-gold-dark font-medium">{title.tag1}</span>
-              <span className="px-3 py-1 rounded-md bg-gold/15 border border-gold/40 text-xs md:text-sm text-gold-dark font-medium">{title.tag2}</span>
+              {r.hashtags.map((tag) => (
+                <span key={tag} className="px-3 py-1 rounded-md bg-gold/15 border border-gold/40 text-xs md:text-sm text-gold-dark font-medium">
+                  {tag}
+                </span>
+              ))}
             </div>
 
             <div className="mt-4 rounded-md border-2 border-gold/60 bg-gold/10 px-4 py-2.5 text-center">
-              <p className="font-semibold text-foreground text-sm md:text-base">{RARITY[r.tier.key]}</p>
+              <p className="font-semibold text-foreground text-sm md:text-base">{RARITY[r.tierKey]}</p>
             </div>
 
             <ul className="mt-6 space-y-4 text-sm md:text-base leading-relaxed text-foreground/85">
@@ -249,12 +252,44 @@ export default function Results() {
           </div>
         </div>
 
+        {/* DẤU ẤN NỘI TẠI */}
+        {(r.features.length > 0 || r.hasCrack) && (
+          <section className="mt-12">
+            <h2 className="font-serif text-2xl md:text-3xl font-bold text-gold mb-5">Dấu ấn nội tại</h2>
+            {r.crackWarning && (
+              <div className="mb-4 rounded-md border-2 border-destructive/60 bg-destructive/10 p-4">
+                <p className="text-sm font-semibold text-destructive leading-relaxed">{r.crackWarning}</p>
+              </div>
+            )}
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[...r.positiveFeatures, ...r.attentionFeatures].map((f) => (
+                <div key={f.name} className="rounded-md border border-gold/40 bg-card p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-semibold text-foreground text-sm">{f.name}</p>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full border ${
+                      f.aesthetic_effect === "positive"
+                        ? "border-gold/50 text-gold"
+                        : "border-foreground/25 text-foreground/60"
+                    }`}>
+                      {f.aesthetic_effect === "positive" ? "Nét độc bản" : "Cần lưu ý"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{f.description}</p>
+                  {f.warning && (
+                    <p className="text-xs text-foreground/80 mt-2 italic leading-relaxed">{f.warning}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* PHONG KẾT CẤU timeline */}
         <section className="mt-14">
           <h2 className="font-serif text-2xl md:text-3xl font-bold text-gold mb-6">Phong kết cấu</h2>
           <div className="grid grid-cols-5 gap-3 md:gap-6">
             {TIERS.map((t, i) => {
-              const active = i === r!.tierIndex;
+              const active = i === r.tierIndex;
               return (
                 <div key={t.key} className="flex flex-col items-center gap-2">
                   <div className={active ? "drop-shadow-[0_0_24px_rgba(192,149,76,0.6)]" : ""}>
@@ -346,78 +381,4 @@ export default function Results() {
       </main>
     </div>
   );
-}
-
-function computeResults(data: any) {
-  const numberInputs = data.numberInputs || {};
-
-  const jadeInput = buildJadeInputFromSurvey({
-    ...data,
-    ni: parseFloat(data.numberInputs?.[9]) || 56,    // key 9 = ni vòng
-    chot: parseFloat(data.numberInputs?.[11]) || 8,  // key 11 = chột
-  });
-  const pricing = calculateJadePrice(jadeInput);
-
-  const chungToTier: Record<string, number> = {
-    "Đậu thô": 0,
-    "Đậu mịn": 0,
-    "Nếp Mịn": 1,
-    "Nếp Hóa": 2,
-    "Nếp Băng": 3, 
-    "Băng": 3,
-    "Băng Thủy": 4,
-    "Thủy tinh": 4,
-  };
-
-  const tierIndex = chungToTier[jadeInput.chungPeak] ?? 0;
-
-  const tier = TIERS[tierIndex];
-
-  const cotText = `Phẩm ngọc đạt ${pricing.chungLabel}. ${
-    pricing.scoreChung >= 75
-      ? "Cấu trúc liên kết chặt chẽ, chất ngọc mướt mát, ngậm nước như sương sớm. Lựa chọn hoàn mỹ cho những ai tìm kiếm chiều sâu của ngọc với một mức ngân sách tối ưu."
-      : pricing.scoreChung >= 50
-      ? "Hạt tinh thể mịn, ánh ngọc êm dịu. Phân khúc trung-cao, phù hợp đeo hàng ngày."
-      : "Hạt tinh thể rõ nét, vẻ đẹp thuần mộc. Thích hợp cho người mới tìm hiểu ngọc."
-  }`;
-
-  const sacText = `dải màu ${pricing.colorLabel}. ${
-    pricing.scoreSac >= 80
-      ? "Không màng đến sự rập khuôn vô hồn, chính những vệt hoa bay đã thổi hồn vào khối đá, tạo nên một tuyệt tác thiên nhiên duy nhất và không thể sao chép."
-      : pricing.scoreSac >= 50
-      ? "Màu sắc dịu dàng, thanh nhã, đem lại cảm giác thư thái khi ngắm nhìn."
-      : "Màu sắc nhạt, nhã nhặn — phong cách tối giản, dễ phối đồ."
-  }`;
-
-  const hasStructuralFlaw = pricing.warnings.some(
-    (w: string) => w.includes("nứt") || w.includes("Crack") || w.includes("Sớ"),
-  );
-  const noiTaiText = hasStructuralFlaw
-    ? "Ngọc quý ắt trải qua phong hóa, giữ lại chút tỳ vết là lẽ thường tình. Sự xuất hiện của một vài vết sớ nhỏ chính là lời khẳng định mạnh mẽ nhất về nguồn gốc tự nhiên. Đây không chỉ là nét độc bản, mà còn là chìa khóa vàng để bạn làm chủ cuộc thương lượng (kỳ vọng giảm 15-20% giá)."
-    : "Ngọc sạch, ít tạp chất. Bề mặt và nội tại đạt tiêu chuẩn tốt cho phân khúc này — một viên ngọc thuần khiết khó tìm.";
-
-  const quotes: Record<string, string> = {
-    "thuong-tai": "Nhan sắc thanh tú, an phận thủ thường, phù hợp để đeo cày deadline mỗi ngày.",
-    "quy-nhan":   "Ôn nhu hiền thục, sắc ngọc đoan trang — xứng danh người biết chọn ngọc.",
-    "phi-tan":    "Sắc ngọc yêu kiều, phong thái kiêu sa — thu hút mọi ánh nhìn từ cái nhìn đầu tiên.",
-    "quy-phi":    "Quý phái tựa ngọc trong sương, sắc đẹp khiến người ta phải ngoái nhìn.",
-    "hoang-hau":  "Mẫu nghi thiên hạ, ngọc quý hiếm có — xứng danh bảo vật truyền đời.",
-  };
-
-  const diameter = parseFloat(numberInputs[9] || numberInputs[11]) || 56;
-  const thickness = parseFloat(numberInputs[11] || numberInputs[13]) || 8;
-
-  return {
-    tier,
-    tierIndex,
-    priceLow:  pricing.minPrice,
-    priceHigh: pricing.maxPrice,
-    cotText,
-    sacText,
-    noiTaiText,
-    quote: quotes[tier.key] ?? quotes["phi-tan"],
-    diameter,
-    thickness,
-    pricing,
-  };
 }
