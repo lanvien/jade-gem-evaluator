@@ -137,9 +137,18 @@ const Assessment = () => {
     const saved = localStorage.getItem("jade-color-tones");
     return saved ? JSON.parse(saved) : {};
   });
-  const [patternData, setPatternData] = useState<PatternData>(() => {
-    const saved = localStorage.getItem("jade-pattern-data");
-    return saved ? JSON.parse(saved) : EMPTY_PATTERN;
+  // v2: độ xuyên sáng (T1-T5) + vi hạt (TE1-TE5) + đặc điểm cấu trúc (multi-select)
+  const [translucency, setTranslucency] = useState<TranslucencyCode | undefined>(() => {
+    const saved = localStorage.getItem("jade-translucency");
+    return (saved as TranslucencyCode) || undefined;
+  });
+  const [grain, setGrain] = useState<GrainCode | undefined>(() => {
+    const saved = localStorage.getItem("jade-grain");
+    return (saved as GrainCode) || undefined;
+  });
+  const [features, setFeatures] = useState<string[]>(() => {
+    const saved = localStorage.getItem("jade-features");
+    return saved ? JSON.parse(saved) : [];
   });
   const [lightboxImg, setLightboxImg] = useState<{ src: string; caption: string } | null>(null);
   const [prefilledFields, setPrefilledFields] = useState<Set<number>>(new Set());
