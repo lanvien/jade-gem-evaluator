@@ -46,6 +46,8 @@ export interface Question {
   type: QuestionType;
   title: string;
   hint: string;
+  note?: string;
+  featureCodes?: string[];
   options: QuestionOption[];
   rescueButton?: { label: string; autoSelectId: string };
   subCheckbox?: { label: string; triggeredByIds: string[] };
