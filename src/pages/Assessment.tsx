@@ -7,8 +7,14 @@ import SectionDivider from "@/components/SectionDivider";
 import { ColorTone } from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
 import JadeCanvas, { JadeCanvasResult } from "@/components/JadeCanvas";
-import PatternStructure, { PatternData } from "@/components/assessment/PatternStructure";
 import ImageLightbox from "@/components/assessment/ImageLightbox";
+import {
+  FEATURES,
+  invalidGrainCodes,
+  classifyChung,
+  type GrainCode,
+  type TranslucencyCode,
+} from "@/content/jadeContent";
 import { useJadeVision, type VisionResult } from "@/hooks/useJadeVision";
 
 const TOTAL = questions.length;
@@ -101,11 +107,6 @@ const NumberInputQuestion = ({
   </div>
 );
 
-const EMPTY_PATTERN: PatternData = {
-  groupA: {},
-  groupB: {},
-};
-
 /* ── Main Component ── */
 const Assessment = () => {
   const navigate = useNavigate();
@@ -137,9 +138,18 @@ const Assessment = () => {
     const saved = localStorage.getItem("jade-color-tones");
     return saved ? JSON.parse(saved) : {};
   });
-  const [patternData, setPatternData] = useState<PatternData>(() => {
-    const saved = localStorage.getItem("jade-pattern-data");
-    return saved ? JSON.parse(saved) : EMPTY_PATTERN;
+  // v2: độ xuyên sáng (T1-T5) + vi hạt (TE1-TE5) + đặc điểm cấu trúc (multi-select)
+  const [translucency, setTranslucency] = useState<TranslucencyCode | undefined>(() => {
+    const saved = localStorage.getItem("jade-translucency");
+    return (saved as TranslucencyCode) || undefined;
+  });
+  const [grain, setGrain] = useState<GrainCode | undefined>(() => {
+    const saved = localStorage.getItem("jade-grain");
+    return (saved as GrainCode) || undefined;
+  });
+  const [features, setFeatures] = useState<string[]>(() => {
+    const saved = localStorage.getItem("jade-features");
+    return saved ? JSON.parse(saved) : [];
   });
   const [lightboxImg, setLightboxImg] = useState<{ src: string; caption: string } | null>(null);
   const [prefilledFields, setPrefilledFields] = useState<Set<number>>(new Set());
@@ -155,12 +165,19 @@ const Assessment = () => {
   const { analyze: analyzeJade, isLoading: aiLoading, error: aiError, confidence: aiConfidence } = useJadeVision();
 
   // ─── AI Vision → form mapping ───
-  const chungToAnswer: Record<string, string> = {
-    "Đậu thô": "1a",
-    "Đậu mịn": "1a",
-    "Nếp Mịn": "1b",
-    "Nếp Hóa": "1b",
-    "Nếp Băng": "1c",
+  // AI chung → cặp (translucency, grain) của pipeline v2
+  const chungToTE: Record<string, [TranslucencyCode, GrainCode]> = {
+    "Đậu thô": ["T5", "TE5"],
+    "Đậu": ["T5", "TE5"],
+    "Đậu mịn": ["T5", "TE2"],
+    "Đậu Mịn": ["T5", "TE2"],
+    "Nếp": ["T4", "TE4"],
+    "Nếp Mịn": ["T4", "TE2"],
+    "Nếp Hóa": ["T3", "TE3"],
+    "Nếp Băng": ["T3", "TE2"],
+    "Băng": ["T2", "TE2"],
+    "Cao Băng": ["T2", "TE1"],
+    "Thuỷ Tinh": ["T1", "TE1"],
   };
   const coverageToAnswer: Record<number, string> = { 1: "3a", 2: "3b", 3: "3c", 4: "3d" };
   const colorHexMap: Record<string, string> = {
@@ -173,14 +190,15 @@ const Assessment = () => {
     "Hoàng": "#e0a83a", "Tranh Hoàng": "#e8b85a", "Hạc Hoàng": "#d8c89a",
     "Bạch Sắc": "#f0f0f0", "Vô Sắc": "#f5f5f0", "Ô Kê Chủng": "#a0a0a0",
   };
-  const flawToAnswer: Record<string, string> = {
-    "Không lỗi": "7a", "Vân ngọc": "7a",
-    "Sớ bông / Gân già": "7b",
-    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "7b",
-    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "7b",
-    "Sớ dọc dài / Sớ lưỡi gà": "7c",
-    "Sớ chéo / Sớ ngang": "7c",
-    "Vết nứt (Crack)": "7c",
+  // AI flaw label → feature code v2
+  const flawToFeature: Record<string, string> = {
+    "Vân ngọc": "hoa_bay",
+    "Sớ bông / Gân già": "so_bong",
+    "Chỉ màu / Gân non / Sớ âm / Sớ dọc": "so_am",
+    "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm": "so_am_dai",
+    "Sớ dọc dài / Sớ lưỡi gà": "so_luoi_ga",
+    "Sớ chéo / Sớ ngang": "so_ngang",
+    "Vết nứt (Crack)": "vet_nut",
   };
   const shapeToAnswer: Record<string, string> = {
     "Bản Đũa": "10a", "Bản Dẹt": "10b", "Bản Vuông": "10c", "Khắc Hoa": "10d",
@@ -197,14 +215,20 @@ const Assessment = () => {
     const newAnswers: Record<number, string> = { ...answers };
     const filled = new Set<number>();
 
-    const a1 = chungToAnswer[v.chungPeak];
-    if (a1) { newAnswers[1] = a1; filled.add(1); }
+    const te = chungToTE[v.chungPeak];
+    if (te) { setTranslucency(te[0]); setGrain(te[1]); filled.add(1); filled.add(2); }
     const a3 = coverageToAnswer[v.coverageLevel];
     if (a3) { newAnswers[3] = a3; filled.add(3); }
-    const a7 = v.flaws?.length ? flawToAnswer[v.flaws[0]] : "7a";
-    if (a7) { newAnswers[7] = a7; filled.add(7); }
     const a10 = shapeToAnswer[v.shape];
     if (a10) { newAnswers[10] = a10; filled.add(10); }
+
+    const aiFeatures = (v.flaws || [])
+      .map((f) => flawToFeature[f])
+      .filter(Boolean);
+    if (aiFeatures.length) {
+      setFeatures((prev) => Array.from(new Set([...prev, ...aiFeatures])));
+      filled.add(20);
+    }
 
     setAnswers(newAnswers);
 
@@ -264,8 +288,10 @@ const Assessment = () => {
     localStorage.setItem("jade-color-tones", JSON.stringify(colorTones));
     localStorage.setItem("jade-number-inputs", JSON.stringify(numberInputs));
     localStorage.setItem("jade-sub-checks", JSON.stringify(subChecks));
-    localStorage.setItem("jade-pattern-data", JSON.stringify(patternData));
-  }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, patternData]);
+    localStorage.setItem("jade-features", JSON.stringify(features));
+    if (translucency) localStorage.setItem("jade-translucency", translucency);
+    if (grain) localStorage.setItem("jade-grain", grain);
+  }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, features, translucency, grain]);
 
   // Exit-count: if user leaves mid-flow >= 2 times, auto-reset on next mount
   useEffect(() => {
@@ -281,7 +307,9 @@ const Assessment = () => {
       setSubChecks({});
       setRingColors(Array(12).fill("#e5e7eb"));
       setColorTones({});
-      setPatternData(EMPTY_PATTERN);
+      setFeatures([]);
+      setTranslucency(undefined);
+      setGrain(undefined);
       setPrefilledFields(new Set());
       setPrefillBanner(null);
       setPreviewImg(null);
@@ -313,14 +341,14 @@ const Assessment = () => {
     const questionNumber = qIndex + 1;
 
     if (questionNumber === TOTAL) {
-      const surveyData = { answers, ringColors, colorTones, numberInputs, subChecks, patternData };
+      const surveyData = { answers, ringColors, colorTones, numberInputs, subChecks, translucency, grain, features };
       localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
       localStorage.removeItem("jade-exit-count");
       navigate("/results");
       return;
     }
     if (stepIdx < steps.length - 1) setStepIdx((s) => s + 1);
-  }, [stepIdx, steps, answers, ringColors, colorTones, numberInputs, subChecks, patternData, navigate]);
+  }, [stepIdx, steps, answers, ringColors, colorTones, numberInputs, subChecks, translucency, grain, features, navigate]);
 
   if (loading) return <LoadingScreen onDone={() => setLoading(false)} />;
 
@@ -335,7 +363,7 @@ const Assessment = () => {
   const selectedAnswer = answers[q.id];
   const questionNumber = qIndex + 1;
 
-  const isAutoAdvance = q.type === "single-choice" || q.type === "surface-check" || q.type === "card-style";
+  const isAutoAdvance = q.type === "single-choice" || q.type === "card-style";
 
   const handleSelect = (optionId: string) => {
     setAnswers((prev) => ({ ...prev, [q.id]: optionId }));
@@ -351,7 +379,9 @@ const Assessment = () => {
             colorTones,
             numberInputs,
             subChecks,
-            patternData,
+            translucency,
+            grain,
+            features,
           };
           localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
           localStorage.removeItem("jade-exit-count");
@@ -379,12 +409,15 @@ const Assessment = () => {
         return (q.inputFields || []).every(
           (f) => numberInputs[f.key] && parseFloat(numberInputs[f.key]) > 0,
         );
-      case "pattern-structure":
+      case "translucency":
+        return !!translucency;
+      case "grain":
+        return !!grain && !!classifyChung(translucency, grain);
+      case "multi-feature":
         return true;
       case "checkbox-legal":
       case "single-choice":
       case "card-style":
-      case "surface-check":
         return !!selectedAnswer;
       default:
         return !!selectedAnswer;
@@ -633,7 +666,7 @@ const Assessment = () => {
           )}
 
           {/* Single Choice & Surface Check & Checkbox Legal */}
-          {(q.type === "single-choice" || q.type === "checkbox-legal" || q.type === "surface-check") && (
+          {(q.type === "single-choice" || q.type === "checkbox-legal") && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {q.options.map((opt) => {
                 // Hide images entirely for Q3 (id === 3)
@@ -715,25 +748,115 @@ const Assessment = () => {
             </div>
           )}
 
-          {/* Pattern Structure */}
-          {q.type === "pattern-structure" && (
+          {/* v2 — Độ xuyên sáng (T1-T5) */}
+          {q.type === "translucency" && (
             <div className="space-y-3">
-              {/* Hint icon ngón tay chỉ tới (i) */}
-              <div className="flex items-center justify-center gap-2 text-xs text-foreground/60 italic">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-gold" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 11V6a2 2 0 1 1 4 0v5" />
-                  <path d="M13 11V4a2 2 0 1 1 4 0v9" />
-                  <path d="M17 13V6a2 2 0 1 1 4 0v10a6 6 0 0 1-6 6H9a6 6 0 0 1-5-2.6L1 14l2-2 4 3V6a2 2 0 1 1 4 0v5" />
-                </svg>
-                <span>Bấm vào biểu tượng</span>
-                <span className="inline-flex items-center justify-center w-5 h-5 rounded-full border border-gold/60 text-gold font-bold text-[10px]">i</span>
-                <span>để xem thông tin chi tiết</span>
-              </div>
-              <PatternStructure
-                value={patternData}
-                onChange={setPatternData}
-                surfaceSmooth={isSurfaceSmooth}
-              />
+              {q.options.map((opt) => {
+                const active = translucency === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      setTranslucency(opt.id as TranslucencyCode);
+                      if (grain && !classifyChung(opt.id as TranslucencyCode, grain)) setGrain(undefined);
+                      clearPrefillFor(q.id);
+                    }}
+                    className={`w-full rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
+                      active ? "border-gold bg-gold/10 shadow-md" : "border-border bg-card hover:border-gold/50"
+                    }`}
+                  >
+                    <p className="text-sm font-bold text-foreground">{opt.label}</p>
+                    {opt.short && <p className="text-xs text-muted-foreground mt-1">{opt.short}</p>}
+                    {active && opt.description && (
+                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{opt.description}</p>
+                    )}
+                  </button>
+                );
+              })}
+              {q.note && <p className="text-xs italic text-muted-foreground">{q.note}</p>}
+            </div>
+          )}
+
+          {/* v2 — Cấu trúc vi hạt (TE1-TE5), chặn tổ hợp không hợp lệ */}
+          {q.type === "grain" && (
+            <div className="space-y-3">
+              {q.options.map((opt) => {
+                const disabled = invalidGrainCodes(translucency).includes(opt.id as GrainCode);
+                const active = grain === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    disabled={disabled}
+                    onClick={() => { setGrain(opt.id as GrainCode); clearPrefillFor(q.id); }}
+                    className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
+                      disabled
+                        ? "border-border bg-muted/40 opacity-40 cursor-not-allowed"
+                        : active
+                        ? "border-gold bg-gold/10 shadow-md"
+                        : "border-border bg-card hover:border-gold/50 hover:shadow-md"
+                    }`}
+                  >
+                    <p className="text-sm font-bold text-foreground">{opt.label}</p>
+                    {opt.short && <p className="text-xs text-muted-foreground mt-1">{opt.short}</p>}
+                    {disabled && (
+                      <p className="text-xs text-muted-foreground mt-1 italic">
+                        Không phù hợp với độ xuyên sáng đã chọn
+                      </p>
+                    )}
+                    {active && opt.description && (
+                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{opt.description}</p>
+                    )}
+                  </button>
+                );
+              })}
+              {translucency && grain && classifyChung(translucency, grain) && (
+                <div className="rounded-lg border border-gold/40 bg-gold/10 p-3 text-center">
+                  <p className="text-sm text-foreground">
+                    Chủng xác định: <strong className="text-gold">{classifyChung(translucency, grain)}</strong>
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* v2 — Đặc điểm nội tại (multi-select) */}
+          {q.type === "multi-feature" && (
+            <div className="space-y-3">
+              <p className="text-xs text-muted-foreground text-center italic">
+                Có thể chọn nhiều đặc điểm, hoặc bỏ qua nếu không ghi nhận đặc điểm nào.
+              </p>
+              {(q.featureCodes || []).map((code) => {
+                const f = FEATURES[code];
+                if (!f) return null;
+                const active = features.includes(code);
+                return (
+                  <button
+                    key={code}
+                    onClick={() =>
+                      setFeatures((prev) =>
+                        prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+                      )
+                    }
+                    className={`w-full rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
+                      active ? "border-gold bg-gold/10 shadow-md" : "border-border bg-card hover:border-gold/50"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                          active ? "border-gold bg-gold text-primary-foreground" : "border-border"
+                        }`}
+                      >
+                        {active ? "✓" : ""}
+                      </span>
+                      <p className="text-sm font-bold text-foreground">{f.name}</p>
+                    </div>
+                    {active && (
+                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{f.description}</p>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -779,7 +902,9 @@ const Assessment = () => {
                 setSubChecks({});
                 setRingColors(Array(12).fill("#e5e7eb"));
                 setColorTones({});
-                setPatternData(EMPTY_PATTERN);
+                setFeatures([]);
+      setTranslucency(undefined);
+      setGrain(undefined);
                 setPrefilledFields(new Set());
                 setPrefillBanner(null);
                 setPreviewImg(null);

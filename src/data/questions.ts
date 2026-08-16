@@ -1,12 +1,10 @@
-import q1_dau from "@/assets/jade/q1_dau.png";
-import q1_nep from "@/assets/jade/q1_nep.png";
-import q1_nbang from "@/assets/jade/q1_nbang.png";
-import q2_dau from "@/assets/jade/q2_dau.png";
-import q2_nep from "@/assets/jade/q2_nep.png";
-import q2_bang from "@/assets/jade/q2_bang.png";
-import q2_nbang from "@/assets/jade/q2_nbang.png";
-import q5_san_lom from "@/assets/jade/q5_san_lom.png";
-import q5_vet_nut from "@/assets/jade/q5_vet_nut.png";
+import {
+  TRANSLUCENCY_OPTIONS,
+  TRANSLUCENCY_QUESTION,
+  GRAIN_OPTIONS,
+  GRAIN_QUESTION,
+  FEATURE_GROUPS,
+} from "@/content/jadeContent";
 import shape_dua from "@/assets/jade/shape_dua.png";
 import shape_he from "@/assets/jade/shape_he.png";
 import shape_vuong from "@/assets/jade/shape_vuong.png";
@@ -16,19 +14,21 @@ export interface QuestionOption {
   id: string;
   label: string;
   description?: string;
+  short?: string;
   multiplier?: number;
   image?: string;
 }
 
 export type QuestionType =
   | "single-choice"
+  | "translucency"
+  | "grain"
+  | "multi-feature"
   | "color-ring"
   | "number-input"
   | "multi-number"
   | "card-style"
-  | "checkbox-legal"
-  | "surface-check"
-  | "pattern-structure";
+  | "checkbox-legal";
 
 export interface NumberField {
   key: number;
@@ -46,6 +46,8 @@ export interface Question {
   type: QuestionType;
   title: string;
   hint: string;
+  note?: string;
+  featureCodes?: string[];
   options: QuestionOption[];
   rescueButton?: { label: string; autoSelectId: string };
   subCheckbox?: { label: string; triggeredByIds: string[] };
@@ -61,7 +63,7 @@ export interface Question {
 export const SECTIONS = [
   { before: 1, label: "I. CỐT NGỌC (Kết cấu & Độ trong)" },
   { before: 4, label: "II. SẮC DIỆN (Màu sắc)" },
-  { before: 7, label: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)" },
+  { before: 20, label: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)" },
   { before: 10, label: "IV. KÍCH THƯỚC & KIỂU DÁNG" },
   { before: 12, label: "V. BỐI CẢNH GIAO DỊCH" },
 ];
@@ -71,27 +73,31 @@ export const questions: Question[] = [
   {
     id: 1,
     category: "I. CỐT NGỌC (Kết cấu & Độ trong)",
-    type: "single-choice",
-    title: "Hạt tinh thể ngọc trông như thế nào?",
-    hint: "Soi đèn pin từ cạnh cách 1-2cm vào vòng, không chiếu thẳng vào mắt.",
-    options: [
-      { id: "1a", label: "Hạt thô, nhìn rõ cấu trúc lấm tấm", description: "Xếp chồng như đậu nấu chín", multiplier: 0.65, image: q1_dau },
-      { id: "1b", label: "Không thấy hạt riêng lẻ, cấu trúc mịn, đặc", description: "Giống sứ hoặc cháo nhuyễn", multiplier: 0.85, image: q1_nep },
-      { id: "1c", label: "Tinh thể mịn như sương vừa bị đông lại", description: "Giống bông tuyết bị làm mờ đi trong kính", multiplier: 1.0, image: q1_nbang },
-    ],
+    type: "translucency",
+    title: TRANSLUCENCY_QUESTION.title,
+    hint: TRANSLUCENCY_QUESTION.hint,
+    note: TRANSLUCENCY_QUESTION.note,
+    options: TRANSLUCENCY_OPTIONS.map((o) => ({
+      id: o.code,
+      label: o.label,
+      description: o.description,
+      short: o.short,
+      image: o.image,
+    })),
   },
   {
     id: 2,
     category: "I. CỐT NGỌC (Kết cấu & Độ trong)",
-    type: "single-choice",
-    title: "Độ xuyên sáng (chất ngọc) trông thế nào?",
-    hint: "Hướng vòng về phía cửa sổ (không phải chiếu ánh sáng trực diện).",
-    options: [
-      { id: "2a", label: "Đục hoàn toàn, không xuyên sáng", description: "Nhìn có cảm giác khô với hạt lấm tấm", multiplier: 0.5, image: q2_dau },
-      { id: "2b", label: "Đục gần như hoàn toàn", description: "Chỉ lóe sáng nhẹ khi đưa sát nguồn sáng", multiplier: 0.65, image: q2_nep },
-      { id: "2c", label: "Xuyên sáng vừa phải", description: "Nhìn như nước vo gạo; áp sát ngón tay phía sau thấy bóng mờ", multiplier: 0.85, image: q2_nbang },
-      { id: "2d", label: "Xuyên sáng rõ, có chiều sâu", description: "Như viên đá lạnh; thấy đường viền ngón tay tương đối rõ", multiplier: 1.0, image: q2_bang },
-    ],
+    type: "grain",
+    title: GRAIN_QUESTION.title,
+    hint: GRAIN_QUESTION.hint,
+    options: GRAIN_OPTIONS.map((o) => ({
+      id: o.code,
+      label: o.label,
+      description: o.description,
+      short: o.short,
+      image: o.image,
+    })),
   },
   {
     id: 3,
@@ -117,27 +123,18 @@ export const questions: Question[] = [
     options: [],
   },
 
-  // ===== III. NỘI TẠI =====
-  {
-    id: 7,
+  // ===== III. NỘI TẠI — multi-select theo FEATURE_GROUPS (v2) =====
+  ...FEATURE_GROUPS.map((g, i) => ({
+    id: 20 + i,
     category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
-    type: "surface-check",
-    title: "1. Kiểm tra Bề Mặt (Cảm giác tay)",
-    hint: "Dùng móng tay cà nhẹ quanh bản vòng (mặt trong và ngoài).",
-    options: [
-      { id: "7a", label: "Mượt hoàn toàn", description: "Không thấy vấp hay khựng ở đâu.", multiplier: 1.0 },
-      { id: "7b", label: "Vết sần/Lõm", description: "Cảm giác hơi hụt tay nhưng không sắc cạnh.", multiplier: 0.7, image: q5_san_lom },
-      { id: "7c", label: "Vết nứt cấn tay", description: "Móng tay bị vướng/vấp lại rõ rệt.", multiplier: 0.5, image: q5_vet_nut },
-    ],
-  },
-  {
-    id: 8,
-    category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
-    type: "pattern-structure",
-    title: "2. Kiểm tra Họa Tiết & Cấu Trúc (Soi đèn)",
-    hint: "Bấm vào (i) để xem thêm thông tin…",
+    type: "multi-feature" as const,
+    title: g.title,
+    hint: g.hint,
     options: [],
-  },
+    featureCodes: g.codes,
+  })),
+
+
 
   // ===== IV. KÍCH THƯỚC & KIỂU DÁNG =====
   {
