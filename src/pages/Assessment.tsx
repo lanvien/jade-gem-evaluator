@@ -7,8 +7,14 @@ import SectionDivider from "@/components/SectionDivider";
 import { ColorTone } from "@/components/ColorRing";
 import ColorRingAlerts from "@/components/assessment/ColorRingAlerts";
 import JadeCanvas, { JadeCanvasResult } from "@/components/JadeCanvas";
-import PatternStructure, { PatternData } from "@/components/assessment/PatternStructure";
 import ImageLightbox from "@/components/assessment/ImageLightbox";
+import {
+  FEATURES,
+  invalidGrainCodes,
+  classifyChung,
+  type GrainCode,
+  type TranslucencyCode,
+} from "@/content/jadeContent";
 import { useJadeVision, type VisionResult } from "@/hooks/useJadeVision";
 
 const TOTAL = questions.length;
@@ -100,11 +106,6 @@ const NumberInputQuestion = ({
     )}
   </div>
 );
-
-const EMPTY_PATTERN: PatternData = {
-  groupA: {},
-  groupB: {},
-};
 
 /* ── Main Component ── */
 const Assessment = () => {
@@ -273,8 +274,10 @@ const Assessment = () => {
     localStorage.setItem("jade-color-tones", JSON.stringify(colorTones));
     localStorage.setItem("jade-number-inputs", JSON.stringify(numberInputs));
     localStorage.setItem("jade-sub-checks", JSON.stringify(subChecks));
-    localStorage.setItem("jade-pattern-data", JSON.stringify(patternData));
-  }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, patternData]);
+    localStorage.setItem("jade-features", JSON.stringify(features));
+    if (translucency) localStorage.setItem("jade-translucency", translucency);
+    if (grain) localStorage.setItem("jade-grain", grain);
+  }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, features, translucency, grain]);
 
   // Exit-count: if user leaves mid-flow >= 2 times, auto-reset on next mount
   useEffect(() => {
@@ -290,7 +293,9 @@ const Assessment = () => {
       setSubChecks({});
       setRingColors(Array(12).fill("#e5e7eb"));
       setColorTones({});
-      setPatternData(EMPTY_PATTERN);
+      setFeatures([]);
+      setTranslucency(undefined);
+      setGrain(undefined);
       setPrefilledFields(new Set());
       setPrefillBanner(null);
       setPreviewImg(null);
@@ -322,14 +327,14 @@ const Assessment = () => {
     const questionNumber = qIndex + 1;
 
     if (questionNumber === TOTAL) {
-      const surveyData = { answers, ringColors, colorTones, numberInputs, subChecks, patternData };
+      const surveyData = { answers, ringColors, colorTones, numberInputs, subChecks, translucency, grain, features };
       localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
       localStorage.removeItem("jade-exit-count");
       navigate("/results");
       return;
     }
     if (stepIdx < steps.length - 1) setStepIdx((s) => s + 1);
-  }, [stepIdx, steps, answers, ringColors, colorTones, numberInputs, subChecks, patternData, navigate]);
+  }, [stepIdx, steps, answers, ringColors, colorTones, numberInputs, subChecks, translucency, grain, features, navigate]);
 
   if (loading) return <LoadingScreen onDone={() => setLoading(false)} />;
 
@@ -344,7 +349,7 @@ const Assessment = () => {
   const selectedAnswer = answers[q.id];
   const questionNumber = qIndex + 1;
 
-  const isAutoAdvance = q.type === "single-choice" || q.type === "surface-check" || q.type === "card-style";
+  const isAutoAdvance = q.type === "single-choice" || q.type === "card-style";
 
   const handleSelect = (optionId: string) => {
     setAnswers((prev) => ({ ...prev, [q.id]: optionId }));
@@ -360,7 +365,9 @@ const Assessment = () => {
             colorTones,
             numberInputs,
             subChecks,
-            patternData,
+            translucency,
+            grain,
+            features,
           };
           localStorage.setItem("jade-survey-data", JSON.stringify(surveyData));
           localStorage.removeItem("jade-exit-count");
@@ -388,12 +395,15 @@ const Assessment = () => {
         return (q.inputFields || []).every(
           (f) => numberInputs[f.key] && parseFloat(numberInputs[f.key]) > 0,
         );
-      case "pattern-structure":
+      case "translucency":
+        return !!translucency;
+      case "grain":
+        return !!grain && !!classifyChung(translucency, grain);
+      case "multi-feature":
         return true;
       case "checkbox-legal":
       case "single-choice":
       case "card-style":
-      case "surface-check":
         return !!selectedAnswer;
       default:
         return !!selectedAnswer;
@@ -642,7 +652,7 @@ const Assessment = () => {
           )}
 
           {/* Single Choice & Surface Check & Checkbox Legal */}
-          {(q.type === "single-choice" || q.type === "checkbox-legal" || q.type === "surface-check") && (
+          {(q.type === "single-choice" || q.type === "checkbox-legal") && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {q.options.map((opt) => {
                 // Hide images entirely for Q3 (id === 3)
@@ -788,7 +798,9 @@ const Assessment = () => {
                 setSubChecks({});
                 setRingColors(Array(12).fill("#e5e7eb"));
                 setColorTones({});
-                setPatternData(EMPTY_PATTERN);
+                setFeatures([]);
+      setTranslucency(undefined);
+      setGrain(undefined);
                 setPrefilledFields(new Set());
                 setPrefillBanner(null);
                 setPreviewImg(null);
