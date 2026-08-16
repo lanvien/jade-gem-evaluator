@@ -14,6 +14,7 @@ export interface QuestionOption {
   id: string;
   label: string;
   description?: string;
+  short?: string;
   multiplier?: number;
   image?: string;
 }
