@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Copy, Check, RotateCcw, Pencil, Download, Share2, Camera } from "lucide-react";
 import { buildJadeInputFromSurvey, formatVND } from "@/lib/pricingEngine";
 import { buildResultV2 } from "@/lib/jadeResultV2";
+import { pickNguPhe, pickHashtags } from "@/lib/tierNarrative";
 import { useSaveToCop } from "@/lib/copNgoc";
 import { resetAssessmentSession } from "@/lib/resetAssessment";
 import { addToVault, buildSegments, nanoId } from "@/lib/jadeVault";
@@ -54,6 +55,24 @@ export default function Results() {
   const r = useMemo(() => {
     try { return buildResultV2(surveyData); } catch { return null; }
   }, [surveyData]);
+
+  // Narrative (ngự phê + hashtag) chọn ĐÚNG MỘT LẦN khi trang load
+  const [narrative] = useState(() => {
+    if (!r) return null;
+    try {
+      const input = buildJadeInputFromSurvey(surveyData);
+      const { tier, quote } = pickNguPhe(input.chungPeak);
+      const [colorTag, shapeTag] = pickHashtags({
+        dominantColor: r.pricing.dominantColor,
+        flaws: [...(surveyData.features ?? []), ...input.flaws],
+        shape: input.shape,
+      });
+      return { tier, quote, tags: [colorTag, shapeTag].filter(Boolean) as string[] };
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  });
 
   const ringCode = r?.resultId ?? "00000";
   const [copied, setCopied] = useState(false);
@@ -210,7 +229,7 @@ export default function Results() {
             <div className="mt-6 rounded-md border border-gold/40 bg-gold/10 p-4">
               <p className="text-sm leading-relaxed text-foreground/85 text-center">
                 <span className="font-semibold">Ngự phê:</span>{" "}
-                <span className="italic">"{r.nguPhe}"</span>
+                <span className="italic">"{narrative?.quote ?? r.nguPhe}"</span>
               </p>
             </div>
           </div>
@@ -224,7 +243,7 @@ export default function Results() {
             </h1>
 
             <div className="flex flex-wrap gap-2 mt-3">
-              {r.hashtags.map((tag) => (
+              {(narrative?.tags ?? []).map((tag) => (
                 <span key={tag} className="px-3 py-1 rounded-md bg-gold/15 border border-gold/40 text-xs md:text-sm text-gold-dark font-medium">
                   {tag}
                 </span>
