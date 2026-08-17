@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { questions, SECTIONS } from "@/data/questions";
+import { questions, SECTIONS, type FeatureItem } from "@/data/questions";
 import { ArrowLeft, ArrowRight, Lightbulb, ZoomIn, Sparkles, Upload, RotateCcw } from "lucide-react";
 import { resetAssessmentSession } from "@/lib/resetAssessment";
 import SectionDivider from "@/components/SectionDivider";
@@ -151,6 +151,11 @@ const Assessment = () => {
     const saved = localStorage.getItem("jade-features");
     return saved ? JSON.parse(saved) : [];
   });
+  const [featureQty, setFeatureQty] = useState<Record<string, "nhieu" | "it">>(() => {
+    const saved = localStorage.getItem("jade-feature-qty");
+    return saved ? JSON.parse(saved) : {};
+  });
+  const [activeFeatureTab, setActiveFeatureTab] = useState(0);
   const [lightboxImg, setLightboxImg] = useState<{ src: string; caption: string } | null>(null);
   const [prefilledFields, setPrefilledFields] = useState<Set<number>>(new Set());
   const [prefillBanner, setPrefillBanner] = useState<string[] | null>(null);
@@ -289,6 +294,7 @@ const Assessment = () => {
     localStorage.setItem("jade-number-inputs", JSON.stringify(numberInputs));
     localStorage.setItem("jade-sub-checks", JSON.stringify(subChecks));
     localStorage.setItem("jade-features", JSON.stringify(features));
+    localStorage.setItem("jade-feature-qty", JSON.stringify(featureQty));
     if (translucency) localStorage.setItem("jade-translucency", translucency);
     if (grain) localStorage.setItem("jade-grain", grain);
   }, [stepIdx, answers, ringColors, colorTones, numberInputs, subChecks, features, translucency, grain]);
@@ -414,6 +420,7 @@ const Assessment = () => {
       case "grain":
         return !!grain && !!classifyChung(translucency, grain);
       case "multi-feature":
+      case "feature-tabs":
         return true;
       case "checkbox-legal":
       case "single-choice":
@@ -857,6 +864,137 @@ const Assessment = () => {
                   </button>
                 );
               })}
+            </div>
+          )}
+
+          {/* v2 — Đặc điểm nội tại gộp 3 tab trong 1 bảng */}
+          {q.type === "feature-tabs" && (
+            <div className="space-y-4">
+              <div className="flex gap-2 border-b border-border">
+                {(q.featureTabs || []).map((tab, i) => (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveFeatureTab(i)}
+                    className={`px-3 md:px-4 py-2 text-xs md:text-sm font-semibold -mb-px border-b-2 transition-colors ${
+                      activeFeatureTab === i
+                        ? "border-gold text-gold"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {(() => {
+                const tab = (q.featureTabs || [])[activeFeatureTab];
+                if (!tab) return null;
+                const toggleCode = (code: string) =>
+                  setFeatures((prev) =>
+                    prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+                  );
+                const pickVariant = (item: FeatureItem, code: string) =>
+                  setFeatures((prev) => {
+                    const others = prev.filter(
+                      (c) => !(item.variants || []).some((v) => v.code === c),
+                    );
+                    return prev.includes(code) ? others : [...others, code];
+                  });
+
+                return (
+                  <div className="space-y-3">
+                    <p className="text-xs text-muted-foreground italic">{tab.hint}</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      Có thể chọn nhiều đặc điểm, hoặc bỏ qua nếu không ghi nhận đặc điểm nào.
+                    </p>
+                    {tab.items.map((item) => {
+                      const codes = item.variants
+                        ? item.variants.map((v) => v.code)
+                        : item.code
+                        ? [item.code]
+                        : [];
+                      const activeCode = codes.find((c) => features.includes(c));
+                      const active = !!activeCode;
+                      const desc = activeCode ? FEATURES[activeCode]?.description : undefined;
+                      return (
+                        <div
+                          key={item.key}
+                          className={`rounded-lg border-2 p-4 transition-all ${
+                            active ? "border-gold bg-gold/10 shadow-md" : "border-border bg-card"
+                          }`}
+                        >
+                          <button
+                            onClick={() => {
+                              if (item.code) toggleCode(item.code);
+                              else if (active) {
+                                setFeatures((prev) => prev.filter((c) => !codes.includes(c)));
+                              } else if (item.variants) {
+                                pickVariant(item, item.variants[0].code);
+                              }
+                            }}
+                            className="flex w-full items-center gap-2 text-left"
+                          >
+                            <span
+                              className={`inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] ${
+                                active ? "border-gold bg-gold text-primary-foreground" : "border-border"
+                              }`}
+                            >
+                              {active ? "✓" : ""}
+                            </span>
+                            <span className="text-sm font-bold text-foreground">{item.name}</span>
+                          </button>
+
+                          {active && item.variants && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {item.variants.map((v) => (
+                                <button
+                                  key={v.code}
+                                  onClick={() => pickVariant(item, v.code)}
+                                  className={`rounded-md border px-3 py-1 text-xs font-medium transition-colors ${
+                                    features.includes(v.code)
+                                      ? "border-gold bg-gold text-primary-foreground"
+                                      : "border-border text-foreground hover:border-gold/60"
+                                  }`}
+                                >
+                                  {v.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {active && item.quantity && (
+                            <div className="mt-2 flex flex-wrap items-center gap-2">
+                              <span className="text-xs text-muted-foreground">Mức độ:</span>
+                              {(["it", "nhieu"] as const).map((qv) => (
+                                <button
+                                  key={qv}
+                                  onClick={() =>
+                                    setFeatureQty((prev) => ({
+                                      ...prev,
+                                      [item.key]: prev[item.key] === qv ? undefined : qv,
+                                    } as Record<string, "nhieu" | "it">))
+                                  }
+                                  className={`rounded-md border px-3 py-1 text-xs font-medium transition-colors ${
+                                    featureQty[item.key] === qv
+                                      ? "border-gold bg-gold text-primary-foreground"
+                                      : "border-border text-foreground hover:border-gold/60"
+                                  }`}
+                                >
+                                  {qv === "it" ? "Ít" : "Nhiều"}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
+                          {active && desc && (
+                            <p className="mt-2 text-xs leading-relaxed text-foreground/70">{desc}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
             </div>
           )}
 
