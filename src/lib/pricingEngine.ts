@@ -78,6 +78,7 @@ export interface PricingResult {
   fomoDiscount: number;
   warnings: string[];
   colorLabel: string;
+  dominantColor: ColorName;
   chungLabel: string;
   aestheticGroup: AestheticGroup;
   aestheticLabel: string;
@@ -574,6 +575,7 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
     fomoDiscount,
     warnings,
     colorLabel: COLOR_LABEL[maxColorName] ?? maxColorName,
+    dominantColor: maxColorName,
     chungLabel: CHUNG_LABEL[input.chungPeak],
     aestheticGroup,
     aestheticLabel,
