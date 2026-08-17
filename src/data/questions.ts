@@ -3,7 +3,6 @@ import {
   TRANSLUCENCY_QUESTION,
   GRAIN_OPTIONS,
   GRAIN_QUESTION,
-  FEATURE_GROUPS,
 } from "@/content/jadeContent";
 import shape_dua from "@/assets/jade/shape_dua.png";
 import shape_he from "@/assets/jade/shape_he.png";
@@ -24,6 +23,7 @@ export type QuestionType =
   | "translucency"
   | "grain"
   | "multi-feature"
+  | "feature-tabs"
   | "color-ring"
   | "number-input"
   | "multi-number"
@@ -40,6 +40,92 @@ export interface NumberField {
   helpText?: string;
 }
 
+/** UI grouping cho câu hỏi đặc điểm (gộp 3 nhóm vào 1 bảng, 3 tab).
+ *  Mọi `code` phải tồn tại trong FEATURES của jadeContent.ts — không tạo nội dung mới. */
+export interface FeatureVariant {
+  label: string;
+  code: string;
+}
+export interface FeatureItem {
+  key: string;
+  name: string;
+  /** code duy nhất (item đơn) */
+  code?: string;
+  /** hoặc các biến thể — chọn 1 */
+  variants?: FeatureVariant[];
+  /** hỏi thêm mức độ nhiều/ít (chỉ lưu tham khảo, không đổi content mapping) */
+  quantity?: boolean;
+}
+export interface FeatureTab {
+  key: string;
+  label: string;
+  hint: string;
+  items: FeatureItem[];
+}
+
+export const FEATURE_TABS: FeatureTab[] = [
+  {
+    key: "hoa-van",
+    label: "Hoa văn & chỉ màu",
+    hint: "Có những đặc điểm nào xuất hiện trên vòng?",
+    items: [
+      { key: "hoa_bay", name: "Hoa bay", code: "hoa_bay" },
+      { key: "chi_mau", name: "Chỉ màu", code: "chi_mau" },
+      { key: "gan_non", name: "Gân ngọc non", code: "gan_non" },
+      { key: "gan_gia", name: "Gân ngọc già", code: "gan_gia" },
+    ],
+  },
+  {
+    key: "so",
+    label: "Sớ",
+    hint: "Vòng có sớ nào không?",
+    items: [
+      { key: "so_bong", name: "Sớ bông", code: "so_bong" },
+      { key: "so_ngan", name: "Sớ ngắn", code: "so_ngan" },
+      {
+        key: "so_am",
+        name: "Sớ âm",
+        variants: [
+          { label: "Ngắn (< 3cm)", code: "so_am" },
+          { label: "Dài (> 3cm)", code: "so_am_dai" },
+        ],
+        quantity: true,
+      },
+      { key: "so_can", name: "Sớ cấn", code: "so_can", quantity: true },
+      { key: "so_luoi_ga", name: "Sớ lưỡi gà", code: "so_luoi_ga", quantity: true },
+      {
+        key: "so_doc",
+        name: "Sớ dọc",
+        variants: [
+          { label: "Ngắn", code: "so_doc" },
+          { label: "Dài", code: "so_doc_dai" },
+        ],
+        quantity: true,
+      },
+      { key: "so_cheo", name: "Sớ chéo", code: "so_cheo" },
+      { key: "so_ngang", name: "Sớ ngang", code: "so_ngang" },
+    ],
+  },
+  {
+    key: "be-mat",
+    label: "Khuyết điểm bề mặt",
+    hint: "Vòng có khuyết điểm bề mặt nào không?",
+    items: [
+      { key: "mat_cat", name: "Mắt cát", code: "mat_cat" },
+      {
+        key: "vet_san_lom",
+        name: "Vết sần / lõm",
+        variants: [
+          { label: "Nhẹ", code: "vet_san_lom_nhe" },
+          { label: "Vừa", code: "vet_san_lom_vua" },
+          { label: "Rõ", code: "vet_san_lom_ro" },
+        ],
+      },
+      { key: "vet_nut", name: "Vết nứt", code: "vet_nut" },
+    ],
+  },
+];
+
 export interface Question {
   id: number;
   category: string;
@@ -48,6 +134,7 @@ export interface Question {
   hint: string;
   note?: string;
   featureCodes?: string[];
+  featureTabs?: FeatureTab[];
   options: QuestionOption[];
   rescueButton?: { label: string; autoSelectId: string };
   subCheckbox?: { label: string; triggeredByIds: string[] };
@@ -123,16 +210,16 @@ export const questions: Question[] = [
     options: [],
   },
 
-  // ===== III. NỘI TẠI — multi-select theo FEATURE_GROUPS (v2) =====
-  ...FEATURE_GROUPS.map((g, i) => ({
-    id: 20 + i,
+  // ===== III. NỘI TẠI — 1 câu hỏi, 3 tab (v2) =====
+  {
+    id: 20,
     category: "III. NỘI TẠI (Cấu Trúc & Tự Nhiên)",
-    type: "multi-feature" as const,
-    title: g.title,
-    hint: g.hint,
+    type: "feature-tabs",
+    title: "Đặc điểm nội tại của vòng",
+    hint: "Chọn theo từng nhóm bên dưới; có thể bỏ qua nếu không ghi nhận đặc điểm nào.",
     options: [],
-    featureCodes: g.codes,
-  })),
+    featureTabs: FEATURE_TABS,
+  },
 
 
 
