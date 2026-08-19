@@ -1,7 +1,12 @@
 // ============================================================
-// HIỂU NGỌC — CONTENT CONFIG (v2)
+// HIỂU NGỌC — CONTENT CONFIG (v2.1 — synced với tierNarrative.ts)
 // Toàn bộ nội dung hiển thị tách khỏi logic component.
 // Logic chỉ: đọc field code → tra bảng ở đây → render.
+//
+// ⚠️ File này là NGUỒN GỐC (canonical source) cho ColorName / Shape.
+// Nếu pricingEngine.ts đang định nghĩa lại 2 type này, đảm bảo
+// literal union khớp 100% ký tự với export bên dưới — đặc biệt
+// "Lão Lam Thuỷ" dùng dấu "uỷ" (không phải "ủy").
 // ============================================================
 
 import q1_dau from "@/assets/jade/q1_dau.png";
@@ -205,6 +210,7 @@ export const TIER_LABEL: Record<TierKey, string> = {
 
 /* ─────────────────────────────────────────────
    D. NGỰ PHÊ (random 1/pool theo tier, seeded)
+   — nguyên văn từ tierNarrative.ts, đã fix lỗi encoding dấu ngoặc kép
    ───────────────────────────────────────────── */
 export const NGU_PHE: Record<TierKey, string[]> = {
   "thuong-tai": [
@@ -217,6 +223,7 @@ export const NGU_PHE: Record<TierKey, string[]> = {
   ],
   "phi-tan": [
     "Thần thái \u201cnửa kín nửa mở\u201d, trong trẻo vừa đủ xài. Mấy chị hay có câu miệng \u201cem đeo cho vui thôi\u201d, nhưng mắt thì liên tục liếc xuống cổ tay ngắm nghía.",
+    "Mờ mờ ảo ảo, trong trẻo như sương sớm. Đeo vào tự nhiên thấy dẹp bớt tính nết tào lao, chuyển sang sống có gu hẳn.",
   ],
   "quy-phi": [
     "Khí chất sương mai, đang trên đà đắc sủng. \u201cEm không cố tình nổi bật đâu, tại chiếc vòng nó tự bắt đèn đó chứ.\u201d",
@@ -229,29 +236,210 @@ export const NGU_PHE: Record<TierKey, string[]> = {
 };
 
 /* ─────────────────────────────────────────────
-   E. HASHTAGS — luôn đúng 2: 1 màu (hoặc hoa bay) + 1 dáng
+   E. MÀU SẮC & DÁNG (ColorName / Shape) — canonical source
+   Đây là nguồn gốc literal union — nếu pricingEngine.ts định nghĩa
+   lại, phải khớp 100% ký tự (đặc biệt "Lão Lam Thuỷ" dấu "uỷ").
    ───────────────────────────────────────────── */
-export type ColorFamily = "tim" | "luc" | "khong_mau" | "trang" | "do_cam" | "vang";
+export type ColorName =
+  // LỤC
+  | "Đế Vương Lục"
+  | "Chính Dương Lục"
+  | "Xanh Cay"
+  | "Xanh Ngọt"
+  | "Lục Táo"
+  | "Đậu Lục"
+  | "Thanh Thủy Lục"
+  | "Xanh Dầu"
+  | "Hồi Lục"
+  // TÍM
+  | "Tử La Lan"
+  | "Tím Cà"
+  | "Tím Lam"
+  // LAM
+  | "Lam Thiên Không"
+  | "Lam Thanh"
+  | "Lão Lam Thuỷ" // confirmed spelling: "Thuỷ" (dấu uỷ)
+  // HỒNG
+  | "Hồng Phỉ"
+  // HOÀNG
+  | "Hoàng Tông Phỉ"
+  // BẠCH
+  | "Bạch Nguyệt Quang"
+  | "Trắng Cháo"
+  // HẮC
+  | "Mặc Thúy"
+  | "Gà Đen"
+  // TRUNG TÍNH
+  | "Xám";
 
-export const HASHTAG_COLOR: Record<ColorFamily, string[]> = {
-  tim: ["#Sắc tím dịu dàng"],
-  luc: ["#Sắc lục phồn vinh"],
-  khong_mau: ["#Tuyết giữa mùa hạ"],
-  trang: ["#Sương trắng tinh khôi"],
-  do_cam: ["#Sắc thắm quyến rũ", "#Huyết ngọc mê đắm"],
-  vang: ["#Ánh kim rực rỡ", "#Giọt nắng sang mùa", "#Hoàng kim phú quý"],
+export type Shape = "Bản Đũa" | "Bản Dẹt" | "Bản Vuông" | "Khắc Hoa";
+
+export type ColorFamily =
+  | "Tím"
+  | "Lục"
+  | "Lam"
+  | "Hồng"
+  | "Hoàng"
+  | "Bạch"
+  | "Hắc"
+  | "TrungTính"
+  | "KhongMau";
+
+export const COLOR_FAMILY_MAP: Record<ColorName, ColorFamily> = {
+  "Đế Vương Lục": "Lục",
+  "Chính Dương Lục": "Lục",
+  "Xanh Cay": "Lục",
+  "Xanh Ngọt": "Lục",
+  "Lục Táo": "Lục",
+  "Đậu Lục": "Lục",
+  "Thanh Thủy Lục": "Lục",
+  "Xanh Dầu": "Lục",
+  "Hồi Lục": "Lục",
+
+  "Tử La Lan": "Tím",
+  "Tím Cà": "Tím",
+  "Tím Lam": "Tím",
+
+  "Lam Thiên Không": "Lam",
+  "Lam Thanh": "Lam",
+  "Lão Lam Thuỷ": "Lam",
+
+  "Hồng Phỉ": "Hồng",
+
+  "Hoàng Tông Phỉ": "Hoàng",
+
+  "Bạch Nguyệt Quang": "Bạch",
+  "Trắng Cháo": "Bạch",
+
+  "Mặc Thúy": "Hắc",
+  "Gà Đen": "Hắc",
+
+  "Xám": "TrungTính",
+};
+
+export const COLOR_FAMILY_HASHTAGS: Record<ColorFamily, string[]> = {
+  "Tím": ["#Sắc tím dịu dàng", "#Tử sắc mộng mơ", "#Tím ngọc thanh tao"],
+  "Lục": ["#Sắc lục phồn vinh", "#Lục ngọc sinh khí", "#Thanh sắc ngọc xanh"],
+  "Lam": ["#Lam sắc thanh nhã", "#Lam ngọc tĩnh lặng", "#Sắc lam trong trẻo"],
+  "Hồng": ["#Sắc thắm quyến rũ", "#Huyết ngọc mê đắm", "#Hồng ngọc kiều diễm"],
+  "Hoàng": ["#Ánh kim rực rỡ", "#Giọt nắng sang mùa", "#Hoàng kim phú quý"],
+  "Bạch": ["#Sương trắng tinh khôi", "#Bạch sắc thanh sạch", "#Ngọc trắng thuần khiết"],
+  "Hắc": ["#Mặc sắc uy nghi", "#Hắc ngọc trầm mặc", "#Sắc tối huyền bí"],
+  "TrungTính": ["#Sắc xám điềm tĩnh", "#Nét ngọc trầm tĩnh", "#Thanh sắc trung hòa"],
+  // Không có ColorName nào map vào "KhongMau" hiện tại — family này chỉ có ý
+  // nghĩa nếu trigger từ translucency (T1 - trong suốt), chưa wiring trigger đó.
+  "KhongMau": ["#Tuyết giữa mùa hạ"],
 };
 
 export const HASHTAG_HOA_BAY = "#Hoa bay yêu kiều";
 
-export type ShapeType = "ban_dua" | "ban_he" | "ban_vuong" | "cham_khac";
-
-export const HASHTAG_SHAPE: Record<ShapeType, string[]> = {
-  ban_dua: ["#Tròn đầy viên mãn", "#Duyên nguyên an lành"],
-  ban_he: ["#Tròn đầy viên mãn", "#Duyên nguyên an lành"],
-  ban_vuong: ["#Tròn đầy viên mãn", "#Duyên nguyên an lành"],
-  cham_khac: ["#Chạm khắc tinh tế"],
+// CONFIRMED — đủ 4/4 dáng, không còn shape nào ở trạng thái "proposed".
+export const SHAPE_HASHTAGS: Record<Shape, string[]> = {
+  "Bản Đũa": ["#Tròn đầy viên mãn", "#Duyên nguyên an lành"],
+  "Bản Dẹt": ["#Thanh nhã duyên dáng", "#Nét ngọc thanh thoát"],
+  "Bản Vuông": ["#Vững vàng phú quý", "#Khuôn ngọc đoan trang"],
+  "Khắc Hoa": ["#Chạm khắc tinh tế"],
 };
+
+function pick<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/**
+ * Trả về đúng 2 hashtag: [colorTag, shapeTag].
+ * Hoa bay KHÔNG override màu (spec đã chốt) → flaws không phải input.
+ * Full 22 màu / 4 dáng — vẫn giữ throw phòng khi ColorName/Shape mở
+ * rộng thêm trong tương lai mà quên update map.
+ */
+export function pickHashtags(params: {
+  dominantColor: ColorName;
+  shape: Shape;
+}): [string, string] {
+  const { dominantColor, shape } = params;
+
+  const family = COLOR_FAMILY_MAP[dominantColor];
+  if (!family) {
+    throw new Error(`Missing COLOR_FAMILY_MAP entry for color: ${dominantColor}`);
+  }
+
+  const colorPool = COLOR_FAMILY_HASHTAGS[family];
+  if (!colorPool?.length) {
+    throw new Error(`Missing hashtag pool for color family: ${family}`);
+  }
+
+  const shapePool = SHAPE_HASHTAGS[shape];
+  if (!shapePool?.length) {
+    throw new Error(`Missing hashtag pool for shape: ${shape}`);
+  }
+
+  return [pick(colorPool), pick(shapePool)];
+}
+
+/* ─────────────────────────────────────────────
+   E2. COLOR DICTIONARY (Sắc Diện narrative) — full 22/22
+   defaultNarrative: nguyên văn từ content pool.
+   ───────────────────────────────────────────── */
+export type ColorTone = "nhạt" | "vừa" | "tươi" | "đậm";
+
+export interface ColorDictionaryEntry {
+  name: ColorName;
+  family: ColorFamily;
+  tone: ColorTone; // DEFAULT tone — user input override, xem getEffectiveTone()
+  defaultNarrative: string;
+}
+
+export const COLOR_DICTIONARY: Record<ColorName, ColorDictionaryEntry> = {
+  "Đế Vương Lục": { name: "Đế Vương Lục", family: "Lục", tone: "đậm", defaultNarrative: "sắc lục trầm sâu, uy lực và giàu sức hiện diện" },
+  "Chính Dương Lục": { name: "Chính Dương Lục", family: "Lục", tone: "tươi", defaultNarrative: "sắc lục tươi sáng, rực rỡ và giàu sinh khí" },
+  "Xanh Cay": { name: "Xanh Cay", family: "Lục", tone: "tươi", defaultNarrative: "sắc xanh sống động, trẻ trung và giàu năng lượng" },
+  "Xanh Ngọt": { name: "Xanh Ngọt", family: "Lục", tone: "nhạt", defaultNarrative: "sắc xanh dịu, sáng và trong trẻo" },
+  "Lục Táo": { name: "Lục Táo", family: "Lục", tone: "tươi", defaultNarrative: "sắc xanh sáng, tươi non và đầy sức sống" },
+  "Đậu Lục": { name: "Đậu Lục", family: "Lục", tone: "vừa", defaultNarrative: "sắc lục trầm mềm, kín đáo và tự nhiên" },
+  "Thanh Thủy Lục": { name: "Thanh Thủy Lục", family: "Lục", tone: "nhạt", defaultNarrative: "sắc xanh thanh nhẹ, gợi cảm giác mát và trong như nước" },
+  "Xanh Dầu": { name: "Xanh Dầu", family: "Lục", tone: "đậm", defaultNarrative: "sắc xanh trầm, đặc biệt và có cá tính" },
+  "Hồi Lục": { name: "Hồi Lục", family: "Lục", tone: "vừa", defaultNarrative: "sắc xanh pha trầm dịu, điềm tĩnh và cổ điển" },
+  "Tử La Lan": { name: "Tử La Lan", family: "Tím", tone: "nhạt", defaultNarrative: "sắc tím mềm mại, thanh tao và có nét mộng" },
+  "Tím Cà": { name: "Tím Cà", family: "Tím", tone: "đậm", defaultNarrative: "sắc tím đậm, trầm và giàu chiều sâu" },
+  "Tím Lam": { name: "Tím Lam", family: "Tím", tone: "đậm", defaultNarrative: "sắc giao thoa giữa tím và lam, sâu và thanh" },
+  "Lam Thiên Không": { name: "Lam Thiên Không", family: "Lam", tone: "nhạt", defaultNarrative: "sắc lam sáng, thanh thoát và nhẹ nhàng" },
+  "Lam Thanh": { name: "Lam Thanh", family: "Lam", tone: "vừa", defaultNarrative: "sắc lam dịu, cân bằng giữa tươi sáng và trầm tĩnh" },
+  "Lão Lam Thuỷ": { name: "Lão Lam Thuỷ", family: "Lam", tone: "đậm", defaultNarrative: "sắc lam trầm, mát và có chiều sâu" },
+  "Hồng Phỉ": { name: "Hồng Phỉ", family: "Hồng", tone: "tươi", defaultNarrative: "sắc hồng ấm, giàu sức sống và mềm mại" },
+  "Hoàng Tông Phỉ": { name: "Hoàng Tông Phỉ", family: "Hoàng", tone: "đậm", defaultNarrative: "sắc vàng ấm, sang trọng và cổ điển" },
+  "Mặc Thúy": { name: "Mặc Thúy", family: "Hắc", tone: "đậm", defaultNarrative: "sắc tối sâu, trầm mặc và giàu cá tính" },
+  "Bạch Nguyệt Quang": { name: "Bạch Nguyệt Quang", family: "Bạch", tone: "nhạt", defaultNarrative: "sắc trắng sáng, thanh sạch và nhẹ nhàng" },
+  "Trắng Cháo": { name: "Trắng Cháo", family: "Bạch", tone: "nhạt", defaultNarrative: "sắc trắng dịu, đục nhẹ và mềm mại" },
+  "Gà Đen": { name: "Gà Đen", family: "Hắc", tone: "đậm", defaultNarrative: "sắc tối trầm, mạnh và giàu tương phản" },
+  "Xám": { name: "Xám", family: "TrungTính", tone: "vừa", defaultNarrative: "sắc trung tính, điềm tĩnh và làm nổi bật cấu trúc" },
+};
+
+/**
+ * userTone luôn override default tone của dictionary — không bao giờ
+ * dùng ngược lại. Đây là input do user chọn trong survey (toneLevel/tones).
+ */
+export function getEffectiveTone(color: ColorName, userTone?: ColorTone): ColorTone {
+  return userTone ?? COLOR_DICTIONARY[color].tone;
+}
+
+/* ─────────────────────────────────────────────
+   E3. SATURATION / DISTRIBUTION TEMPLATES — nguyên văn từ content pool
+   ───────────────────────────────────────────── */
+export const SATURATION_TEMPLATES = {
+  "nhạt": "Sắc độ nhẹ nhàng, tạo nên vẻ thanh thoát và dịu mắt.",
+  "vừa": "Sắc độ vừa phải, giữ được sự cân bằng giữa độ nổi bật và nét mềm mại.",
+  "tươi": "Sắc màu tươi sáng, tạo nên cảm giác giàu sức sống ngay từ ánh nhìn đầu tiên.",
+  "đậm": "Sắc độ đậm giúp màu có sức hiện diện rõ ràng và tạo chiều sâu thị giác mạnh hơn.",
+} as const;
+
+export const DISTRIBUTION_TEMPLATES = {
+  "đều": "Màu phân bố tương đối đồng đều, tạo nên tổng thể ổn định và hài hòa.",
+  "loang nhẹ": "Những chuyển sắc nhẹ khiến diện ngọc có chuyển động mà vẫn giữ được sự hài hòa.",
+  "loang mạnh": "Các vùng màu chuyển động rõ rệt, tạo nên một bố cục giàu biến hóa và khó lặp lại hoàn toàn.",
+  "thành mảng": "Những mảng màu tạo nên bố cục rõ ràng, khiến từng vùng sắc trở thành một phần của diện ngọc.",
+  "thành vệt": "Những vệt màu tự nhiên tạo nên hướng chuyển động cho bề mặt, khiến ánh nhìn không dừng lại ở một điểm duy nhất.",
+  "điểm xuyết": "Những vùng màu nhỏ xuất hiện như các điểm nhấn, tạo thêm nhịp điệu cho tổng thể.",
+  "chuyển màu": "Các sắc màu chuyển tiếp tự nhiên, tạo nên cảm giác liền mạch và giàu chiều sâu.",
+} as const;
 
 /* ─────────────────────────────────────────────
    F. STRUCTURAL FEATURES
