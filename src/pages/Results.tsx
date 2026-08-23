@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Copy, Check, RotateCcw, Pencil, Download, Share2, Camera } from "lucide-react";
 import { buildJadeInputFromSurvey, formatVND } from "@/lib/pricingEngine";
-import { buildResultV2 } from "@/lib/jadeResultV2";
+import { generateResultNarrative } from "@/lib/narrative";
 import { useSaveToCop } from "@/lib/copNgoc";
 import { resetAssessmentSession } from "@/lib/resetAssessment";
 import { addToVault, buildSegments, nanoId } from "@/lib/jadeVault";
@@ -21,6 +21,10 @@ import rankPhiTanLocked from "@/assets/jade/rank_phitan_locked.png";
 import rankQuyPhiLocked from "@/assets/jade/rank_quyphi_locked.png";
 import rankHoangHauLocked from "@/assets/jade/rank_hoanghau_locked.png";
 
+// TODO (đã note ở freeze trước): TITLES/TIERS/RARITY nên migrate vào
+// jadeContent.ts để mọi content nằm 1 chỗ. Giữ tạm ở đây vì chưa có
+// content pool đã duyệt cho riêng phần "royal title" — không phải quên,
+// là cố tình để lại cho đợt content sau, KHÔNG bịa thêm content mới ở đây.
 const TIERS = [
   { key: "thuong-tai", name: "Thường Tại", sub: "Chúng đậu", icon: rankThuongTai, locked: rankThuongTaiLocked },
   { key: "quy-nhan",   name: "Quý Nhân",   sub: "Nếp mịn",   icon: rankQuyNhan,   locked: rankQuyNhanLocked },
@@ -29,12 +33,12 @@ const TIERS = [
   { key: "hoang-hau",  name: "Hoàng Hậu",  sub: "Thuỷ tinh", icon: rankHoangHau,  locked: rankHoangHauLocked },
 ];
 
-const TITLES: Record<string, { royal: string; tag1: string; tag2: string }> = {
-  "thuong-tai": { royal: "Thường tại hiện tại", tag1: "#Sắc dịu nhẹ",  tag2: "#Mộc mạc thanh tao" },
-  "quy-nhan":   { royal: "Quý nhân hiện tại",   tag1: "#Sắc ấm áp",    tag2: "#Ôn nhu hiền thục" },
-  "phi-tan":    { royal: "Ái phi hiện tại",     tag1: "#Sắc tím dịu dàng", tag2: "#Hoa bay yêu kiều" },
-  "quy-phi":    { royal: "Quý phi hiện tại",    tag1: "#Sắc lục vượng khí", tag2: "#Băng tâm ngọc khiết" },
-  "hoang-hau":  { royal: "Hoàng hậu hiện tại",  tag1: "#Sắc đế vương",  tag2: "#Mẫu nghi thiên hạ" },
+const TITLES: Record<string, { royal: string }> = {
+  "thuong-tai": { royal: "Thường tại hiện tại" },
+  "quy-nhan":   { royal: "Quý nhân hiện tại" },
+  "phi-tan":    { royal: "Ái phi hiện tại" },
+  "quy-phi":    { royal: "Quý phi hiện tại" },
+  "hoang-hau":  { royal: "Hoàng hậu hiện tại" },
 };
 
 const RARITY: Record<string, string> = {
@@ -51,11 +55,21 @@ export default function Results() {
     () => JSON.parse(localStorage.getItem("jade-survey-data") || "{}"),
     [],
   );
-  const r = useMemo(() => {
-    try { return buildResultV2(surveyData); } catch { return null; }
+
+  // Nguồn narrative DUY NHẤT — thay thế hoàn toàn buildResultV2 +
+  // tierNarrative.pickNguPhe/pickHashtags cũ. Ngự phê + hashtag đã được
+  // sample 1 lần (seeded) BÊN TRONG generateResultNarrative, không cần
+  // state riêng ở đây nữa.
+  const narrative = useMemo(() => {
+    try {
+      return generateResultNarrative(surveyData);
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
   }, [surveyData]);
 
-  const ringCode = r?.resultId ?? "00000";
+  const ringCode = narrative?.resultId ?? "00000";
   const [copied, setCopied] = useState(false);
   const { mutate: saveToCop, isPending } = useSaveToCop();
 
@@ -97,9 +111,9 @@ export default function Results() {
   };
 
   const handleSaveToVault = () => {
-    if (!r) return;
+    if (!narrative) return;
     saveToCop(
-      { nickname: ringCode, input: buildJadeInputFromSurvey(surveyData), result: r.pricing },
+      { nickname: ringCode, input: buildJadeInputFromSurvey(surveyData), result: narrative.pricing },
       { onError: (e: any) => toast.error(e?.message ?? "Lỗi khi lưu cloud") },
     );
     const existingCount = (() => {
@@ -115,13 +129,13 @@ export default function Results() {
       hasPhieuHoa: !!aiCtx?.hasPhieuHoa,
       isMuna: !!aiCtx?.isMuna,
       assessment: {
-        chungPeak: aiCtx?.chungPeak || r.chung,
-        chungBase: r.chung,
-        baseColor: r.pricing.colorLabel,
-        toneLevel: r.pricing.scoreSac,
-        flaws: r.attentionFeatures.map((f) => f.name),
+        chungPeak: aiCtx?.chungPeak || narrative.chung,
+        chungBase: narrative.chung,
+        baseColor: narrative.pricing.colorLabel,
+        toneLevel: narrative.pricing.scoreSac,
+        flaws: narrative.inclusions.attentionFeatures.map((f) => f.name),
         shape: surveyData.answers?.[10] || "—",
-        estimatedPrice: `${formatVND(r.priceLow)} – ${formatVND(r.priceHigh)}`,
+        estimatedPrice: `${formatVND(narrative.pricing.minPrice)} – ${formatVND(narrative.pricing.maxPrice)}`,
         ringCode,
       },
     });
@@ -133,7 +147,7 @@ export default function Results() {
     });
   };
 
-  if (!r) {
+  if (!narrative) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-muted-foreground">Chưa có dữ liệu khảo sát.</p>
@@ -141,8 +155,12 @@ export default function Results() {
     );
   }
 
-  const tier = TIERS[r.tierIndex] ?? TIERS[0];
-  const title = TITLES[r.tierKey] ?? TITLES["phi-tan"];
+  const tier = TIERS[narrative.tierIndex] ?? TIERS[0];
+  const title = TITLES[narrative.tierKey] ?? TITLES["phi-tan"];
+  const hasInclusionContent =
+    narrative.inclusions.positiveFeatures.length > 0 ||
+    narrative.inclusions.attentionFeatures.length > 0 ||
+    narrative.inclusions.hasCrack;
 
   return (
     <div className="min-h-screen bg-background">
@@ -166,7 +184,6 @@ export default function Results() {
         <div className="grid md:grid-cols-2 gap-8 md:gap-10 items-start">
           {/* LEFT — Ring frame */}
           <div className="relative">
-            {/* Crown badge overlay */}
             <img
               src={tier.icon}
               alt={tier.name}
@@ -203,14 +220,14 @@ export default function Results() {
             <div className="mt-5 text-center">
               <p className="text-sm text-gold">Khung giá tham khảo</p>
               <p className="font-serif text-lg md:text-xl font-bold text-gold mt-1">
-                {formatVND(r.priceLow)} – {formatVND(r.priceHigh)}
+                {formatVND(narrative.pricing.minPrice)} – {formatVND(narrative.pricing.maxPrice)}
               </p>
             </div>
 
             <div className="mt-6 rounded-md border border-gold/40 bg-gold/10 p-4">
               <p className="text-sm leading-relaxed text-foreground/85 text-center">
                 <span className="font-semibold">Ngự phê:</span>{" "}
-                <span className="italic">"{r.nguPhe}"</span>
+                <span className="italic">"{narrative.nguPhe}"</span>
               </p>
             </div>
           </div>
@@ -224,45 +241,60 @@ export default function Results() {
             </h1>
 
             <div className="flex flex-wrap gap-2 mt-3">
-              {r.hashtags.map((tag) => (
-               <span key={tag} className="px-3 py-1 rounded-md bg-gold/15 border border-gold/40 text-xs md:text-sm text-gold-dark font-medium">
+              {narrative.hashtags.map((tag) => (
+                <span key={tag} className="px-3 py-1 rounded-md bg-gold/15 border border-gold/40 text-xs md:text-sm text-gold-dark font-medium">
                   {tag}
                 </span>
               ))}
             </div>
 
             <div className="mt-4 rounded-md border-2 border-gold/60 bg-gold/10 px-4 py-2.5 text-center">
-              <p className="font-semibold text-foreground text-sm md:text-base">{RARITY[r.tierKey]}</p>
+              <p className="font-semibold text-foreground text-sm md:text-base">{RARITY[narrative.tierKey]}</p>
             </div>
 
             <ul className="mt-6 space-y-4 text-sm md:text-base leading-relaxed text-foreground/85">
               <li className="flex gap-2">
                 <span className="text-gold mt-1.5">•</span>
-                <p><strong className="text-foreground">Cốt Ngọc</strong>: {r.cotText.replace(/^Phẩm ngọc đạt /, "Phẩm ngọc đạt ")}</p>
+                <p><strong className="text-foreground">Cốt Ngọc</strong>: {narrative.structure}</p>
+              </li>
+              {narrative.color.text && (
+                <li className="flex gap-2">
+                  <span className="text-gold mt-1.5">•</span>
+                  <p><strong className="text-foreground">Sắc Diện</strong>: {narrative.color.text}</p>
+                </li>
+              )}
+              <li className="flex gap-2">
+                <span className="text-gold mt-1.5">•</span>
+                <p><strong className="text-foreground">Dấu Ấn Thời Gian</strong>: {narrative.inclusions.summary}</p>
               </li>
               <li className="flex gap-2">
                 <span className="text-gold mt-1.5">•</span>
-                <p><strong className="text-foreground">Sắc Diện</strong>: {r.sacText.replace(/^Sở hữu sắc diện: /, "Sở hữu ")}</p>
+                <p>
+                  <strong className="text-foreground">Hình Đoan</strong>: {narrative.form.widthDescriptor}{" "}
+                  {narrative.form.thicknessDescriptor} {narrative.form.symmetryDescriptor}
+                </p>
               </li>
               <li className="flex gap-2">
                 <span className="text-gold mt-1.5">•</span>
-                <p><strong className="text-foreground">Nội tại</strong>: {r.noiTaiText}</p>
+                <p><strong className="text-foreground">Phẩm Giá</strong>: {narrative.valuation.paragraph}</p>
               </li>
             </ul>
           </div>
         </div>
 
         {/* DẤU ẤN NỘI TẠI */}
-        {(r.features.length > 0 || r.hasCrack) && (
+        {hasInclusionContent && (
           <section className="mt-12">
             <h2 className="font-serif text-2xl md:text-3xl font-bold text-gold mb-5">Dấu ấn nội tại</h2>
-            {r.crackWarning && (
+            {narrative.inclusions.crackWarning && (
               <div className="mb-4 rounded-md border-2 border-destructive/60 bg-destructive/10 p-4">
-                <p className="text-sm font-semibold text-destructive leading-relaxed">{r.crackWarning}</p>
+                <p className="text-sm font-semibold text-destructive leading-relaxed">
+                  {narrative.inclusions.crackWarning}
+                </p>
               </div>
             )}
             <div className="grid sm:grid-cols-2 gap-3">
-              {[...r.positiveFeatures, ...r.attentionFeatures].map((f) => (
+              {[...narrative.inclusions.positiveFeatures, ...narrative.inclusions.attentionFeatures].map((f) => (
                 <div key={f.name} className="rounded-md border border-gold/40 bg-card p-4">
                   <div className="flex items-center justify-between gap-2">
                     <p className="font-semibold text-foreground text-sm">{f.name}</p>
@@ -276,7 +308,9 @@ export default function Results() {
                   </div>
                   <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{f.description}</p>
                   {f.warning && (
-                    <p className="text-xs text-foreground/80 mt-2 italic leading-relaxed">{f.warning}</p>
+                    <p className="text-xs text-foreground/80 mt-2 italic leading-relaxed">
+                      Cần lưu ý khi sử dụng và bảo quản.
+                    </p>
                   )}
                 </div>
               ))}
@@ -289,7 +323,7 @@ export default function Results() {
           <h2 className="font-serif text-2xl md:text-3xl font-bold text-gold mb-6">Phong kết cấu</h2>
           <div className="grid grid-cols-5 gap-3 md:gap-6">
             {TIERS.map((t, i) => {
-              const active = i === r.tierIndex;
+              const active = i === narrative.tierIndex;
               return (
                 <div key={t.key} className="flex flex-col items-center gap-2">
                   <div className={active ? "drop-shadow-[0_0_24px_rgba(192,149,76,0.6)]" : ""}>
