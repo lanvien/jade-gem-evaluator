@@ -12,6 +12,7 @@
 // ============================================================
 import {
   COLOR_DICTIONARY,
+  COLOR_STORY,
   SATURATION_TEMPLATES,
   DISTRIBUTION_TEMPLATES,
   type ColorName,
@@ -85,6 +86,7 @@ function multiColorNarrative(
 
 export interface ColorNarrativeResult {
   text: string;
+  story: string | null; // đoạn dài mới (COLOR_STORY) — hiển thị RIÊNG, không ghép vào text
   primary: ColorName | null;
   relationship: ColorRelationship | null;
   transition: ReturnType<typeof transitionEngine> | null;
@@ -102,7 +104,7 @@ export function generateColorNarrative(ringColors: string[]): ColorNarrativeResu
   if (!result) {
     // Không có màu nào hợp lệ trong 12 slice — không throw, vì đây là
     // trạng thái hợp lệ (user chưa tô màu), không phải lỗi mapping.
-    return { text: "", primary: null, relationship: null, transition: null };
+    return { text: "", story: null, primary: null, relationship: null, transition: null };
   }
 
   const relationship = colorRelationshipEngine(result);
@@ -142,5 +144,5 @@ export function generateColorNarrative(ringColors: string[]): ColorNarrativeResu
   // Results.tsx dùng field `transition` này trực tiếp.
   const transition = transitionEngine(slices);
 
-  return { text, primary: result.primary, relationship, transition };
+  return { text, story: COLOR_STORY[result.primary] ?? null, primary: result.primary, relationship, transition };
 }
