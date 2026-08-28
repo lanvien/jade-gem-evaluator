@@ -413,6 +413,30 @@ export const COLOR_DICTIONARY: Record<ColorName, ColorDictionaryEntry> = {
   "Xám": { name: "Xám", family: "TrungTính", tone: "vừa", defaultNarrative: "sắc trung tính, điềm tĩnh và làm nổi bật cấu trúc" },
 };
 
+export const COLOR_STORY: Record<ColorName, string> = {
+  "Đế Vương Lục": "Đế Vương Lục đại diện cho đỉnh cao sắc xanh phỉ thúy, đậm đà, kiêu hãnh và tràn đầy uy lực.",
+  "Chính Dương Lục": "Sắc xanh rực rỡ dưới ánh nắng, mang lại năng lượng tích cực và sự tươi mới bền lâu.",
+  "Xanh Cay": "Tông xanh sắc nét, trẻ trung và đầy sức sống, tạo cá tính mạnh mẽ cho người sở hữu.",
+  "Xanh Ngọt": "Dịu dàng và trong trẻo như làn nước thu, mang lại cảm giác bình yên, thư thái.",
+  "Lục Táo": "Tươi non như chồi mới mọc, tràn đầy hơi thở mùa xuân và sức sống mãnh liệt.",
+  "Đậu Lục": "Tông màu mộc mạc, gần gũi, mang nét đẹp cổ điển và trường tồn với thời gian.",
+  "Thanh Thủy Lục": "Mát lành và mướt mắt như dòng suối nhỏ, thanh tao mà không phô trương.",
+  "Xanh Dầu": "Sâu lắng, điềm tĩnh và đầy bí ẩn, phù hợp với những ai yêu thích chiều sâu nội tâm.",
+  "Hồi Lục": "Nét xanh hoài niệm, trầm tĩnh và đĩnh đạc, đong đầy khí chất truyền thống.",
+  "Tử La Lan": "Tử La Lan – Tuyệt sắc mùa xuân, mang nét mộng mơ, thanh tao và quý phái.",
+  "Tím Cà": "Sắc tím đậm đà, sang trọng, tỏa ra sức hút quý phái và vô cùng quyến rũ.",
+  "Tím Lam": "Sự giao thoa ảo diệu giữa tím và lam, tĩnh lặng, bí ẩn và độc đáo.",
+  "Lam Thiên Không": "Mở ra khoảng trời rộng lớn, nhẹ nhàng và tự do như mây trời.",
+  "Lam Thanh": "Sắc lam dịu mát, mang lại sự cân bằng, an yên cho tâm trí.",
+  "Lão Lam Thuỷ": "Sâu thẫm như đáy biển cổ xưa, trầm tĩnh và vô cùng đắt giá.",
+  "Hồng Phỉ": "Warm và rực rỡ, biểu trưng cho may mắn, thịnh vượng và tình yêu.",
+  "Hoàng Tông Phỉ": "Rực rỡ ánh kim, mang vượng khí và nét sang trọng ấm áp.",
+  "Mặc Thúy": "Đen trầm khi nhìn thường, nhưng bừng sáng xanh lục dưới ánh đèn soi – vẻ đẹp ẩn giấu kiêu hãnh.",
+  "Bạch Nguyệt Quang": "Trong trẻo như ánh trăng rằm, thuần khiết, thanh sạch và dịu êm.",
+  "Trắng Cháo": "Mềm mại, nhu hòa, mang lại cảm giác an toàn và mộc mạc.",
+  "Gà Đen": "Sắc tối cá tính, góc cạnh và giàu tính nghệ thuật hiện đại.",
+  "Xám": "Trung tính, hiện đại, tôn vinh trọn vẹn từng đường nét kết cấu.",
+};
 /**
  * userTone luôn override default tone của dictionary — không bao giờ
  * dùng ngược lại. Đây là input do user chọn trong survey (toneLevel/tones).
@@ -455,19 +479,24 @@ export type DurabilityAttention = "NONE" | "LOW" | "MEDIUM" | "HIGH" | "VERY_HIG
 export interface FeatureContent {
   code: string;
   name: string;
-  description: string;
+  hook?: string;               // câu mở đầu ngắn
+  description: string;         // giữ nguyên — mô tả chính
+  aestheticNote?: string;      // "Ảnh hưởng thẩm mỹ: ..."
+  durabilityNote?: string;     // "Độ bền" / "Mức cần lưu ý" / "Cần lưu ý"
   aesthetic_effect: AestheticEffect;
   durability_attention: DurabilityAttention;
   warning: boolean;
-  internal_score: number; // heuristic nội bộ — KHÔNG hiển thị dạng số
+  internal_score: number;
 }
 
 export const FEATURES: Record<string, FeatureContent> = {
   hoa_bay: {
     code: "hoa_bay",
     name: "Hoa bay",
-    description:
-      "Sợi màu và những vệt mềm tạo cảm giác sống động như những cánh hoa đang trôi trong nước. Đây là một đặc điểm thẩm mỹ tự nhiên và được xem là điểm cộng.",
+    hook: "Tập hợp các vệt màu trôi nổi tự do trong lòng ngọc.",
+    description: "Các vệt màu đan xen như cánh hoa trôi, tạo điểm nhấn tự nhiên và sinh động cho khối đá.",
+    aestheticNote: "Tăng tính thẩm mỹ, tạo nét uyển chuyển độc đáo cho tổng thể.",
+    durabilityNote: "Không ảnh hưởng đến kết cấu hay độ bền của ngọc.",
     aesthetic_effect: "positive",
     durability_attention: "NONE",
     warning: false,
@@ -476,8 +505,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   chi_mau: {
     code: "chi_mau",
     name: "Chỉ màu",
-    description:
-      "Đường màu đậm hơn nền ngọc, thường xuất hiện thành những sợi mảnh chạy trong lòng đá. Có thể dễ nhầm với đường nứt hoặc sớ. Khi soi đèn, ánh sáng vẫn truyền liền qua đường màu thay vì bị cắt.",
+    hook: "Tập hợp các dải màu tập trung thành đường mảnh.",
+    description: "Đường màu kéo dài trong lòng ngọc, thường có sắc độ đậm hơn nền.",
+    aestheticNote: "Tạo vệt nhấn thị giác, phụ thuộc vào hướng chạy của dải màu.",
+    durabilityNote: "Không ảnh hưởng đến kết cấu chịu lực.",
     aesthetic_effect: "negative_minor",
     durability_attention: "LOW",
     warning: false,
@@ -486,8 +517,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   gan_non: {
     code: "gan_non",
     name: "Gân ngọc non",
-    description:
-      "Những đường chằng chịt như rễ cây, thường có màu trắng nhạt và thường gặp ở ngọc non. Chủ yếu ảnh hưởng đến tính thẩm mỹ và là một dấu hiệu cần được cân nhắc khi đánh giá cấu trúc tổng thể.",
+    hook: "Mạng lưới đường gân nhạt màu phân nhánh.",
+    description: "Các đường gân nhỏ xuất hiện rải rác, thể hiện giai đoạn kết tinh chưa hoàn toàn đồng nhất.",
+    aestheticNote: "Có thể làm giảm đôi chút độ mướt và độ đồng màu bề mặt.",
+    durabilityNote: "Cần lưu ý nhẹ khi va chạm mạnh.",
     aesthetic_effect: "negative_minor",
     durability_attention: "LOW",
     warning: false,
@@ -496,8 +529,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   gan_gia: {
     code: "gan_gia",
     name: "Gân ngọc già",
-    description:
-      "Những đường chằng chịt như rễ cây, thường có màu đậm hơn và thường gặp ở ngọc già. Thường ít ảnh hưởng đến độ bền nhưng có thể ảnh hưởng đến tính thẩm mỹ.",
+    hook: "Đường gân sẫm màu đan xen rắn chắc.",
+    description: "Mạng lưới đường gân đã biến chất hoàn toàn, tiệm cận với độ cứng của nền đá.",
+    aestheticNote: "Tạo phong vị cổ kính, tuy nhiên có thể chia cắt mảng màu.",
+    durabilityNote: "Kết cấu tương đối ổn định.",
     aesthetic_effect: "negative_minor",
     durability_attention: "LOW",
     warning: false,
@@ -506,8 +541,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   so_bong: {
     code: "so_bong",
     name: "Sớ bông",
-    description:
-      "Đường sớ không sắc nét mà mờ và lấm tấm như cụm tuyết hoặc sợi bông. Thường không ảnh hưởng đến độ bền.",
+    hook: "Đừng hoảng, sớ bông không phải vết nứt.",
+    description: "Các cụm tinh thể dạng bông tuyết lơ lửng, tạo độ mờ tự nhiên.",
+    aestheticNote: "Làm giảm độ trong suốt nhưng tạo hiệu ứng sương mờ dịu mắt.",
+    durabilityNote: "An toàn, không làm giảm khả năng chịu lực.",
     aesthetic_effect: "negative_minor",
     durability_attention: "LOW",
     warning: false,
@@ -526,8 +563,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   so_am: {
     code: "so_am",
     name: "Sớ âm",
-    description:
-      "Đường sớ nằm sâu trong lòng ngọc; khi rà nhẹ móng tay trên bề mặt không cảm thấy gợn nhưng khi soi đèn có thể nhận biết đường này qua sự thay đổi của ánh sáng.",
+    hook: "Đường sớ nằm hoàn toàn bên trong lòng ngọc.",
+    description: "Đường kết cấu ẩn sâu bên trong, rờ tay trên bề mặt hoàn toàn trơn láng.",
+    aestheticNote: "Có thể quan sát thấy dưới ánh sáng soi đèn.",
+    durabilityNote: "Cần theo dõi nếu có lực tác động trực tiếp.",
     aesthetic_effect: "negative_medium",
     durability_attention: "MEDIUM",
     warning: true,
@@ -556,8 +595,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   so_luoi_ga: {
     code: "so_luoi_ga",
     name: "Sớ lưỡi gà",
-    description:
-      "Đường sớ có hình dáng nhọn như lưỡi gà và ôm quanh bản vòng. Đây là dạng cần đặc biệt lưu ý vì vị trí và hình thái có thể khiến khu vực này nhạy cảm hơn khi va chạm.",
+    hook: "Vệt sớ nhọn góc ôm theo thành vòng.",
+    description: "Đường sớ vót nhọn ăn sâu theo hình chữ V hoặc dạng lưỡi gạt.",
+    aestheticNote: "Gây gián đoạn nhịp màu tại góc nhọn của sớ.",
+    durabilityNote: "Khu vực tập trung ứng suất, cần tránh va đập góc.",
     aesthetic_effect: "negative_high",
     durability_attention: "HIGH",
     warning: true,
@@ -566,8 +607,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   so_doc: {
     code: "so_doc",
     name: "Sớ dọc",
-    description:
-      "Đường sớ chạy dọc theo bản vòng. Hướng này thường thuận hơn về phương chịu lực, nhưng vẫn có thể ảnh hưởng đến tính thẩm mỹ tùy chiều dài và vị trí.",
+    hook: "Đường sớ chạy song song theo chu vi vòng.",
+    description: "Đường kết cấu phát triển dọc theo chiều dài của bản ngọc.",
+    aestheticNote: "Ít gây chú ý nếu chạy trùng với vệt màu.",
+    durabilityNote: "Ít nguy hiểm hơn sớ ngang nhưng vẫn cần giữ gìn.",
     aesthetic_effect: "negative_medium",
     durability_attention: "MEDIUM",
     warning: true,
@@ -586,8 +629,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   so_cheo: {
     code: "so_cheo",
     name: "Sớ chéo",
-    description:
-      "Đường sớ vắt chéo qua bản vòng. Mức độ cần lưu ý phụ thuộc vào chiều dài, vị trí và việc đường sớ nằm sâu hay đã chạm bề mặt.",
+    hook: "Đường sớ đâm xiên qua thân ngọc.",
+    description: "Đường kết cấu chéo góc so với hướng của bản vòng.",
+    aestheticNote: "Tạo cảm giác mất cân đối cục bộ.",
+    durabilityNote: "Đỏi hỏi cẩn trọng trong quá trình đeo hàng ngày.",
     aesthetic_effect: "negative_high",
     durability_attention: "HIGH",
     warning: true,
@@ -596,8 +641,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   so_ngang: {
     code: "so_ngang",
     name: "Sớ ngang",
-    description:
-      "Đường sớ chạy ngang bản vòng và có thể tạo thành một hướng yếu hơn khi chịu va chạm. Đặc biệt cần lưu ý nếu đường sớ kéo dài từ mặt trong ra mặt ngoài.",
+    hook: "Đường sớ cắt vuông góc qua bản vòng.",
+    description: "Vệt kết cấu đứt đoạn chạy cắt ngang chiều rộng chiếc vòng.",
+    aestheticNote: "Tạo vệt cắt rõ rệt trên diện ngọc.",
+    durabilityNote: "Mức độ rủi ro cao khi rơi hoặc va chạm ngang.",
     aesthetic_effect: "negative_high",
     durability_attention: "HIGH",
     warning: true,
@@ -606,8 +653,10 @@ export const FEATURES: Record<string, FeatureContent> = {
   mat_cat: {
     code: "mat_cat",
     name: "Mắt cát",
-    description:
-      "Mảng hoặc cụm hạt thô khác màu do có khoáng chất khác lẫn trong lòng hoặc trên bề mặt ngọc. Vị trí này có thể ảnh hưởng đến cả thẩm mỹ và độ liền mạch của cấu trúc.",
+    hook: "Điểm khoáng thô khác màu lẫn trên bề mặt.",
+    description: "Hạt khoáng tạp chất cứng hoặc mềm hơn tập trung thành điểm lẻ.",
+    aestheticNote: "Tạo điểm tì vết nhỏ trên mặt mài bóng.",
+    durabilityNote: "Có thể tạo vị trí dơ hoặc bong nhẹ nếu bị tác động.",
     aesthetic_effect: "negative_high",
     durability_attention: "MEDIUM",
     warning: true,
@@ -643,11 +692,13 @@ export const FEATURES: Record<string, FeatureContent> = {
     warning: false,
     internal_score: -3,
   },
-  vet_nut: {
+vet_nut: {
     code: "vet_nut",
     name: "Vết nứt",
-    description:
-      "Đường nứt có thể hình thành tự nhiên hoặc xuất hiện trong quá trình khai thác, vận chuyển, chế tác hay sử dụng. Khi nhìn rõ hoặc cảm nhận được trên bề mặt, đây là yếu tố có thể ảnh hưởng đáng kể đến độ bền và tính thẩm mỹ.",
+    hook: "Đường rạn tách biệt hoàn toàn kết cấu ngọc.",
+    description: "Vết rạn có thể cảm nhận bằng móng tay hoặc soi đèn thấy ranh giới hở.",
+    aestheticNote: "Ảnh hưởng rõ rệt đến giá trị và vẻ đẹp tổng thể.",
+    durabilityNote: "Rất nguy hiểm, rủi ro vỡ cao khi chịu lực.",
     aesthetic_effect: "negative_high",
     durability_attention: "VERY_HIGH",
     warning: true,
