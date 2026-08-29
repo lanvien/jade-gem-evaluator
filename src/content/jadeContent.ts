@@ -846,15 +846,15 @@ export const CHUNG_BASE_COPY: Record<ChungName, string> = {
   "Nếp Băng":
     "Phẩm ngọc đạt cảnh giới Nếp Băng. Độ trong mờ kết hợp cùng cấu trúc hạt {grain}, tạo nên chất ngọc mềm, mượt và có cảm giác như lớp sương được giữ lại trong lòng đá. Vẻ đẹp nằm ở sự cân bằng giữa độ dịu của ánh sáng và độ chặt của cấu trúc.",
   "Nếp Hóa":
-    "Phẩm ngọc đạt cảnh giới Nếp Hóa. Chất ngọc mang độ trong vừa phải, trong khi cấu trúc {grain} bắt đầu tạo nên dấu ấn rõ hơn bên trong. Tổng thể giữ được vẻ mềm mại nhưng đồng thời cho phép người xem cảm nhận rõ hơn "thịt ngọc".",
+    "Phẩm ngọc đạt cảnh giới Nếp Hóa. Chất ngọc mang độ trong vừa phải, trong khi cấu trúc {grain} bắt đầu tạo nên dấu ấn rõ hơn bên trong. Tổng thể giữ được vẻ mềm mại nhưng đồng thời cho phép người xem cảm nhận rõ hơn 'thịt ngọc'.",
   "Nếp Mịn":
     "Phẩm ngọc đạt cảnh giới Nếp Mịn. Độ trong dịu kết hợp với cấu trúc hạt {grain}, tạo nên chất ngọc mềm, đều và tương đối liền khối. Đây là vẻ đẹp thiên về sự mượt mà, cân bằng và tự nhiên.",
   "Nếp":
-    "Phẩm ngọc đạt cảnh giới Nếp. Độ xuyên sáng vừa phải cùng cấu trúc {grain} khiến "thịt ngọc" biểu hiện rõ hơn. Chất ngọc không phô diễn bằng độ trong mà gây ấn tượng bởi độ đặc và kết cấu tự nhiên.",
+    "Phẩm ngọc đạt cảnh giới Nếp. Độ xuyên sáng vừa phải cùng cấu trúc {grain} khiến 'thịt ngọc' biểu hiện rõ hơn. Chất ngọc không phô diễn bằng độ trong mà gây ấn tượng bởi độ đặc và kết cấu tự nhiên.",
   "Đậu Mịn":
     "Phẩm ngọc đạt cảnh giới Đậu Mịn. Độ trong thấp khiến ánh sáng khó đi sâu, nhưng cấu trúc {grain} vẫn giữ cho tổng thể tương đối đều và mềm. Vẻ đẹp của nhóm này nằm ở độ đặc và sự ổn định của chất ngọc.",
   "Đậu":
-    "Phẩm ngọc đạt cảnh giới Đậu. Độ xuyên sáng thấp kết hợp cùng cấu trúc {grain} tạo nên chất ngọc đặc và có kết cấu rõ rệt. Thay vì vẻ trong sáng, điểm cuốn hút nằm ở sự hiện diện mạnh của "thịt ngọc" và cấu trúc tự nhiên.",
+    "Phẩm ngọc đạt cảnh giới Đậu. Độ xuyên sáng thấp kết hợp cùng cấu trúc {grain} tạo nên chất ngọc đặc và có kết cấu rõ rệt. Thay vì vẻ trong sáng, điểm cuốn hút nằm ở sự hiện diện mạnh của 'thịt ngọc' và cấu trúc tự nhiên.",
 };
 
 export const GRAIN_MODIFIER: Record<GrainCode, string> = {
@@ -862,7 +862,7 @@ export const GRAIN_MODIFIER: Record<GrainCode, string> = {
   TE2: "hạt mịn, tương đối liên kết và tạo cảm giác khá liền khối",
   TE3: "hạt khá mịn, bắt đầu có thể cảm nhận rõ hơn cấu trúc bên trong",
   TE4: "hạt khá lớn, khiến cấu trúc bên trong biểu hiện rõ hơn",
-  TE5: "hạt lớn và dễ nhận biết, tạo nên cảm giác "thịt ngọc" rõ rệt",
+  TE5: "hạt lớn và dễ nhận biết, tạo nên cảm giác 'thịt ngọc' rõ rệt",
 };
 
 export const CHUNG_DESCRIPTOR: Record<ChungName, { grain: string; texture: string; value: string }> = {
