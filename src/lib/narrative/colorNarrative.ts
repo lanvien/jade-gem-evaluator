@@ -15,8 +15,9 @@ import {
   COLOR_STORY,
   SATURATION_TEMPLATES,
   DISTRIBUTION_TEMPLATES,
-  type ColorName,
 } from "@/content/jadeContent";
+import type { ColorName } from "@/content/jadeContent";
+
 import {
   classifySlices,
   extractColorSlices,
@@ -24,8 +25,8 @@ import {
   colorRelationshipEngine,
   distributionEngine,
   transitionEngine,
-  type ColorRelationship,
 } from "./algorithms";
+import type { ColorRelationship } from "./algorithms";
 
 function colorLabel(c: ColorName): string {
   return c;
