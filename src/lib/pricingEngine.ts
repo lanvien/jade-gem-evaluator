@@ -510,9 +510,9 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
   confidence -= calcSellerConfidence(input.sellerProofLevel);
   confidence = Math.max(confidence, 0.55);
 
-  const spread = 1 - confidence;
-  const minPrice = roundToHundredK(vFinal * (1 - spread * 1.5));
-  const maxPrice = roundToHundredK(vFinal * (1 + spread * 0.8));
+const spread = Math.max(1 - confidence, 0.03); // luôn có khoảng giá, kể cả khi confidence tuyệt đối
+const minPrice = roundToHundredK(vFinal * (1 - spread * 1.5));
+const maxPrice = roundToHundredK(vFinal * (1 + spread * 0.8));
 
   // ── Flags ──
   const hasLightEffect = allColors.some(c => LIGHT_EFFECT_COLORS.has(c));
