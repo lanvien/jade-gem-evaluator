@@ -230,6 +230,13 @@ export default function Results() {
                 <span className="italic">"{narrative.nguPhe}"</span>
               </p>
             </div>
+
+            {narrative.flavorCard && (
+              <div className="mt-4 rounded-md border border-gold/20 bg-card/30 p-3">
+                <p className="text-[10px] uppercase tracking-wide text-gold/70 font-semibold">{narrative.flavorCard.label}</p>
+                <p className="text-xs text-foreground/70 italic mt-1">{narrative.flavorCard.text}</p>
+              </div>
+            )}
           </div>
 
           {/* RIGHT — Narrative */}
@@ -314,6 +321,21 @@ export default function Results() {
                   )}
                 </div>
               ))}
+            </div>
+          </section>
+        )}
+
+        {narrative.personalityCard && (
+          <section className="mt-12">
+            <h2 className="font-serif text-2xl md:text-3xl font-bold text-gold mb-5">
+              Nếu chiếc vòng này là một người…
+            </h2>
+            <div className="rounded-md border border-gold/40 bg-card p-5 space-y-2 text-sm">
+              <p><strong className="text-foreground">Tính cách:</strong> {narrative.personalityCard.personality}</p>
+              <p><strong className="text-foreground">Đi uống gì:</strong> {narrative.personalityCard.drink}</p>
+              <p><strong className="text-foreground">Mặc gì:</strong> {narrative.personalityCard.outfit}</p>
+              <p><strong className="text-foreground">Playlist:</strong> {narrative.personalityCard.playlist}</p>
+              <p><strong className="text-foreground">Vibe:</strong> {narrative.personalityCard.vibe}</p>
             </div>
           </section>
         )}
