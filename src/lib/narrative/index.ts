@@ -21,6 +21,9 @@ import {
   type TranslucencyCode,
 } from "@/content/jadeContent";
 import { buildJadeInputFromSurvey, calculateJadePrice, type PricingResult } from "@/lib/pricingEngine";
+import { EASTER_EGGS } from "@/content/jadeEasterEggs";
+import { PERSONALITY_CARDS, type PersonalityCard } from "@/content/jadePersonality";
+import { ROAST_CARDS, LEARN_CARDS, FUN_FACTS } from "@/content/jadeFeatureExtras";
 import { generateStructureNarrative } from "./structureNarrative";
 import { generateColorNarrative } from "./colorNarrative";
 import { generateInclusionNarrative } from "./inclusionNarrative";
@@ -37,6 +40,9 @@ export interface ResultNarrative {
   tierLabel: string;
   nguPhe: string;
   hashtags: [string, string];
+  easterEgg: string;
+  personalityCard: PersonalityCard | null;
+  flavorCard: { label: string; text: string };
   structure: ReturnType<typeof generateStructureNarrative>;
   color: ReturnType<typeof generateColorNarrative>;
   inclusions: ReturnType<typeof generateInclusionNarrative>;
@@ -125,7 +131,29 @@ export function generateResultNarrative(surveyData: Record<string, any>): Result
     negativeDrivers: valuation.negativeDrivers,
     band: valuation.band,
   });
+  const allEggs = [...EASTER_EGGS.cafe, ...EASTER_EGGS.rumor, ...EASTER_EGGS.grandma, ...EASTER_EGGS.learn];
+  const easterEgg = seededPick(allEggs, seed + "|egg") ?? allEggs[0] ?? "";
+  const personalityCard: PersonalityCard | null = color.primary
+    ? PERSONALITY_CARDS[color.primary] ?? null
+    : null;
 
+  const flavorCandidates: { label: string; text: string }[] = [
+    ...EASTER_EGGS.cafe.map((text) => ({ label: "Quầy cà phê nói nhỏ", text })),
+    ...EASTER_EGGS.rumor.map((text) => ({ label: "Tiệm ngọc đồn rằng", text })),
+    ...EASTER_EGGS.grandma.map((text) => ({ label: "Bà ngoại duyệt", text })),
+    ...EASTER_EGGS.learn.map((text) => ({ label: "30 giây học ngọc", text })),
+  ];
+  featureCodes.forEach((code) => {
+    const learn = LEARN_CARDS[code];
+    if (learn) flavorCandidates.push({ label: "30 giây học ngọc", text: learn });
+    const facts = FUN_FACTS[code];
+    if (facts) facts.forEach((text) => flavorCandidates.push({ label: "Fun fact", text }));
+    const roast = ROAST_CARDS[code];
+    if (roast) flavorCandidates.push({ label: "Bóc phốt nhẹ chiếc vòng", text: roast.hook });
+  });
+  const flavorCard =
+    seededPick(flavorCandidates, seed + "|flavor") ?? { label: "Quầy cà phê nói nhỏ", text: allEggs[0] };
+  
   return {
     seed,
     resultId,
@@ -135,6 +163,9 @@ export function generateResultNarrative(surveyData: Record<string, any>): Result
     tierLabel: TIER_LABEL[tierKey] ?? "",
     nguPhe,
     hashtags: [colorTag, shapeTag] as [string, string],
+    easterEgg,
+    personalityCard,
+    flavorCard,
     structure,
     color,
     inclusions,
