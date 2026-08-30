@@ -46,18 +46,19 @@ export interface ResultNarrative {
   pricing: PricingResult;
 }
 
-function buildSeed(data: any): string {
+function buildSeed(data: Record<string, any>): string {
   return JSON.stringify({
     t: data?.translucency ?? null,
     g: data?.grain ?? null,
-    f: [...(data?.features ?? [])].sort(),
+    // Kiểm tra an toàn xem features có phải mảng không trước khi spread [...]
+    f: Array.isArray(data?.features) ? [...data.features].sort() : [],
     a: data?.answers ?? {},
     n: data?.numberInputs ?? {},
     c: data?.ringColors ?? [],
   });
 }
 
-export function generateResultNarrative(surveyData: any): ResultNarrative | null {
+export function generateResultNarrative(surveyData: Record<string, any>): ResultNarrative | null {
   const translucency: TranslucencyCode | undefined = surveyData?.translucency;
   const grain: GrainCode | undefined = surveyData?.grain;
   const chung = classifyChung(translucency, grain);
@@ -77,17 +78,27 @@ export function generateResultNarrative(surveyData: any): ResultNarrative | null
   });
   const pricing = calculateJadePrice(input);
 
-  // ── Ngự phê + Hashtag — sampled ONCE, seeded (rule 13 spec v1.1:
-  // đây là 3 nguồn random hợp lệ duy nhất, phải cache lại) ──
-  const nguPhe = seededPick(NGU_PHE[tierKey], seed + "|ngu-phe") ?? NGU_PHE[tierKey][0];
-  const featureCodes: string[] = surveyData?.features ?? [];
-  const colorFamily = COLOR_FAMILY_MAP[pricing.dominantColor];
-  const shape = input.shape;
+// ── Ngự phê + Hashtag ──
+  const nguPheList = NGU_PHE[tierKey] || [];
+  const nguPhe = seededPick(nguPheList, seed + "|ngu-phe") ?? nguPheList[0] ?? "";
+  
+  const featureCodes: string[] = Array.isArray(surveyData?.features) ? surveyData.features : [];
+  
+  // Ép kiểu/Fallback an toàn cho Color & Shape
+  const dominantColor = pricing?.dominantColor;
+  const colorFamily = dominantColor && COLOR_FAMILY_MAP[dominantColor] 
+    ? COLOR_FAMILY_MAP[dominantColor] 
+    : Object.keys(COLOR_FAMILY_HASHTAGS)[0];
+
+  const shape: Shape = input?.shape ?? "tron";
+
+  const availableColorTags = COLOR_FAMILY_HASHTAGS[colorFamily] || ["#CẩmThạch"];
   const colorTag = featureCodes.includes("hoa_bay")
     ? HASHTAG_HOA_BAY
-    : seededPick(COLOR_FAMILY_HASHTAGS[colorFamily], seed + "|color") ??
-      COLOR_FAMILY_HASHTAGS[colorFamily][0];
-  const shapeTag = seededPick(SHAPE_HASHTAGS[shape], seed + "|shape") ?? SHAPE_HASHTAGS[shape][0];
+    : seededPick(availableColorTags, seed + "|color") ?? availableColorTags[0];
+
+  const availableShapeTags = SHAPE_HASHTAGS[shape] || ["#VòngTay"];
+  const shapeTag = seededPick(availableShapeTags, seed + "|shape") ?? availableShapeTags[0];
 
   // ── 5 narrative generator ──
   const structure = generateStructureNarrative(chung, grain);
@@ -109,7 +120,7 @@ export function generateResultNarrative(surveyData: any): ResultNarrative | null
   const summary = generateSummaryNarrative({
     chung,
     primaryColor: color.primary,
-    shapeLabel: shape,
+    shapeLabel: String(shape), // Bọc String() ở đây    
     positiveDrivers: valuation.positiveDrivers,
     negativeDrivers: valuation.negativeDrivers,
     band: valuation.band,
@@ -121,9 +132,9 @@ export function generateResultNarrative(surveyData: any): ResultNarrative | null
     chung,
     tierKey,
     tierIndex,
-    tierLabel: TIER_LABEL[tierKey],
+    tierLabel: TIER_LABEL[tierKey] ?? "",
     nguPhe,
-    hashtags: [colorTag, shapeTag],
+    hashtags: [colorTag, shapeTag] as [string, string],
     structure,
     color,
     inclusions,
