@@ -758,28 +758,48 @@ const Assessment = () => {
           {/* v2 — Độ xuyên sáng (T1-T5) */}
           {q.type === "translucency" && (
             <div className="space-y-3">
-              {q.options.map((opt) => {
-                const active = translucency === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() => {
-                      setTranslucency(opt.id as TranslucencyCode);
-                      if (grain && !classifyChung(opt.id as TranslucencyCode, grain)) setGrain(undefined);
-                      clearPrefillFor(q.id);
-                    }}
-                    className={`w-full rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
-                      active ? "border-gold bg-gold/10 shadow-md" : "border-border bg-card hover:border-gold/50"
-                    }`}
-                  >
-                    <p className="text-sm font-bold text-foreground">{opt.label}</p>
-                    {opt.short && <p className="text-xs text-muted-foreground mt-1">{opt.short}</p>}
-                    {active && opt.description && (
-                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{opt.description}</p>
-                    )}
-                  </button>
-                );
-              })}
+              <div className="overflow-x-auto pb-2">
+                <div className="grid min-w-[900px] grid-cols-5 gap-3">
+                  {q.options.map((opt) => {
+                    const active = translucency === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        onClick={() => {
+                          setTranslucency(opt.id as TranslucencyCode);
+                          if (grain && !classifyChung(opt.id as TranslucencyCode, grain)) setGrain(undefined);
+                          clearPrefillFor(q.id);
+                        }}
+                        className={`overflow-hidden rounded-lg border-2 text-left transition-all hover:shadow-md ${
+                          active ? "border-gold bg-gold/10 shadow-md" : "border-border bg-card hover:border-gold/50"
+                        }`}
+                      >
+                        {opt.image && (
+                          <div
+                            className="relative flex aspect-[4/3] w-full cursor-zoom-in items-center justify-center overflow-hidden bg-muted/30 p-2 group"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openLightbox(opt.image, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
+                            }}
+                          >
+                            <img src={opt.image} alt={opt.label} className="h-full w-full object-contain" />
+                            <div className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 opacity-80 transition-opacity group-hover:opacity-100">
+                              <ZoomIn className="h-4 w-4 text-foreground" />
+                            </div>
+                          </div>
+                        )}
+                        <div className="p-3">
+                          <p className="text-sm font-bold text-foreground">{opt.label}</p>
+                          {opt.short && <p className="mt-1 text-xs text-muted-foreground">{opt.short}</p>}
+                          {active && opt.description && (
+                            <p className="mt-2 text-xs leading-relaxed text-foreground/70">{opt.description}</p>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               {q.note && <p className="text-xs italic text-muted-foreground">{q.note}</p>}
             </div>
           )}
@@ -787,35 +807,58 @@ const Assessment = () => {
           {/* v2 — Cấu trúc vi hạt (TE1-TE5), chặn tổ hợp không hợp lệ */}
           {q.type === "grain" && (
             <div className="space-y-3">
-              {q.options.map((opt) => {
-                const disabled = invalidGrainCodes(translucency).includes(opt.id as GrainCode);
-                const active = grain === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    disabled={disabled}
-                    onClick={() => { setGrain(opt.id as GrainCode); clearPrefillFor(q.id); }}
-                    className={`w-full rounded-lg border-2 p-4 text-left transition-all ${
-                      disabled
-                        ? "border-border bg-muted/40 opacity-40 cursor-not-allowed"
-                        : active
-                        ? "border-gold bg-gold/10 shadow-md"
-                        : "border-border bg-card hover:border-gold/50 hover:shadow-md"
-                    }`}
-                  >
-                    <p className="text-sm font-bold text-foreground">{opt.label}</p>
-                    {opt.short && <p className="text-xs text-muted-foreground mt-1">{opt.short}</p>}
-                    {disabled && (
-                      <p className="text-xs text-muted-foreground mt-1 italic">
-                        Không phù hợp với độ xuyên sáng đã chọn
-                      </p>
-                    )}
-                    {active && opt.description && (
-                      <p className="text-xs text-foreground/70 mt-2 leading-relaxed">{opt.description}</p>
-                    )}
-                  </button>
-                );
-              })}
+              <div className="overflow-x-auto pb-2">
+                <div className="grid min-w-[900px] grid-cols-5 gap-3">
+                  {q.options.map((opt) => {
+                    const disabled = invalidGrainCodes(translucency).includes(opt.id as GrainCode);
+                    const active = grain === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        disabled={disabled}
+                        onClick={() => { setGrain(opt.id as GrainCode); clearPrefillFor(q.id); }}
+                        className={`overflow-hidden rounded-lg border-2 text-left transition-all ${
+                          disabled
+                            ? "cursor-not-allowed border-border bg-muted/40 opacity-40"
+                            : active
+                            ? "border-gold bg-gold/10 shadow-md"
+                            : "border-border bg-card hover:border-gold/50 hover:shadow-md"
+                        }`}
+                      >
+                        {opt.image && (
+                          <div
+                            className="relative flex aspect-[4/3] w-full items-center justify-center overflow-hidden bg-muted/30 p-2 group"
+                            onClick={(e) => {
+                              if (disabled) return;
+                              e.stopPropagation();
+                              openLightbox(opt.image, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
+                            }}
+                          >
+                            <img src={opt.image} alt={opt.label} className="h-full w-full object-contain" />
+                            {!disabled && (
+                              <div className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 opacity-80 transition-opacity group-hover:opacity-100">
+                                <ZoomIn className="h-4 w-4 text-foreground" />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        <div className="p-3">
+                          <p className="text-sm font-bold text-foreground">{opt.label}</p>
+                          {opt.short && <p className="mt-1 text-xs text-muted-foreground">{opt.short}</p>}
+                          {disabled && (
+                            <p className="mt-1 text-xs italic text-muted-foreground">
+                              Không phù hợp với độ xuyên sáng đã chọn
+                            </p>
+                          )}
+                          {active && opt.description && (
+                            <p className="mt-2 text-xs leading-relaxed text-foreground/70">{opt.description}</p>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
               {translucency && grain && classifyChung(translucency, grain) && (
                 <div className="rounded-lg border border-gold/40 bg-gold/10 p-3 text-center">
                   <p className="text-sm text-foreground">
