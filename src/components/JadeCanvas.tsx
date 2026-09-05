@@ -230,7 +230,10 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
       return;
     }
 
-    const sorted = Object.entries(counts).sort(([, a], [, b]) => b - a);
+    const rawSorted = Object.entries(counts).sort(([, a], [, b]) => b - a);
+    const MIN_SHARE = 0.02;
+    const filtered = rawSorted.filter(([, count]) => count / totalColored >= MIN_SHARE);
+    const sorted = filtered.length > 0 ? filtered : rawSorted;
     const topColor = sorted[0][0];
     const topPct = (sorted[0][1] / totalColored) * 100;
     const baseColors = sorted.slice(0, 3).map(([c]) => c);
