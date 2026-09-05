@@ -96,7 +96,7 @@ export function generateResultNarrative(surveyData: Record<string, any>): Result
     ? COLOR_FAMILY_MAP[dominantColor] 
     : Object.keys(COLOR_FAMILY_HASHTAGS)[0];
 
-  const shape: Shape = input?.shape ?? "tron";
+  const shape: Shape = input.shape;
 
   const availableColorTags = COLOR_FAMILY_HASHTAGS[colorFamily] || ["#CẩmThạch"];
   const colorTag = featureCodes.includes("hoa_bay")

@@ -9,13 +9,16 @@
 // "Lão Lam Thuỷ" dùng dấu "uỷ" (không phải "ủy").
 // ============================================================
 
-import q1_dau from "@/assets/jade/q1_dau.png";
-import q1_nep from "@/assets/jade/q1_nep.png";
-import q1_nbang from "@/assets/jade/q1_nbang.png";
-import q2_dau from "@/assets/jade/q2_dau.png";
-import q2_nep from "@/assets/jade/q2_nep.png";
-import q2_bang from "@/assets/jade/q2_bang.png";
-import q2_nbang from "@/assets/jade/q2_nbang.png";
+import q1TrongSuot from "@/assets/jade/chung/q1-trong-suot.png";
+import q1BanTrongSuot from "@/assets/jade/chung/q1-ban-trong-suot.png";
+import q1TrongMo from "@/assets/jade/chung/q1-trong-mo.png";
+import q1BanTrongMo from "@/assets/jade/chung/q1-ban-trong-mo.png";
+import q1Duc from "@/assets/jade/chung/q1-duc.png";
+import q2CucMin from "@/assets/jade/chung/q2-cuc-min.jpg";
+import q2Min from "@/assets/jade/chung/q2-min.png";
+import q2KhaMin from "@/assets/jade/chung/q2-kha-min.png";
+import q2KhaTho from "@/assets/jade/chung/q2-kha-tho.png";
+import q2Tho from "@/assets/jade/chung/q2-tho.png";
 
 /* ─────────────────────────────────────────────
    A. CÂU 1 — ĐỘ XUYÊN SÁNG (field code: translucency)
@@ -37,7 +40,7 @@ export const TRANSLUCENCY_OPTIONS: OptionContent[] = [
     short: "Nhìn xuyên qua rất rõ",
     description:
       "Ánh sáng truyền qua rất rõ, có thể nhìn xuyên qua lòng ngọc và nhận biết khá rõ vật thể phía sau.",
-    image: q2_bang,
+    image: q1TrongSuot,
   },
   {
     code: "T2",
@@ -45,7 +48,7 @@ export const TRANSLUCENCY_OPTIONS: OptionContent[] = [
     short: "Thấy hình khối phía sau, chi tiết bị mờ",
     description:
       "Ánh sáng truyền qua rõ nhưng không hoàn toàn trong; có thể thấy hình khối phía sau nhưng chi tiết bị mờ.",
-    image: q2_bang,
+    image: q1BanTrongSuot,
   },
   {
     code: "T3",
@@ -53,7 +56,7 @@ export const TRANSLUCENCY_OPTIONS: OptionContent[] = [
     short: "Xuyên sáng nhưng hình phía sau đã mờ",
     description:
       "Ánh sáng xuyên qua được nhưng hình ảnh phía sau đã mờ đáng kể, tạo cảm giác mềm và mờ ảo.",
-    image: q2_nbang,
+    image: q1TrongMo,
   },
   {
     code: "T4",
@@ -61,7 +64,7 @@ export const TRANSLUCENCY_OPTIONS: OptionContent[] = [
     short: "Chỉ cảm nhận ánh sáng và bóng mờ",
     description:
       "Chỉ một phần ánh sáng xuyên qua; chủ yếu cảm nhận được ánh sáng và bóng mờ thay vì hình dạng rõ ràng.",
-    image: q2_nep,
+    image: q1BanTrongMo,
   },
   {
     code: "T5",
@@ -69,7 +72,7 @@ export const TRANSLUCENCY_OPTIONS: OptionContent[] = [
     short: "Hầu như không xuyên sáng",
     description:
       "Ánh sáng hầu như không xuyên qua lòng ngọc; không thể nhìn rõ vật thể phía sau.",
-    image: q2_dau,
+    image: q1Duc,
   },
 ];
 
@@ -92,7 +95,7 @@ export const GRAIN_OPTIONS: OptionContent[] = [
     short: "Hạt rất nhỏ, liên kết chặt, liền khối",
     description:
       "Hạt tinh thể rất nhỏ và liên kết chặt đến mức khó nhận ra ranh giới từng hạt; tổng thể lòng ngọc trông đặc, mịn và liền khối.",
-    image: q1_nbang,
+    image: q2CucMin,
   },
   {
     code: "TE2",
@@ -100,7 +103,7 @@ export const GRAIN_OPTIONS: OptionContent[] = [
     short: "Hạt nhỏ, đồng đều, phải nhìn kỹ mới thấy ranh giới",
     description:
       "Hạt nhỏ, khá đồng đều và liên kết tương đối chặt; ranh giới giữa các hạt chỉ nhận thấy khi quan sát kỹ.",
-    image: q1_nbang,
+    image: q2Min,
   },
   {
     code: "TE3",
@@ -108,7 +111,7 @@ export const GRAIN_OPTIONS: OptionContent[] = [
     short: "Nhận ra cấu trúc hạt nhưng chưa thô",
     description:
       "Có thể nhận ra cấu trúc hạt nhưng hạt vẫn tương đối nhỏ; bề mặt và lòng ngọc chưa tạo cảm giác thô rõ rệt.",
-    image: q1_nep,
+    image: q2KhaMin,
   },
   {
     code: "TE4",
@@ -116,7 +119,7 @@ export const GRAIN_OPTIONS: OptionContent[] = [
     short: "Hạt tương đối lớn, bắt đầu gợn",
     description:
       "Hạt tinh thể tương đối lớn, ranh giới giữa các hạt dễ nhận biết hơn; cấu trúc bên trong bắt đầu tạo cảm giác gợn/thô.",
-    image: q1_nep,
+    image: q2KhaTho,
   },
   {
     code: "TE5",
@@ -124,7 +127,7 @@ export const GRAIN_OPTIONS: OptionContent[] = [
     short: "Hạt lớn, ranh giới rõ, kém liền mạch",
     description:
       "Hạt tinh thể lớn và ranh giới khá rõ; cấu trúc bên trong dễ quan sát, tạo cảm giác thô và kém liền mạch hơn.",
-    image: q1_dau,
+    image: q2Tho,
   },
 ];
 
