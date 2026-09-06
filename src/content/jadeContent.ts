@@ -277,6 +277,52 @@ export type ColorName =
 
 export type Shape = "Bản Đũa" | "Bản Dẹt" | "Bản Vuông" | "Khắc Hoa";
 
+/* ─────────────────────────────────────────────
+   COLOR_HEX — NGUỒN HEX DUY NHẤT cho toàn app.
+   Dùng cho: palette vẽ (JadeCanvas), reverse-lookup hex→ColorName
+   (algorithms.ts, pricingEngine.ts). KHÔNG còn heuristic đoán RGB ở
+   bất kỳ đâu — mọi hex đi vào hệ thống từ giờ LUÔN LÀ 1 trong 22 giá
+   trị chính xác này (JadeCanvas chỉ cho chọn từ palette, không có
+   color picker tự do), nên reverse-lookup là exact match, không xấp xỉ.
+   ───────────────────────────────────────────── */
+export const COLOR_HEX: Record<ColorName, string> = {
+  "Đế Vương Lục": "#1a5c2a",
+  "Chính Dương Lục": "#2d7a3a",
+  "Xanh Cay": "#1e6b30",
+  "Xanh Ngọt": "#4a9e5c",
+  "Lục Táo": "#6ab87a",
+  "Đậu Lục": "#8bc99a",
+  "Thanh Thủy Lục": "#7ab5a8",
+  "Xanh Dầu": "#3d6b58",
+  "Hồi Lục": "#8aaa94",
+  "Tử La Lan": "#b088c4",
+  "Tím Cà": "#7a4fa0",
+  "Tím Lam": "#7080c0",
+  "Lam Thiên Không": "#4a7fc4",
+  "Lam Thanh": "#7aaad4",
+  "Lão Lam Thuỷ": "#6090a8",
+  "Hồng Phỉ": "#c45a3a",
+  "Hoàng Tông Phỉ": "#c89040",
+  "Mặc Thúy": "#1a1a2e",
+  "Bạch Nguyệt Quang": "#f0ece4",
+  "Trắng Cháo": "#e8e2d8",
+  "Gà Đen": "#c8c0b0",
+  "Xám": "#a0a0a0",
+};
+
+// Reverse lookup — dùng chung cho algorithms.ts + pricingEngine.ts,
+// tránh 2 bản copy-paste khác nhau như trước đây.
+export const HEX_TO_COLOR_NAME: Record<string, ColorName> = Object.fromEntries(
+  Object.entries(COLOR_HEX).map(([name, hex]) => [hex.toLowerCase(), name as ColorName]),
+);
+
+/** Exact lookup — trả null nếu hex không khớp đúng 1 trong 22 giá trị
+ * chuẩn (không đoán xấp xỉ). "#e5e7eb"/"#ffffff" = slice chưa tô. */
+export function hexToColorName(hex: string | undefined | null): ColorName | null {
+  if (!hex) return null;
+  return HEX_TO_COLOR_NAME[hex.toLowerCase()] ?? null;
+}
+
 export type ColorFamily =
   | "Tím"
   | "Lục"
