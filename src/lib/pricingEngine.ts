@@ -9,6 +9,7 @@
 import {
   classifyChung,
   FEATURES,
+  hexToColorName,
   type ChungName,
   type GrainCode,
   type TranslucencyCode,
@@ -668,82 +669,30 @@ function mapTone(tones: Record<string, string>): ToneLevel {
   return 3;
 }
 
-function inferToneFromHex(ringColors: string[]): ToneLevel {
-  if (!ringColors.length) return 3;
-  const avg = ringColors.reduce((sum, hex) => {
-    const r = parseInt(hex.slice(1, 3), 16) || 0;
-    const g = parseInt(hex.slice(3, 5), 16) || 0;
-    const b = parseInt(hex.slice(5, 7), 16) || 0;
-    return sum + Math.max(r, g, b);
-  }, 0) / ringColors.length;
-  if (avg > 200) return 1;
-  if (avg > 150) return 2;
-  if (avg > 100) return 3;
-  return 4;
-}
-
 function mapBaseColor(ringColors: string[]): ColorName {
   if (!ringColors.length) return "Trắng Cháo";
   // Đếm màu, lấy màu xuất hiện nhiều nhất
   const counts: Record<string, number> = {};
-  ringColors.forEach(c => { if (c && c !== "#ffffff") counts[c] = (counts[c] || 0) + 1; });
+  ringColors.forEach(c => { if (c && c !== "#ffffff" && c !== "#e5e7eb") counts[c] = (counts[c] || 0) + 1; });
   const top = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
   if (!top) return "Trắng Cháo";
-
-  const r = parseInt(top.slice(1, 3), 16) || 0;
-  const g = parseInt(top.slice(3, 5), 16) || 0;
-  const b = parseInt(top.slice(5, 7), 16) || 0;
-
-  // Lục family
-  if (g > r + 25 && g > b + 15) {
-    if (g > 180) return "Chính Dương Lục";
-    if (g > 140 && r < 60) return "Đế Vương Lục";
-    if (g > 120) return "Xanh Ngọt";
-    if (g > 90 && b > 60) return "Thanh Thủy Lục";
-    if (g > 90) return "Lục Táo";
-    return "Đậu Lục";
-  }
-  // Tím
-  if (r > 100 && b > 100 && b > g + 20 && r > g + 10) return "Tử La Lan";
-  if (r > 80 && b > r && b > g && Math.abs(r - b) < 80 && g < b - 10) return "Tím Lam";
-  // Lam
-  if (b > r + 40 && b > g + 20) return "Lam Thiên Không";
-  if (b > g + 20 && b > r) return "Lam Thanh";
-  // Vàng/cam
-  if (r > 150 && g > 100 && b < 80) return "Hoàng Tông Phỉ";
-  // Đỏ
-  if (r > 150 && g < 80) return "Hồng Phỉ";
-  // Đen
-  if (r < 60 && g < 60 && b < 60) return "Mặc Thúy";
-  // Trắng
-  if (r > 200 && g > 200 && b > 200) return "Bạch Nguyệt Quang";
-  // Xám
-  if (Math.abs(r - g) < 20 && Math.abs(g - b) < 20 && r < 150) return "Xám";
-
-  return "Đậu Lục";
+  // Exact lookup — không còn đoán RGB. Hex vào đây luôn là 1 trong 22
+  // giá trị chuẩn (JadeCanvas chỉ cho chọn từ palette cố định).
+  return hexToColorName(top) ?? "Trắng Cháo";
 }
 
 function mapAccentColors(ringColors: string[], baseColor: ColorName): ColorName[] {
-  // Lấy màu thứ 2 từ canvas (nếu có)
+  // Lấy màu thứ 2/3 từ canvas (nếu có)
   const counts: Record<string, number> = {};
-  ringColors.forEach(c => { if (c && c !== "#ffffff") counts[c] = (counts[c] || 0) + 1; });
+  ringColors.forEach(c => { if (c && c !== "#ffffff" && c !== "#e5e7eb") counts[c] = (counts[c] || 0) + 1; });
   const sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
   const accents: ColorName[] = [];
   for (const hex of sorted.slice(1, 3)) {
-    const r = parseInt(hex.slice(1, 3), 16) || 0;
-    const g = parseInt(hex.slice(3, 5), 16) || 0;
-    const b = parseInt(hex.slice(5, 7), 16) || 0;
-    let color: ColorName = "Đậu Lục";
-    if (g > r + 25 && g > b + 15) color = g > 120 ? "Lục Táo" : "Đậu Lục";
-    else if (r > 100 && b > 100 && b > g + 20) color = "Tử La Lan";
-    else if (b > r + 40 && b > g + 20) color = "Lam Thiên Không";
-    else if (r > 150 && g > 100 && b < 80) color = "Hoàng Tông Phỉ";
-    else if (r > 200 && g > 200 && b > 200) color = "Bạch Nguyệt Quang";
-    if (color !== baseColor) accents.push(color);
+    const color = hexToColorName(hex);
+    if (color && color !== baseColor) accents.push(color);
   }
   return accents;
 }
-
 export function buildJadeInputFromSurvey(data: any): JadeInput {
   const answers: Record<string, string> = data.answers || {};
   const numberInputs: Record<string, string> = data.numberInputs || {};
