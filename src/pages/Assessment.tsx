@@ -987,6 +987,30 @@ const Assessment = () => {
                             <span className="text-sm font-bold text-foreground">{item.name}</span>
                           </button>
 
+                          {item.images && item.images.length > 0 && (
+                            <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                              {item.images.map((image, imageIndex) => (
+                                <button
+                                  key={image}
+                                  type="button"
+                                  onClick={() => openLightbox(image, item.name)}
+                                  className="group relative h-24 w-32 shrink-0 overflow-hidden rounded-md border border-border bg-muted/30 p-1 transition-colors hover:border-gold"
+                                  aria-label={`Xem ảnh ${item.name} ${imageIndex + 1}`}
+                                >
+                                  <img
+                                    src={image}
+                                    alt={`${item.name} ${imageIndex + 1}`}
+                                    className="h-full w-full object-contain"
+                                    loading="lazy"
+                                  />
+                                  <span className="absolute right-1.5 top-1.5 rounded-full bg-background/80 p-1 opacity-80 transition-opacity group-hover:opacity-100">
+                                    <ZoomIn className="h-3.5 w-3.5 text-foreground" />
+                                  </span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+
                           {active && item.variants && (
                             <div className="mt-3 flex flex-wrap gap-2">
                               {item.variants.map((v) => (

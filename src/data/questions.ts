@@ -8,6 +8,7 @@ import shape_dua from "@/assets/jade/shape_dua.png";
 import shape_he from "@/assets/jade/shape_he.png";
 import shape_vuong from "@/assets/jade/shape_vuong.png";
 import shape_khac_hoa from "@/assets/jade/shape_khac_hoa.png";
+import { INTRINSIC_IMAGES } from "@/assets/jade/intrinsic";
 
 export interface QuestionOption {
   id: string;
@@ -49,6 +50,7 @@ export interface FeatureVariant {
 export interface FeatureItem {
   key: string;
   name: string;
+  images?: readonly string[];
   /** code duy nhất (item đơn) */
   code?: string;
   /** hoặc các biến thể — chọn 1 */
@@ -69,10 +71,10 @@ export const FEATURE_TABS: FeatureTab[] = [
     label: "Hoa văn & chỉ màu",
     hint: "Có những đặc điểm nào xuất hiện trên vòng?",
     items: [
-      { key: "hoa_bay", name: "Hoa bay", code: "hoa_bay" },
-      { key: "chi_mau", name: "Chỉ màu", code: "chi_mau" },
-      { key: "gan_non", name: "Gân ngọc non", code: "gan_non" },
-      { key: "gan_gia", name: "Gân ngọc già", code: "gan_gia" },
+      { key: "hoa_bay", name: "Hoa bay", code: "hoa_bay", images: INTRINSIC_IMAGES.hoa_bay },
+      { key: "chi_mau", name: "Chỉ màu", code: "chi_mau", images: INTRINSIC_IMAGES.chi_mau },
+      { key: "gan_non", name: "Gân ngọc non", code: "gan_non", images: INTRINSIC_IMAGES.gan_non },
+      { key: "gan_gia", name: "Gân ngọc già", code: "gan_gia", images: INTRINSIC_IMAGES.gan_gia },
     ],
   },
   {
@@ -80,7 +82,7 @@ export const FEATURE_TABS: FeatureTab[] = [
     label: "Sớ",
     hint: "Vòng có sớ nào không?",
     items: [
-      { key: "so_bong", name: "Sớ bông", code: "so_bong" },
+      { key: "so_bong", name: "Sớ bông", code: "so_bong", images: INTRINSIC_IMAGES.so_bong },
       { key: "so_ngan", name: "Sớ ngắn", code: "so_ngan" },
       {
         key: "so_am",
@@ -90,9 +92,10 @@ export const FEATURE_TABS: FeatureTab[] = [
           { label: "Dài (> 3cm)", code: "so_am_dai" },
         ],
         quantity: true,
+        images: INTRINSIC_IMAGES.so_am,
       },
       { key: "so_can", name: "Sớ cấn", code: "so_can", quantity: true },
-      { key: "so_luoi_ga", name: "Sớ lưỡi gà", code: "so_luoi_ga", quantity: true },
+      { key: "so_luoi_ga", name: "Sớ lưỡi gà", code: "so_luoi_ga", quantity: true, images: INTRINSIC_IMAGES.so_luoi_ga },
       {
         key: "so_doc",
         name: "Sớ dọc",
@@ -101,9 +104,10 @@ export const FEATURE_TABS: FeatureTab[] = [
           { label: "Dài", code: "so_doc_dai" },
         ],
         quantity: true,
+        images: INTRINSIC_IMAGES.so_doc,
       },
-      { key: "so_cheo", name: "Sớ chéo", code: "so_cheo" },
-      { key: "so_ngang", name: "Sớ ngang", code: "so_ngang" },
+      { key: "so_cheo", name: "Sớ chéo", code: "so_cheo", images: INTRINSIC_IMAGES.so_cheo },
+      { key: "so_ngang", name: "Sớ ngang", code: "so_ngang", images: INTRINSIC_IMAGES.so_ngang },
     ],
   },
   {
@@ -111,7 +115,7 @@ export const FEATURE_TABS: FeatureTab[] = [
     label: "Khuyết điểm bề mặt",
     hint: "Vòng có khuyết điểm bề mặt nào không?",
     items: [
-      { key: "mat_cat", name: "Mắt cát", code: "mat_cat" },
+      { key: "mat_cat", name: "Mắt cát", code: "mat_cat", images: INTRINSIC_IMAGES.mat_cat },
       {
         key: "vet_san_lom",
         name: "Vết sần / lõm",
@@ -121,7 +125,7 @@ export const FEATURE_TABS: FeatureTab[] = [
           { label: "Rõ", code: "vet_san_lom_ro" },
         ],
       },
-      { key: "vet_nut", name: "Vết nứt", code: "vet_nut" },
+      { key: "vet_nut", name: "Vết nứt", code: "vet_nut", images: INTRINSIC_IMAGES.vet_nut },
     ],
   },
 ];
