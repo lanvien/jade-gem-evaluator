@@ -3,7 +3,7 @@
 // KHÔNG bao giờ đụng vào price/classification (đến từ pricingEngine.ts).
 // ============================================================
 
-import { COLOR_FAMILY_MAP, COLOR_DICTIONARY, type ColorName, type ColorFamily } from "@/content/jadeContent";
+import { COLOR_FAMILY_MAP, COLOR_DICTIONARY, hexToColorName, type ColorName, type ColorFamily } from "@/content/jadeContent";
 
 /* ─────────────────────────────────────────────
    1. CLEANLINESS ENGINE (deterministic)
