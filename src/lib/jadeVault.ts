@@ -92,7 +92,7 @@ export function buildSegments(
     return {
       hex,
       opacity: isEmpty ? 1 : TONE_OPACITY[tone] ?? 0.75,
-      colorName: HEX_TO_NAME[hex] || HEX_TO_NAME[hex.toUpperCase()] || "—",
+      colorName: hexToColorName(hex) ?? (isEmpty ? "Trống" : "—"),
     };
   });
 }
