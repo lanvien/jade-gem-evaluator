@@ -663,44 +663,86 @@ const Assessment = () => {
                 // Hide images entirely for Q3 (id === 3)
                 const showImageSlot = q.id !== 3;
                 return (
-                <button
-                  key={opt.id}
-                  onClick={() => handleSelect(opt.id)}
-                  className={`rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
-                    selectedAnswer === opt.id
-                      ? "border-gold bg-gold/10 shadow-md"
-                      : "border-border bg-card hover:border-gold/50"
-                  }`}
-                >
-                  {/* Image - tap to open lightbox - only if image exists */}
-                  {showImageSlot && opt.image && (
-                    <div
-                      className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group bg-muted/30 w-full"
-                      style={{ aspectRatio: "4 / 3" }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
-                      }}
-                    >
-                      <img
-                        src={opt.image}
-                        alt={opt.label}
-                        className="object-cover w-full h-full"
-                      />
-                      <div className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                        <ZoomIn className="h-4 w-4 text-foreground" />
+                  <button
+                    key={opt.id}
+                    onClick={() => handleSelect(opt.id)}
+                    className={`rounded-lg border-2 p-4 text-left transition-all hover:shadow-md ${
+                      selectedAnswer === opt.id
+                        ? "border-gold bg-gold/10 shadow-md"
+                        : "border-border bg-card hover:border-gold/50"
+                    }`}
+                  >
+                    {/* Image - tap to open lightbox - only if image exists */}
+                    {showImageSlot && opt.image && (
+                      <div
+                        className="rounded-md mb-3 overflow-hidden flex items-center justify-center cursor-zoom-in relative group bg-muted/30 w-full"
+                        style={{ aspectRatio: "4 / 3" }}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openLightbox(opt.image!, `${opt.label}${opt.description ? ` — ${opt.description}` : ""}`);
+                        }}
+                      >
+                        <img
+                          src={opt.image}
+                          alt={opt.label}
+                          className="object-cover w-full h-full"
+                        />
+                        <div className="absolute top-2 right-2 bg-background/80 rounded-full p-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                          <ZoomIn className="h-4 w-4 text-foreground" />
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  <p className="text-sm font-semibold text-foreground">{opt.label}</p>
-                  {opt.description && (
-                    <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
-                  )}
-                </button>
+                    )}
+                    <p className="text-sm font-semibold text-foreground">{opt.label}</p>
+                    {opt.description && (
+                      <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
+                    )}
+                  </button>
                 );
               })}
             </div>
           )}
+
+          {showConditionalText && (
+            <div className="mt-4 p-4 bg-gold/10 border border-gold/30 rounded-lg text-sm text-foreground">
+              {q.conditionalText?.text}
+            </div>
+          )}
+        </div>
+
+        {/* Navigation */}
+        <div className="flex justify-between items-center mt-8">
+          <button
+            onClick={prev}
+            disabled={stepIdx === 0}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Quay lại
+          </button>
+
+          <button
+            onClick={next}
+            disabled={!canGoNext}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-gold text-primary-foreground text-sm font-bold hover:bg-gold-dark disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
+          >
+            {questionNumber === TOTAL ? "Xem kết quả" : "Tiếp theo"}
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {lightboxImg && (
+        <ImageLightbox
+          src={lightboxImg.src}
+          caption={lightboxImg.caption}
+          onClose={() => setLightboxImg(null)}
+        />
+      )}
+    </div>
+  );
+};
+
+export default Assessment;
 
           {/* Card Style — bản đũa / hẹ / vuông / khắc hoa */}
           {q.type === "card-style" && (
