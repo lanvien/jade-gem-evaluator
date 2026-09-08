@@ -588,28 +588,12 @@ const Assessment = () => {
             <>
               <JadeCanvas
                 onChange={(r: JadeCanvasResult) => {
-                  const HEX: Record<string, string> = {
-                    de_vuong_luc: "#1a5c2a", chinh_duong_luc: "#2d7a3a",
-                    xanh_cay: "#1e6b30", xanh_ngot: "#4a9e5c",
-                    luc_tao: "#6ab87a", dau_luc: "#8bc99a",
-                    thanh_thuy_luc: "#7ab5a8", xanh_dau: "#3d6b58", hoi_luc: "#8aaa94",
-                    tu_la_lan: "#b088c4", tim_ca: "#7a4fa0", tim_lam: "#7080c0",
-                    lam_thien_khong: "#4a7fc4", lam_thanh: "#7aaad4", lao_lam_thuy: "#6090a8",
-                    hong_phi: "#c45a3a", hoang_tong_phi: "#c89040",
-                    mac_thuy: "#1a1a2e", bach_nguyet_quang: "#f0ece4",
-                    trang_chao: "#e8e2d8", ga_den: "#c8c0b0", xam: "#a0a0a0",
-                  };
-                  const fill = Array.from({ length: 12 }, (_, i) => {
-                    const key = r.baseColors[i % r.baseColors.length] ?? "trang_chao";
-                    return HEX[key] ?? "#e5e7eb";
-                  });
-                  setRingColors(fill);
+                  // r.ringColors giờ là 12 hex THẬT, ghi nhận trực tiếp lúc vẽ
+                  // trong JadeCanvas — không còn suy đoán/bịa layout ở đây nữa.
+                  setRingColors(r.ringColors);
                   if (r.snapshot) localStorage.setItem("jade-canvas-snapshot", r.snapshot);
                 }}
               />
-              <ColorRingAlerts colors={ringColors} />
-            </>
-          )}
 
           {/* Number Input */}
           {q.type === "number-input" && (
