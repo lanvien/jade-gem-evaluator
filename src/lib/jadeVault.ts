@@ -2,21 +2,11 @@
 // JADE VAULT — Local-only persistence (localStorage "jadeVault")
 // Coexists with Supabase Cốp Ngọc (lib/copNgoc.ts) — independent.
 // ============================================================
+import { hexToColorName } from "@/content/jadeContent";
 
 const STORAGE_KEY = "jadeVault";
 
-// Quick hex → name lookup (kept in sync with ColorRing.JADE_COLORS)
-const HEX_TO_NAME: Record<string, string> = {
-  "#1B5E20": "Đế Vương Lục", "#2E7D32": "Chính Dương Lục", "#1A3A0A": "Xanh Cay",
-  "#A5D6A7": "Xanh Ngọt", "#66BB6A": "Lục Táo", "#2E5A1C": "Xanh Rau Bina",
-  "#558B2F": "Đậu Lục", "#26A69A": "Thanh Thủy Lục", "#33691E": "Du Thanh",
-  "#78909C": "Hồi Lục", "#1B2B1B": "Mặc Thúy",
-  "#CE93D8": "Tử La Lan", "#7B1FA2": "Tím Cà", "#5C6BC0": "Tím Lam",
-  "#E53935": "Hồng Phỉ", "#FB8C00": "Hoàng Tông Phỉ", "#F48FB1": "Phấn Hồng",
-  "#0277BD": "Lam Thiên Không", "#4FC3F7": "Lam Thanh", "#1A3A5C": "Lão Lam Thủy",
-  "#F5F5F5": "Bạch Nguyệt Quang", "#9E9E9E": "Xương Gà Đen", "#212121": "Mặc Thúy (Hắc)",
-  "#e5e7eb": "Trống",
-};
+const TONE_OPACITY: Record<string, number> = { light: 0.4, medium: 0.75, dark: 1 };
 
 const TONE_OPACITY: Record<string, number> = { light: 0.4, medium: 0.75, dark: 1 };
 
