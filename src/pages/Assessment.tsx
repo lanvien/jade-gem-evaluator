@@ -592,7 +592,8 @@ const Assessment = () => {
                   if (r.snapshot) localStorage.setItem("jade-canvas-snapshot", r.snapshot);
                 }}
               />
-            )}
+            </>
+          )}
 
           {/* Number Input */}
           {q.type === "number-input" && (
