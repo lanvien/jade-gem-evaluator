@@ -588,12 +588,11 @@ const Assessment = () => {
             <>
               <JadeCanvas
                 onChange={(r: JadeCanvasResult) => {
-                  // r.ringColors giờ là 12 hex THẬT, ghi nhận trực tiếp lúc vẽ
-                  // trong JadeCanvas — không còn suy đoán/bịa layout ở đây nữa.
                   setRingColors(r.ringColors);
                   if (r.snapshot) localStorage.setItem("jade-canvas-snapshot", r.snapshot);
                 }}
               />
+            )}
 
           {/* Number Input */}
           {q.type === "number-input" && (
@@ -701,48 +700,6 @@ const Assessment = () => {
               })}
             </div>
           )}
-
-          {showConditionalText && (
-            <div className="mt-4 p-4 bg-gold/10 border border-gold/30 rounded-lg text-sm text-foreground">
-              {q.conditionalText?.text}
-            </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <div className="flex justify-between items-center mt-8">
-          <button
-            onClick={prev}
-            disabled={stepIdx === 0}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-border text-sm font-semibold text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Quay lại
-          </button>
-
-          <button
-            onClick={next}
-            disabled={!canGoNext}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-gold text-primary-foreground text-sm font-bold hover:bg-gold-dark disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-sm"
-          >
-            {questionNumber === TOTAL ? "Xem kết quả" : "Tiếp theo"}
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {lightboxImg && (
-        <ImageLightbox
-          src={lightboxImg.src}
-          caption={lightboxImg.caption}
-          onClose={() => setLightboxImg(null)}
-        />
-      )}
-    </div>
-  );
-};
-
-export default Assessment;
 
           {/* Card Style — bản đũa / hẹ / vuông / khắc hoa */}
           {q.type === "card-style" && (
