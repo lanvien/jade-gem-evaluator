@@ -8,8 +8,6 @@ const STORAGE_KEY = "jadeVault";
 
 const TONE_OPACITY: Record<string, number> = { light: 0.4, medium: 0.75, dark: 1 };
 
-const TONE_OPACITY: Record<string, number> = { light: 0.4, medium: 0.75, dark: 1 };
-
 export interface VaultSegment {
   hex: string;
   opacity: number;
