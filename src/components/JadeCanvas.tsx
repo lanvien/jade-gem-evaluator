@@ -70,9 +70,21 @@ const COLOR_SCORE: Record<string, number> = {
 
 export interface JadeCanvasResult {
   baseColors: string[];
+  /** 12 ô hex màu để tương thích với vòng 12 phần cũ */
+  ringColors: string[];
   colorLayout: "solid" | "hoa_bay" | "loang" | "multi";
   topColor: string;
   snapshot?: string;
+}
+
+const EMPTY_HEX = "#e5e7eb";
+
+function toRingColors(keys: string[]): string[] {
+  const hexes = keys
+    .map((k) => COLORS.find((c) => c.key === k)?.hex)
+    .filter(Boolean) as string[];
+  if (hexes.length === 0) return Array(12).fill(EMPTY_HEX);
+  return Array.from({ length: 12 }, (_, i) => hexes[i % hexes.length]);
 }
 
 interface JadeCanvasProps {
