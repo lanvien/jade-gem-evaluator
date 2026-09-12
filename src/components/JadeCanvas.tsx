@@ -197,7 +197,7 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
     ctx.fillRect(0, 0, SIZE, SIZE);
     drawRingOutline(ctx);
     setHistory([]);
-    const empty: JadeCanvasResult = { baseColors: ["trang_chao"], colorLayout: "solid", topColor: "trang_chao" };
+    const empty: JadeCanvasResult = { baseColors: ["trang_chao"], ringColors: Array(12).fill(EMPTY_HEX), colorLayout: "solid", topColor: "trang_chao" };
     setAnalysis(empty);
     onChange(empty);
   }
@@ -236,7 +236,7 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
     }
 
     if (totalColored < 50) {
-      const empty: JadeCanvasResult = { baseColors: ["trang_chao"], colorLayout: "solid", topColor: "trang_chao" };
+      const empty: JadeCanvasResult = { baseColors: ["trang_chao"], ringColors: Array(12).fill(EMPTY_HEX), colorLayout: "solid", topColor: "trang_chao" };
       setAnalysis(empty);
       onChange(empty);
       return;
@@ -257,7 +257,7 @@ export default function JadeCanvas({ onChange }: JadeCanvasProps) {
     else colorLayout = "solid";
 
     const snapshot = canvasRef.current!.toDataURL("image/png");
-    const result: JadeCanvasResult = { baseColors, colorLayout, topColor, snapshot };
+    const result: JadeCanvasResult = { baseColors, ringColors: toRingColors(baseColors), colorLayout, topColor, snapshot };
     setAnalysis(result);
     onChange(result);
   }
