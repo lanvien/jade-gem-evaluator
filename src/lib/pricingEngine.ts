@@ -669,6 +669,24 @@ function mapTone(tones: Record<string, string>): ToneLevel {
   return 3;
 }
 
+function inferToneFromHex(ringColors: string[]): ToneLevel {
+  const painted = ringColors.filter(c => c && c !== "#ffffff" && c !== "#e5e7eb");
+  if (painted.length === 0) return 3;
+  let sum = 0;
+  for (const hex of painted) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    sum += (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  }
+  const lum = sum / painted.length;
+  if (lum > 0.75) return 1;
+  if (lum > 0.6) return 2;
+  if (lum > 0.4) return 3;
+  if (lum > 0.22) return 4;
+  return 5;
+}
+
 function mapBaseColor(ringColors: string[]): ColorName {
   if (!ringColors.length) return "Trắng Cháo";
   // Đếm màu, lấy màu xuất hiện nhiều nhất
@@ -678,7 +696,7 @@ function mapBaseColor(ringColors: string[]): ColorName {
   if (!top) return "Trắng Cháo";
   // Exact lookup — không còn đoán RGB. Hex vào đây luôn là 1 trong 22
   // giá trị chuẩn (JadeCanvas chỉ cho chọn từ palette cố định).
-  return hexToColorName(top) ?? "Trắng Cháo";
+  return (hexToColorName(top) as ColorName | undefined) ?? "Trắng Cháo";
 }
 
 function mapAccentColors(ringColors: string[], baseColor: ColorName): ColorName[] {
@@ -688,7 +706,7 @@ function mapAccentColors(ringColors: string[], baseColor: ColorName): ColorName[
   const sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
   const accents: ColorName[] = [];
   for (const hex of sorted.slice(1, 3)) {
-    const color = hexToColorName(hex);
+    const color = hexToColorName(hex) as ColorName | undefined;
     if (color && color !== baseColor) accents.push(color);
   }
   return accents;
