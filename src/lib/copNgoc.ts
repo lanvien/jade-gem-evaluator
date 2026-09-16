@@ -5,11 +5,13 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAnonUser } from "./anonAuth";
 import type { PricingResult, JadeInput } from "./pricingEngine";
 import { formatVND } from "./pricingEngine";
 
 const SESSION_KEY = "cop_ngoc_session_id";
 const QUERY_KEY = ["cop_ngoc"] as const;
+
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -50,15 +52,31 @@ function rowToData(row: CopRow): CopData {
 }
 
 // ─────────────────────────────────────────────
-// SESSION
+// SESSION — danh tính ẩn danh do Supabase Auth cấp (auth.uid())
 // ─────────────────────────────────────────────
-function getOrCreateSessionId(): string {
-  let id = localStorage.getItem(SESSION_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(SESSION_KEY, id);
+let legacyClaimed = false;
+
+/** Nhận lại cốp cũ của chính trình duyệt này (mô hình session_id trước đây). */
+async function claimLegacy(uid: string): Promise<void> {
+  if (legacyClaimed) return;
+  legacyClaimed = true;
+  const legacy = localStorage.getItem(SESSION_KEY);
+  if (!legacy || legacy === uid) {
+    localStorage.setItem(SESSION_KEY, uid);
+    return;
   }
-  return id;
+  try {
+    await (supabase as any).rpc("claim_cop_by_session", { p_session: legacy });
+  } catch {
+    /* không chặn luồng dùng app */
+  }
+  localStorage.setItem(SESSION_KEY, uid);
+}
+
+async function getSessionId(): Promise<string> {
+  const uid = await ensureAnonUser();
+  await claimLegacy(uid);
+  return uid;
 }
 
 export function resetLocalSession(): void {
@@ -71,37 +89,28 @@ function generateCopCode(): string {
 }
 
 // ─────────────────────────────────────────────
-// DB CALLS (via supabase-js client)
+// DB CALLS (via supabase-js client) — RLS lọc theo auth.uid()
 // ─────────────────────────────────────────────
-async function fetchCop(sessionId: string): Promise<CopData | null> {
+async function fetchCop(_uid: string): Promise<CopData | null> {
   const { data, error } = await supabase
     .from("cop_ngoc")
     .select("*")
-    .eq("session_id", sessionId)
-    .maybeSingle();
-  if (error && error.code !== "PGRST116") throw error;
-  return data ? rowToData(data as unknown as CopRow) : null;
+    .order("updated_at", { ascending: false })
+    .limit(1);
+  if (error) throw error;
+  const row = data?.[0];
+  return row ? rowToData(row as unknown as CopRow) : null;
 }
 
-async function fetchCopByCode(copCode: string): Promise<CopData | null> {
-  const { data, error } = await supabase
-    .from("cop_ngoc")
-    .select("*")
-    .eq("cop_code", copCode.toUpperCase())
-    .maybeSingle();
-  if (error && error.code !== "PGRST116") throw error;
-  return data ? rowToData(data as unknown as CopRow) : null;
-}
-
-async function upsertCop(sessionId: string, items: CopItem[]): Promise<CopData> {
-  const existing = await fetchCop(sessionId);
+async function upsertCop(uid: string, items: CopItem[]): Promise<CopData> {
+  const existing = await fetchCop(uid);
   const now = new Date().toISOString();
 
   if (existing) {
     const { data, error } = await supabase
       .from("cop_ngoc")
       .update({ items: items as any, updated_at: now })
-      .eq("session_id", sessionId)
+      .eq("session_id", existing.sessionId)
       .select()
       .single();
     if (error) throw error;
@@ -112,12 +121,13 @@ async function upsertCop(sessionId: string, items: CopItem[]): Promise<CopData> 
   const { data, error } = await supabase
     .from("cop_ngoc")
     .insert({
-      session_id: sessionId,
+      session_id: uid,
+      user_id: uid,
       cop_code: copCode,
       items: items as any,
       created_at: now,
       updated_at: now,
-    })
+    } as any)
     .select()
     .single();
   if (error) throw error;
@@ -128,11 +138,12 @@ async function upsertCop(sessionId: string, items: CopItem[]): Promise<CopData> 
 // HOOKS
 // ─────────────────────────────────────────────
 export function useCopNgoc() {
-  const sessionId = typeof window !== "undefined" ? getOrCreateSessionId() : "";
   return useQuery({
-    queryKey: [...QUERY_KEY, sessionId],
-    queryFn: () => fetchCop(sessionId),
-    enabled: !!sessionId,
+    queryKey: QUERY_KEY,
+    queryFn: async () => {
+      const uid = await getSessionId();
+      return fetchCop(uid);
+    },
     staleTime: 1000 * 60 * 5,
   });
 }
@@ -141,21 +152,20 @@ export function useRestoreCop() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (copCode: string) => {
-      const cop = await fetchCopByCode(copCode);
-      if (!cop) throw new Error(`Không tìm thấy mã "${copCode}". Kiểm tra lại nhé!`);
-      const sessionId = getOrCreateSessionId();
-      const { error } = await supabase
-        .from("cop_ngoc")
-        .update({ session_id: sessionId })
-        .eq("cop_code", copCode.toUpperCase());
+      const uid = await getSessionId();
+      const code = copCode.trim().toUpperCase();
+      const { data, error } = await (supabase as any).rpc("claim_cop_by_code", { p_code: code });
       if (error) throw error;
-      return cop;
+      const row = Array.isArray(data) ? data[0] : data;
+      if (!row) throw new Error(`Không tìm thấy mã "${code}". Kiểm tra lại nhé!`);
+      return rowToData(row as CopRow);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
   });
 }
+
 
 export function useSaveToCop() {
   const queryClient = useQueryClient();
@@ -169,7 +179,7 @@ export function useSaveToCop() {
       input: JadeInput;
       result: PricingResult;
     }) => {
-      const sessionId = getOrCreateSessionId();
+      const sessionId = await getSessionId();
       const existing = await fetchCop(sessionId);
       const currentItems: CopItem[] = existing?.items ?? [];
 
@@ -194,7 +204,7 @@ export function useRemoveFromCop() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (itemId: string) => {
-      const sessionId = getOrCreateSessionId();
+      const sessionId = await getSessionId();
       const existing = await fetchCop(sessionId);
       if (!existing) return null;
       const updatedItems = existing.items.filter(i => i.id !== itemId);

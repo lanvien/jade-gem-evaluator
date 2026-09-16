@@ -6,6 +6,7 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAnonUser } from "@/lib/anonAuth";
 import { getSignedUrls } from "@/lib/jadeImages";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,9 +61,10 @@ export default function SubmissionDetail() {
     if (!content || !id) return;
     setPosting(true);
     try {
+      const uid = await ensureAnonUser();
       const { data, error } = await supabase
         .from("comments")
-        .insert({ submission_id: id, guest_name: name, content })
+        .insert({ submission_id: id, guest_name: name, content, user_id: uid } as any)
         .select()
         .single();
       if (error) throw error;

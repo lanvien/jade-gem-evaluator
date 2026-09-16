@@ -9,6 +9,7 @@ import UsernameModal from "@/components/UsernameModal";
 import { getUsername } from "@/lib/username";
 import { uploadJadeImage } from "@/lib/jadeImages";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAnonUser } from "@/lib/anonAuth";
 
 const MAX_FILES = 5;
 const MAX_DESC = 500;
@@ -43,12 +44,14 @@ export default function SubmitJade() {
 
     setSubmitting(true);
     try {
+      const uid = await ensureAnonUser();
       const paths = await Promise.all(files.map((f) => uploadJadeImage(f, name)));
       const { error } = await supabase.from("submissions").insert({
         guest_name: name,
         description: desc.trim() || null,
         image_urls: paths,
-      });
+        user_id: uid,
+      } as any);
       if (error) throw error;
       toast.success("Đã gửi! Cộng đồng sẽ giúp bạn sớm thôi 🪨");
       navigate("/cong-dong");

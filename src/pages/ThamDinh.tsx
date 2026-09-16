@@ -5,16 +5,12 @@ import { toast } from "sonner";
 import { useJadeVision, type VisionResult } from "@/hooks/useJadeVision";
 import { calcJadePrice, formatVND, type PricingOutput } from "@/lib/jadePrice";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAnonUser } from "@/lib/anonAuth";
 
-const SESSION_KEY = "cop_ngoc_session_id";
-function getSessionId(): string {
-  let id = localStorage.getItem(SESSION_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(SESSION_KEY, id);
-  }
-  return id;
+async function getSessionId(): Promise<string> {
+  return ensureAnonUser();
 }
+
 function genCopCode(): string {
   return `NGOC-${Math.floor(1000 + Math.random() * 9000)}`;
 }
@@ -97,9 +93,10 @@ export default function ThamDinh() {
     if (!pricing || !vision) return;
     setSaving(true);
     try {
-      const sessionId = getSessionId();
-      const { data: existing } = await supabase
-        .from("cop_ngoc").select("*").eq("session_id", sessionId).maybeSingle();
+      const sessionId = await getSessionId();
+      const { data: rows } = await supabase
+        .from("cop_ngoc").select("*").order("updated_at", { ascending: false }).limit(1);
+      const existing = rows?.[0];
       const item = {
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
@@ -112,12 +109,13 @@ export default function ThamDinh() {
       if (existing) {
         await supabase.from("cop_ngoc")
           .update({ items: updatedItems as any, updated_at: new Date().toISOString() })
-          .eq("session_id", sessionId);
+          .eq("session_id", existing.session_id);
       } else {
         await supabase.from("cop_ngoc").insert({
-          session_id: sessionId, cop_code: genCopCode(), items: updatedItems as any,
-        });
+          session_id: sessionId, user_id: sessionId, cop_code: genCopCode(), items: updatedItems as any,
+        } as any);
       }
+
       toast.success("Đã lưu vào Cốp Ngọc 🏺");
     } catch (e: any) {
       toast.error(e.message ?? "Lưu thất bại");
