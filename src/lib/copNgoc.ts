@@ -5,11 +5,13 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAnonUser } from "./anonAuth";
 import type { PricingResult, JadeInput } from "./pricingEngine";
 import { formatVND } from "./pricingEngine";
 
 const SESSION_KEY = "cop_ngoc_session_id";
 const QUERY_KEY = ["cop_ngoc"] as const;
+
 
 // ─────────────────────────────────────────────
 // TYPES
