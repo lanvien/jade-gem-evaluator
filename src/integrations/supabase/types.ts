@@ -21,6 +21,7 @@ export type Database = {
           guest_name: string
           id: string
           submission_id: string
+          user_id: string | null
         }
         Insert: {
           content: string
@@ -28,6 +29,7 @@ export type Database = {
           guest_name: string
           id?: string
           submission_id: string
+          user_id?: string | null
         }
         Update: {
           content?: string
@@ -35,6 +37,7 @@ export type Database = {
           guest_name?: string
           id?: string
           submission_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -53,6 +56,7 @@ export type Database = {
           items: Json
           session_id: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           cop_code: string
@@ -60,6 +64,7 @@ export type Database = {
           items?: Json
           session_id: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           cop_code?: string
@@ -67,6 +72,7 @@ export type Database = {
           items?: Json
           session_id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -77,6 +83,7 @@ export type Database = {
           guest_name: string
           id: string
           image_urls: string[]
+          user_id: string | null
         }
         Insert: {
           created_at?: string
@@ -84,6 +91,7 @@ export type Database = {
           guest_name: string
           id?: string
           image_urls?: string[]
+          user_id?: string | null
         }
         Update: {
           created_at?: string
@@ -91,6 +99,7 @@ export type Database = {
           guest_name?: string
           id?: string
           image_urls?: string[]
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -99,7 +108,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_cop_by_code: {
+        Args: { p_code: string }
+        Returns: {
+          cop_code: string
+          created_at: string
+          items: Json
+          session_id: string
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "cop_ngoc"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_cop_by_session: {
+        Args: { p_session: string }
+        Returns: {
+          cop_code: string
+          created_at: string
+          items: Json
+          session_id: string
+          updated_at: string
+          user_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "cop_ngoc"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       [_ in never]: never
