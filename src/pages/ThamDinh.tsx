@@ -5,16 +5,12 @@ import { toast } from "sonner";
 import { useJadeVision, type VisionResult } from "@/hooks/useJadeVision";
 import { calcJadePrice, formatVND, type PricingOutput } from "@/lib/jadePrice";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureAnonUser } from "@/lib/anonAuth";
 
-const SESSION_KEY = "cop_ngoc_session_id";
-function getSessionId(): string {
-  let id = localStorage.getItem(SESSION_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem(SESSION_KEY, id);
-  }
-  return id;
+async function getSessionId(): Promise<string> {
+  return ensureAnonUser();
 }
+
 function genCopCode(): string {
   return `NGOC-${Math.floor(1000 + Math.random() * 9000)}`;
 }
