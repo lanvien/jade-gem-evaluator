@@ -179,7 +179,7 @@ export function useSaveToCop() {
       input: JadeInput;
       result: PricingResult;
     }) => {
-      const sessionId = getOrCreateSessionId();
+      const sessionId = await getSessionId();
       const existing = await fetchCop(sessionId);
       const currentItems: CopItem[] = existing?.items ?? [];
 
@@ -204,7 +204,7 @@ export function useRemoveFromCop() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (itemId: string) => {
-      const sessionId = getOrCreateSessionId();
+      const sessionId = await getSessionId();
       const existing = await fetchCop(sessionId);
       if (!existing) return null;
       const updatedItems = existing.items.filter(i => i.id !== itemId);
