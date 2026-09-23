@@ -12,7 +12,6 @@ async function getSessionId(): Promise<string> {
   return ensureAnonUser();
 }
 
-import { generateCopCode } from "@/lib/copCode";
 
 function genCopCode(): string {
   return generateCopCode();
