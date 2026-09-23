@@ -11,8 +11,10 @@ async function getSessionId(): Promise<string> {
   return ensureAnonUser();
 }
 
+import { generateCopCode } from "@/lib/copCode";
+
 function genCopCode(): string {
-  return `NGOC-${Math.floor(1000 + Math.random() * 9000)}`;
+  return generateCopCode();
 }
 
 interface ImgFile { file: File; url: string; }
