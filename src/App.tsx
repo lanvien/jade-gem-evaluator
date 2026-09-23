@@ -19,7 +19,12 @@ import ThamDinh from "./pages/ThamDinh.tsx";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  useEffect(() => {
+    ensureAnonUser().catch(() => {});
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
