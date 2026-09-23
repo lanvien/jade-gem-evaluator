@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureAnonUser } from "./anonAuth";
+import { generateCopCode } from "./copCode";
 import type { PricingResult, JadeInput } from "./pricingEngine";
 import { formatVND } from "./pricingEngine";
 
@@ -83,10 +84,7 @@ export function resetLocalSession(): void {
   localStorage.removeItem(SESSION_KEY);
 }
 
-function generateCopCode(): string {
-  const num = Math.floor(Math.random() * 9000) + 1000;
-  return `NGOC-${num}`;
-}
+// Mã cốp dùng bộ sinh ngẫu nhiên an toàn (xem src/lib/copCode.ts)
 
 // ─────────────────────────────────────────────
 // DB CALLS (via supabase-js client) — RLS lọc theo auth.uid()
