@@ -6,6 +6,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureAnonUser } from "./anonAuth";
+import { generateCopCode } from "./copCode";
 import type { PricingResult, JadeInput } from "./pricingEngine";
 import { formatVND } from "./pricingEngine";
 

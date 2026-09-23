@@ -6,6 +6,7 @@ import { useJadeVision, type VisionResult } from "@/hooks/useJadeVision";
 import { calcJadePrice, formatVND, type PricingOutput } from "@/lib/jadePrice";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureAnonUser } from "@/lib/anonAuth";
+import { generateCopCode } from "@/lib/copCode";
 
 async function getSessionId(): Promise<string> {
   return ensureAnonUser();
