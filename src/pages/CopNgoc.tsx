@@ -84,7 +84,7 @@ const CopNgoc = () => {
             type="text"
             value={restoreCode}
             onChange={(e) => setRestoreCode(e.target.value)}
-            placeholder="NGOC-XXXX (khôi phục từ máy khác)"
+            placeholder="NGOC-XXXXX-XXXXX (khôi phục từ máy khác)"
             className="flex-1 min-w-[200px] rounded-lg border border-border bg-background px-3 py-2 text-base outline-none focus:border-accent"
           />
           <button
