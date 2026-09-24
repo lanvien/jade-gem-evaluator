@@ -83,6 +83,7 @@ export type Database = {
           guest_name: string
           id: string
           image_urls: string[]
+          is_published: boolean
           user_id: string | null
         }
         Insert: {
@@ -91,6 +92,7 @@ export type Database = {
           guest_name: string
           id?: string
           image_urls?: string[]
+          is_published?: boolean
           user_id?: string | null
         }
         Update: {
@@ -99,6 +101,7 @@ export type Database = {
           guest_name?: string
           id?: string
           image_urls?: string[]
+          is_published?: boolean
           user_id?: string | null
         }
         Relationships: []
