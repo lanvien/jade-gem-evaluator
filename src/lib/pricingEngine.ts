@@ -70,6 +70,7 @@ export interface PricingResult {
   vFinal: number;
   minPrice: number;
   maxPrice: number;
+  isPriceUnbounded: boolean;
   hardCapApplied: boolean;
   isImperialCandidate: boolean;
   hasLightEffect: boolean;
@@ -128,6 +129,8 @@ export const CHUNG_LABEL: Record<Chung, string> = {
   "Thuỷ Tinh": "Chủng Thuỷ Tinh",
 };
 
+// Trần giá cứng theo chủng. Thuỷ Tinh không có trần thật — set Infinity để
+// biểu diễn "vô cực" đúng nghĩa, không dùng một con số lớn giả định.
 export const HARD_CAP: Record<Chung, number> = {
   "Đậu": 3_000_000,
   "Đậu Mịn": 8_000_000,
@@ -137,10 +140,13 @@ export const HARD_CAP: Record<Chung, number> = {
   "Nếp Băng": 300_000_000,
   "Băng": 800_000_000,
   "Cao Băng": 1_500_000_000,
-  "Thuỷ Tinh": 3_000_000_000,
+  "Thuỷ Tinh": Infinity,
 };
 
-// V_BASE: giá sàn khi trắng trơn, lành lặn, ni54 chuẩn
+// V_BASE: giá sàn khi trắng trơn, lành lặn, ni54 chuẩn.
+// Thuỷ Tinh: sàn 2 tỷ — đây là mức tối thiểu thực tế của chủng này khi
+// kích thước đạt chuẩn (ni ≥ 50, chốt ≥ 8). Vòng nhỏ hơn mức đó được
+// giảm giá theo kích thước qua wPhysic, xem THUY_TINH_MIN_SIZE bên dưới.
 const V_BASE: Record<Chung, number> = {
   "Đậu": 400_000,
   "Đậu Mịn": 1_000_000,
@@ -150,8 +156,24 @@ const V_BASE: Record<Chung, number> = {
   "Nếp Băng": 35_000_000,
   "Băng": 80_000_000,
   "Cao Băng": 150_000_000,
-  "Thuỷ Tinh": 250_000_000,
+  "Thuỷ Tinh": 2_000_000_000,
 };
+
+// Ngưỡng kích thước để áp sàn giá Thuỷ Tinh. Dưới ngưỡng này (vòng nhỏ),
+// sàn 2 tỷ KHÔNG áp dụng — giá được phép giảm theo kích thước thật.
+const THUY_TINH_MIN_SIZE = { ni: 50, chot: 8 };
+
+// Thuỷ Tinh chủng trong thực tế chỉ tồn tại ở 2 dạng:
+// (1) vô sắc — trong veo, có thể có "hoa bay" (Vân ngọc) nhưng không có
+//     sắc màu chủ đạo thật sự;
+// (2) 2 sắc cực hiếm: Lam Thiên Không hoặc Tử La Lan.
+// Mọi màu khác ở chủng Thuỷ Tinh là combo không tồn tại trên thực tế.
+const THUY_TINH_ALLOWED_COLORS = new Set<ColorName>([
+  "Trắng Cháo",
+  "Bạch Nguyệt Quang",
+  "Lam Thiên Không",
+  "Tử La Lan",
+]);
 
 const COVERAGE_RATIO: Record<1 | 2 | 3 | 4, number> = {
   1: 1.0,
@@ -418,6 +440,22 @@ function buildRadarData(input: JadeInput, qJade: number, wRisk: number): RadarDa
 export function calculateJadePrice(input: JadeInput): PricingResult {
   const warnings: string[] = [];
 
+  // ── Ràng buộc màu hợp lệ cho chủng Thuỷ Tinh ──
+  // Thuỷ Tinh chủng thực tế chỉ có vô sắc (trong veo, có thể có hoa bay)
+  // hoặc 2 sắc cực hiếm Lam Thiên Không / Tử La Lan. Mọi màu khác ở chủng
+  // này là combo không tồn tại — cảnh báo thay vì âm thầm tính giá sai.
+  if (input.chungPeak === "Thuỷ Tinh") {
+    const allInputColors = [input.baseColor, ...input.accentColors];
+    const invalidColors = allInputColors.filter(c => !THUY_TINH_ALLOWED_COLORS.has(c));
+    if (invalidColors.length > 0) {
+      warnings.push(
+        `⚠️ Thuỷ Tinh chủng trên thực tế không tồn tại ở màu ${invalidColors.join(", ")}. ` +
+        `Chủng này chỉ có vô sắc (trong veo, có thể có hoa bay) hoặc 2 sắc cực hiếm: Lam Thiên Không / Tử La Lan. ` +
+        `Kết quả định giá bên dưới không đáng tin — kiểm tra lại phân loại chủng hoặc màu đã nhập.`
+      );
+    }
+  }
+
   // ── Cốt ngọc ──
   const peakScore = CHUNG_SCORE[input.chungPeak];
   const baseScore = CHUNG_SCORE[input.chungBase];
@@ -498,10 +536,22 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
   const fomoDiscount = calcFomoDiscount(input.sellerRedFlags ?? 0);
 
   // ── Tính giá cuối ──
-  const vPre = vBase * colorK * wPhysic * wRisk * fomoDiscount;
+  let vPre = vBase * colorK * wPhysic * wRisk * fomoDiscount;
+
+  // Sàn giá riêng cho Thuỷ Tinh: tối thiểu 2 tỷ, TRỪ PHI vòng dưới ngưỡng
+  // kích thước chuẩn (ni < 50 và chốt < 8) — khi đó cho phép giá giảm
+  // theo kích thước thật thay vì bị kéo lên sàn.
+  if (input.chungPeak === "Thuỷ Tinh") {
+    const isSmallSize = input.ni < THUY_TINH_MIN_SIZE.ni && input.chot < THUY_TINH_MIN_SIZE.chot;
+    if (!isSmallSize) {
+      vPre = Math.max(vPre, V_BASE["Thuỷ Tinh"]);
+    }
+  }
+
   const hardCap = HARD_CAP[input.chungPeak];
-  const vFinal = Math.min(vPre, hardCap);
-  const hardCapApplied = vPre > hardCap;
+  const isPriceUnbounded = !Number.isFinite(hardCap);
+  const hardCapApplied = Number.isFinite(hardCap) && vPre > hardCap;
+  const vFinal = isPriceUnbounded ? vPre : Math.min(vPre, hardCap);
 
   // ── Confidence / price band ──
   let confidence = 1.0;
@@ -511,9 +561,13 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
   confidence -= calcSellerConfidence(input.sellerProofLevel);
   confidence = Math.max(confidence, 0.55);
 
-const spread = Math.max(1 - confidence, 0.03); // luôn có khoảng giá, kể cả khi confidence tuyệt đối
-const minPrice = roundToHundredK(vFinal * (1 - spread * 1.5));
-const maxPrice = roundToHundredK(vFinal * (1 + spread * 0.8));
+  const spread = Math.max(1 - confidence, 0.03); // luôn có khoảng giá, kể cả khi confidence tuyệt đối
+  const minPrice = roundToHundredK(vFinal * (1 - spread * 1.5));
+  // Với chủng Thuỷ Tinh (giá không trần), maxPrice không có ý nghĩa —
+  // UI nên hiển thị "vô cực" (♾) thay vì con số này khi isPriceUnbounded = true.
+  const maxPrice = isPriceUnbounded
+    ? Infinity
+    : roundToHundredK(vFinal * (1 + spread * 0.8));
 
   // ── Flags ──
   const hasLightEffect = allColors.some(c => LIGHT_EFFECT_COLORS.has(c));
@@ -567,6 +621,7 @@ const maxPrice = roundToHundredK(vFinal * (1 + spread * 0.8));
     vFinal: roundToHundredK(vFinal),
     minPrice,
     maxPrice,
+    isPriceUnbounded,
     hardCapApplied,
     isImperialCandidate,
     hasLightEffect,
@@ -589,12 +644,18 @@ const maxPrice = roundToHundredK(vFinal * (1 + spread * 0.8));
 // DISPLAY HELPERS
 // ─────────────────────────────────────────────
 export function formatVND(n: number): string {
+  if (!Number.isFinite(n)) return "♾";
   if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)} tỷ`;
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(0)} triệu`;
   return n.toLocaleString("vi-VN") + "đ";
 }
 
+// Ví dụ: "2.0 tỷ – ♾" cho Thuỷ Tinh chủng đạt sàn, hoặc "2.0 tỷ – 2.3 tỷ"
+// cho các chủng có trần bình thường.
 export function getPriceRangeLabel(result: PricingResult): string {
+  if (result.isPriceUnbounded) {
+    return `${formatVND(result.minPrice)} – ♾`;
+  }
   return `${formatVND(result.minPrice)} – ${formatVND(result.maxPrice)}`;
 }
 
