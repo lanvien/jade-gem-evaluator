@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ensureAnonUser } from "@/lib/anonAuth";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -34,7 +34,13 @@ const App = () => {
           <Route path="/" element={<Index />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/results" element={<Results />} />
-          <Route path="/tham-dinh" element={<ThamDinh />} />
+          
+          <Route path="/dinh-gia-phi-thuy" element={<ThamDinh />} />
+          <Route
+            path="/tham-dinh"
+            element={<Navigate to="/dinh-gia-phi-thuy" replace />}
+          />
+          
           <Route path="/cop-ngoc" element={<CopNgoc />} />
           <Route path="/jade-vault" element={<JadeVault />} />
           <Route path="/vong/:id" element={<PublicBracelet />} />
