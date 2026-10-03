@@ -43,7 +43,7 @@ const Header = () => {
         </div>
 
         <nav className="hidden md:flex items-center gap-8 text-sm font-semibold uppercase tracking-wider">
-          <a href="/assessment" onClick={guardedGoToAssessment} className="text-foreground hover:text-accent transition-colors cursor-pointer">Định giá phỉ thúy</a>
+          <Link to="/dinh-gia-phi-thuy" className="text-foreground hover:text-accent transition-colors">Định giá phỉ thúy</Link>
           <Link to="/cong-dong" className="text-foreground hover:text-accent transition-colors">Cộng đồng</Link>
           <a href="#mission" className="text-foreground hover:text-accent transition-colors">Về Hiểu Ngọc</a>
           <a href="#guides" className="text-foreground hover:text-accent transition-colors">Cẩm Nang</a>
@@ -71,7 +71,7 @@ const Header = () => {
 
       {mobileOpen && (
         <nav className="md:hidden border-t border-border bg-background px-4 py-4 space-y-3 animate-fade-in-up">
-          <a href="/assessment" onClick={guardedGoToAssessment} className="block text-sm font-semibold uppercase cursor-pointer">Định giá phỉ thúy</a>
+          <Link to="/dinh-gia-phi-thuy" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Định giá phỉ thúy</Link>
           <Link to="/cong-dong" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Cộng đồng</Link>
           <a href="#mission" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Về Hiểu Ngọc</a>
           <a href="#guides" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Cẩm Nang</a>
