@@ -132,15 +132,15 @@ export const CHUNG_LABEL: Record<Chung, string> = {
 // Trần giá cứng theo chủng. Thuỷ Tinh không có trần thật — set Infinity để
 // biểu diễn "vô cực" đúng nghĩa, không dùng một con số lớn giả định.
 export const HARD_CAP: Record<Chung, number> = {
-  "Đậu": 3_000_000,
-  "Đậu Mịn": 8_000_000,
-  "Nếp": 25_000_000,
-  "Nếp Mịn": 40_000_000,
-  "Nếp Hóa": 80_000_000,
-  "Nếp Băng": 300_000_000,
-  "Băng": 800_000_000,
-  "Cao Băng": 1_500_000_000,
-  "Thuỷ Tinh": Infinity,
+  "Đậu": 12_000_000,
+  "Đậu Mịn": 15_000_000,
+  "Nếp": 35_000_000,
+  "Nếp Mịn": 60_000_000,
+  "Nếp Hóa": 200_000_000,
+  "Nếp Băng": 400_000_000,
+  "Băng": 1_000_000_000,
+  "Cao Băng": 2_000_000_000,
+  "Thuỷ Tinh": 50_000_000_000,
 };
 
 // V_BASE: giá sàn khi trắng trơn, lành lặn, ni54 chuẩn.
@@ -148,15 +148,15 @@ export const HARD_CAP: Record<Chung, number> = {
 // kích thước đạt chuẩn (ni ≥ 50, chốt ≥ 8). Vòng nhỏ hơn mức đó được
 // giảm giá theo kích thước qua wPhysic, xem THUY_TINH_MIN_SIZE bên dưới.
 const V_BASE: Record<Chung, number> = {
-  "Đậu": 400_000,
-  "Đậu Mịn": 1_000_000,
-  "Nếp": 2_000_000,
-  "Nếp Mịn": 3_000_000,
-  "Nếp Hóa": 10_000_000,
+  "Đậu": 1_500_000,
+  "Đậu Mịn": 2_000_000,
+  "Nếp": 6_000_000,
+  "Nếp Mịn": 10_000_000,
+  "Nếp Hóa": 15_000_000,
   "Nếp Băng": 35_000_000,
   "Băng": 80_000_000,
-  "Cao Băng": 150_000_000,
-  "Thuỷ Tinh": 2_000_000_000,
+  "Cao Băng": 500_000_000,
+  "Thuỷ Tinh": 800_000_000,
 };
 
 // Ngưỡng kích thước để áp sàn giá Thuỷ Tinh. Dưới ngưỡng này (vòng nhỏ),
@@ -292,7 +292,7 @@ const YELLOW_COLORS = new Set<ColorName>([
 
 const FLAW_RISK: Record<FlawType, number> = {
   "Không lỗi":                                   1.00,
-  "Vân ngọc":                                    1.02,  // điểm CỘNG
+  "Vân ngọc":                                    1.5,  // điểm CỘNG
   "Sớ bông / Gân già":                           0.9888,
   "Chỉ màu / Gân non / Sớ âm / Sớ dọc":        0.9555,
   "Sớ âm dài / Sớ cấn / Mắt cát / Sần lõm":    0.88,
@@ -515,6 +515,11 @@ export function calculateJadePrice(input: JadeInput): PricingResult {
 
   // Xuân Đới Tài bonus
   if (xuanDaiTai) colorK *= 1.3;
+
+  const isThuyTinhRareColor =
+    input.chungPeak === "Thuỷ Tinh" &&
+    (maxColorName === "Lam Thiên Không" || maxColorName === "Tử La Lan");
+  if (isThuyTinhRareColor) colorK *= 3;
 
   // ── Physical multiplier ──
   const wNi = getNiFactor(input.ni);
