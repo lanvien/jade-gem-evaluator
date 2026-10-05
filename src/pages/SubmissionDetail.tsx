@@ -19,6 +19,7 @@ interface Submission {
   description: string | null;
   image_urls: string[];
   created_at: string;
+  is_published: boolean;
 }
 interface Comment {
   id: string;
@@ -41,6 +42,8 @@ export default function SubmissionDetail() {
   useEffect(() => {
     if (!id) return;
     (async () => {
+      // Chờ danh tính ẩn danh sẵn sàng trước khi đọc bài.
+      try { await ensureAnonUser(); } catch { /* vẫn thử đọc */ }
       const { data } = await supabase.from("submissions").select("*").eq("id", id).maybeSingle();
       if (!data) { setNotFound(true); return; }
       setSub(data as Submission);
@@ -114,6 +117,11 @@ export default function SubmissionDetail() {
               </div>
             )}
             <div className="p-5">
+              {!sub.is_published && (
+                <p className="mb-3 rounded border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive">
+                  Bài này đã bị ẩn khỏi Phòng Trà. Chỉ bạn nhìn thấy.
+                </p>
+              )}
               <div className="flex items-center justify-between">
                 <span className="font-serif text-lg font-bold">{sub.guest_name}</span>
                 <span className="text-xs text-muted-foreground">

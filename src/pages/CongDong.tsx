@@ -6,6 +6,7 @@ import { MessageCircle, ImagePlus } from "lucide-react";
 import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { getSignedUrls } from "@/lib/jadeImages";
+import { ensureAnonUser } from "@/lib/anonAuth";
 import { Button } from "@/components/ui/button";
 
 interface Submission {
@@ -35,6 +36,9 @@ export default function CongDong() {
         .limit(100);
       if (error) { setItems([]); return; }
 
+      // Feed công khai: bài đang hiện, hoặc bài của chính mình (kể cả đã ẩn).
+      const me = (await supabase.auth.getSession()).data.session?.user?.id;
+      subs.splice(0, subs.length, ...subs.filter((s) => s.is_published || s.user_id === me));
       const ids = (subs ?? []).map((s) => s.id);
       let counts: Record<string, number> = {};
       if (ids.length) {
@@ -118,6 +122,11 @@ export default function CongDong() {
                     {formatDistanceToNow(new Date(s.created_at), { addSuffix: true, locale: vi })}
                   </span>
                 </div>
+                {!s.is_published && s.user_id === uid && (
+                  <p className="mt-2 inline-block rounded border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
+                    Đã bị ẩn khỏi Phòng Trà — chỉ bạn thấy bài này
+                  </p>
+                )}
                 {s.description && (
                   <p className="mt-2 text-sm text-foreground/80 line-clamp-3">{s.description}</p>
                 )}
