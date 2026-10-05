@@ -1,5 +1,6 @@
-import { Upload, Image } from "lucide-react";
+import { Link } from "react-router-dom";
 import splash from "@/assets/jade/ui_splash_3.png";
+import SubmitJadeForm from "@/components/community/SubmitJadeForm";
 
 const AppraisalSection = () => {
   return (
@@ -17,27 +18,16 @@ const AppraisalSection = () => {
         className="pointer-events-none absolute -left-16 bottom-0 w-56 md:w-72 opacity-40 -scale-x-100 select-none"
       />
 
-      <div className="relative">
-        <div className="space-y-3 mb-10">
-          <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">Thẩm định thực tế</h2>
+      <div className="relative max-w-2xl mx-auto">
+        <div className="space-y-3 mb-8">
+          <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground">Gửi vòng lên Phòng Trà</h2>
           <p className="text-muted-foreground italic">
-            Nơi cộng đồng chuyên gia định giá giúp bạn. Hoàn toàn ẩn danh, không lộ thông tin
+            Chia sẻ chiếc vòng của bạn để cộng đồng cùng thưởng lãm và góp ý. Hoàn toàn ẩn danh.{" "}
+            <Link to="/cong-dong" className="text-accent underline not-italic">Xem Phòng Trà Thưởng Ngọc</Link>
           </p>
         </div>
-
-        <div className="rounded-xl border-2 border-dashed border-border bg-card/80 backdrop-blur-sm p-12 text-center space-y-4 hover:border-gold transition-colors cursor-pointer">
-          <div className="flex justify-center">
-            <div className="rounded-full bg-muted p-4">
-              <Upload className="h-8 w-8 text-muted-foreground" />
-            </div>
-          </div>
-          <p className="text-foreground font-medium flex items-center justify-center gap-2">
-            <Image className="h-5 w-5" />
-            Kéo thả hoặc chọn ảnh vòng của bạn tại đây.
-          </p>
-          <p className="text-xs text-muted-foreground max-w-md mx-auto">
-            Gợi ý: Hãy gửi ít nhất 3 ảnh (Ảnh tổng thể, ảnh soi đèn xuyên thấu, ảnh chụp cận cảnh sơ ngọc) để chuyên gia có cái nhìn chính xác nhất.
-          </p>
+        <div className="rounded-xl border border-border bg-card/80 backdrop-blur-sm p-6">
+          <SubmitJadeForm />
         </div>
       </div>
     </section>

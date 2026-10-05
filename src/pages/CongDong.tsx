@@ -14,18 +14,23 @@ interface Submission {
   description: string | null;
   image_urls: string[];
   created_at: string;
+  is_published: boolean;
+  user_id: string | null;
   comment_count?: number;
   signedImages?: string[];
 }
 
 export default function CongDong() {
   const [items, setItems] = useState<Submission[] | null>(null);
+  const [uid, setUid] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
+      // Chờ danh tính ẩn danh sẵn sàng trước khi đọc feed.
+      try { setUid(await ensureAnonUser()); } catch { /* vẫn thử đọc */ }
       const { data: subs, error } = await supabase
         .from("submissions")
-        .select("id, guest_name, description, image_urls, created_at")
+        .select("id, guest_name, description, image_urls, created_at, is_published, user_id")
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) { setItems([]); return; }
