@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { formatDistanceToNow, format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -38,24 +38,36 @@ export default function SubmissionDetail() {
   const [posting, setPosting] = useState(false);
   const [askName, setAskName] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
+  const load = useCallback(async () => {
     if (!id) return;
-    (async () => {
+    setLoadError(false);
+    setNotFound(false);
+    try {
       // Chờ danh tính ẩn danh sẵn sàng trước khi đọc bài.
       try { await ensureAnonUser(); } catch { /* vẫn thử đọc */ }
-      const { data } = await supabase.from("submissions").select("*").eq("id", id).maybeSingle();
+      const { data, error } = await supabase.from("submissions").select("*").eq("id", id).maybeSingle();
+      if (error) throw error;
+      // Không có dòng nào = không tồn tại, hoặc đã bị ẩn và không phải của bạn.
       if (!data) { setNotFound(true); return; }
       setSub(data as Submission);
       setSigned(await getSignedUrls(data.image_urls ?? []));
-      const { data: cs } = await supabase
+      const { data: cs, error: csError } = await supabase
         .from("comments")
         .select("*")
         .eq("submission_id", id)
         .order("created_at", { ascending: true });
+      if (csError) throw csError;
       setComments((cs ?? []) as Comment[]);
-    })();
+    } catch {
+      setLoadError(true);
+    }
   }, [id]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const submitComment = async () => {
     const name = getUsername();
@@ -92,6 +104,20 @@ export default function SubmissionDetail() {
     );
   }
 
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto max-w-2xl px-4 py-16 text-center">
+          <p className="text-muted-foreground">Không tải được bài đăng. Vui lòng kiểm tra kết nối và thử lại.</p>
+          <Button onClick={load} className="mt-4 bg-gold hover:bg-gold-dark text-primary-foreground">
+            Thử lại
+          </Button>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -119,7 +145,7 @@ export default function SubmissionDetail() {
             <div className="p-5">
               {!sub.is_published && (
                 <p className="mb-3 rounded border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm font-semibold text-destructive">
-                  Bài này đã bị ẩn khỏi Phòng Trà. Chỉ bạn nhìn thấy.
+                  Bài này đã bị ẩn khỏi Phòng Trà.
                 </p>
               )}
               <div className="flex items-center justify-between">
