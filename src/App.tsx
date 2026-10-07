@@ -14,6 +14,7 @@ import PublicBracelet from "./pages/PublicBracelet.tsx";
 import CongDong from "./pages/CongDong.tsx";
 import SubmissionDetail from "./pages/SubmissionDetail.tsx";
 import SubmitJade from "./pages/SubmitJade.tsx";
+import Admin from "./pages/Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import DinhGiaPhiThuy from "./pages/DinhGiaPhiThuy.tsx";
 import Seo from "@/components/Seo";
@@ -79,6 +80,7 @@ const App = () => {
           />
           <Route path="/cong-dong/dang" element={noindex("/cong-dong/dang", "Đăng vòng ngọc", <SubmitJade />)} />
           <Route path="/cong-dong/:id" element={noindex("/cong-dong", "Bài đăng cộng đồng", <SubmissionDetail />)} />
+          <Route path="/admin" element={noindex("/admin", "Quản trị", <Admin />)} />
           <Route path="/phong-tra" element={<Navigate to="/cong-dong" replace />} />
           <Route path="*" element={noindex("/404", "Không tìm thấy trang", <NotFound />)} />
         </Routes>
