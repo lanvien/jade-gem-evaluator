@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -24,17 +24,19 @@ interface Submission {
 export default function CongDong() {
   const [items, setItems] = useState<Submission[] | null>(null);
   const [uid, setUid] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
-  useEffect(() => {
-    (async () => {
+  const load = useCallback(async () => {
+    setLoadError(false);
+    try {
       // Chờ danh tính ẩn danh sẵn sàng trước khi đọc feed.
-      try { setUid(await ensureAnonUser()); } catch { /* vẫn thử đọc */ }
+      setUid(await ensureAnonUser());
       const { data: subs, error } = await supabase
         .from("submissions")
         .select("id, guest_name, description, image_urls, created_at, is_published, user_id")
         .order("created_at", { ascending: false })
         .limit(100);
-      if (error) { setItems([]); return; }
+      if (error) throw error;
 
       // Feed công khai: bài đang hiện, hoặc bài của chính mình (kể cả đã ẩn).
       const me = (await supabase.auth.getSession()).data.session?.user?.id;
@@ -59,8 +61,15 @@ export default function CongDong() {
         }))
       );
       setItems(enriched);
-    })();
+    } catch {
+      // Lỗi tải ≠ Phòng Trà trống: báo lỗi và cho thử lại.
+      setLoadError(true);
+    }
   }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,8 +89,18 @@ export default function CongDong() {
           </Link>
         </div>
 
-        {items === null && (
+        {items === null && !loadError && (
           <p className="text-muted-foreground text-center py-12">Đang tải…</p>
+        )}
+        {loadError && (
+          <div className="text-center py-16 border border-dashed border-border rounded-lg">
+            <p className="text-muted-foreground mb-4">
+              Không tải được Phòng Trà. Vui lòng kiểm tra kết nối và thử lại.
+            </p>
+            <Button onClick={load} className="bg-gold hover:bg-gold-dark text-primary-foreground">
+              Thử lại
+            </Button>
+          </div>
         )}
         {items && items.length === 0 && (
           <div className="text-center py-16 border border-dashed border-border rounded-lg">
