@@ -46,7 +46,7 @@ const Header = () => {
           <Link to="/dinh-gia-phi-thuy" className="text-foreground hover:text-accent transition-colors">Định giá phỉ thúy</Link>
           <Link to="/cong-dong" className="text-foreground hover:text-accent transition-colors">Cộng đồng</Link>
           <a href="#mission" className="text-foreground hover:text-accent transition-colors">Về Hiểu Ngọc</a>
-          <a href="#guides" className="text-foreground hover:text-accent transition-colors">Cẩm Nang</a>
+          <Link to="/cam-nang" className="text-foreground hover:text-accent transition-colors">Cẩm Nang</Link>
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
@@ -74,7 +74,7 @@ const Header = () => {
           <Link to="/dinh-gia-phi-thuy" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Định giá phỉ thúy</Link>
           <Link to="/cong-dong" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Cộng đồng</Link>
           <a href="#mission" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Về Hiểu Ngọc</a>
-          <a href="#guides" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Cẩm Nang</a>
+          <Link to="/cam-nang" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase">Cẩm Nang</Link>
           <Link to="/jade-vault" onClick={() => setMobileOpen(false)} className="block text-sm font-semibold uppercase text-accent">
             Cốp ngọc của tôi
           </Link>
