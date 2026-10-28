@@ -64,18 +64,7 @@ export default function AppSidebarSheet() {
           <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
             <SidebarItem to="/" onClick={close} icon={<Home className="h-4 w-4" />} label="Trang chủ" />
             <SidebarItem to="/phong-tra" onClick={close} icon={<Users className="h-4 w-4" />} label="Cộng đồng thẩm định" />
-            <SidebarItem
-              to="/#guides"
-              onClick={() => {
-                close();
-                setTimeout(() => {
-                  const el = document.getElementById("guides");
-                  el?.scrollIntoView({ behavior: "smooth" });
-                }, 200);
-              }}
-              icon={<BookOpen className="h-4 w-4" />}
-              label="Cẩm nang"
-            />
+            <SidebarItem to="/cam-nang" onClick={close} icon={<BookOpen className="h-4 w-4" />} label="Cẩm nang" />
           </nav>
 
           <div className="px-5 py-3 border-t border-border text-[11px] text-muted-foreground text-center">
