@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { Suspense, lazy, useCallback, useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -8,6 +8,8 @@ import Header from "@/components/Header";
 import { supabase } from "@/integrations/supabase/client";
 import { ensureAnonUser } from "@/lib/anonAuth";
 import { Button } from "@/components/ui/button";
+
+const ArticleManager = lazy(() => import("@/components/admin/ArticleManager"));
 
 interface Post {
   id: string;
@@ -32,6 +34,7 @@ export default function Admin() {
   const [listError, setListError] = useState(false);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
+  const [section, setSection] = useState<"community" | "articles">("community");
 
   const loadPosts = useCallback(async () => {
     setListError(false);
@@ -130,7 +133,7 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto max-w-3xl px-4 py-8">
+      <main className={`container mx-auto px-4 py-8 ${phase === "admin" && section === "articles" ? "max-w-4xl" : "max-w-3xl"}`}>
         {phase === "checking" && (
           <p className="text-muted-foreground text-center py-12">Đang kiểm tra…</p>
         )}
@@ -193,7 +196,7 @@ export default function Admin() {
               <div>
                 <h1 className="font-serif text-3xl font-bold">Quản trị Phòng Trà</h1>
                 <p className="text-muted-foreground text-sm mt-1">
-                  {posts ? `${posts.length} bài đăng` : "Đang tải…"}
+                  {section === "articles" ? "Quản lý bài Cẩm Nang" : posts ? `${posts.length} bài đăng` : "Đang tải…"}
                 </p>
               </div>
               <Button variant="outline" size="sm" onClick={signOut}>
@@ -201,6 +204,31 @@ export default function Admin() {
               </Button>
             </div>
 
+            <div className="mb-6 flex gap-2 border-b border-border">
+              {([["community", "Bài cộng đồng"], ["articles", "Cẩm Nang"]] as const).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSection(key)}
+                  className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${
+                    section === key
+                      ? "border-gold text-foreground"
+                      : "border-transparent text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {section === "articles" && (
+              <Suspense fallback={<p className="text-muted-foreground text-center py-12">Đang tải…</p>}>
+                <ArticleManager />
+              </Suspense>
+            )}
+
+            {section === "community" && (
+              <>
             {listError && (
               <div className="text-center py-10 border border-dashed border-border rounded-lg mb-5">
                 <p className="text-muted-foreground mb-4">Không tải được danh sách bài đăng.</p>
@@ -280,6 +308,8 @@ export default function Admin() {
                 </div>
               ))}
             </div>
+              </>
+            )}
           </>
         )}
       </main>
