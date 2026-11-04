@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ensureAnonUser } from "@/lib/anonAuth";
@@ -18,6 +18,9 @@ import Admin from "./pages/Admin.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import DinhGiaPhiThuy from "./pages/DinhGiaPhiThuy.tsx";
 import Seo from "@/components/Seo";
+
+const CamNang = lazy(() => import("./pages/CamNang.tsx"));
+const CamNangDetail = lazy(() => import("./pages/CamNangDetail.tsx"));
 
 const queryClient = new QueryClient();
 
@@ -39,6 +42,7 @@ const App = () => {
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <Suspense fallback={<div className="min-h-screen bg-background" />}>
         <Routes>
           <Route
             path="/"
@@ -80,10 +84,13 @@ const App = () => {
           />
           <Route path="/cong-dong/dang" element={noindex("/cong-dong/dang", "Đăng vòng ngọc", <SubmitJade />)} />
           <Route path="/cong-dong/:id" element={noindex("/cong-dong", "Bài đăng cộng đồng", <SubmissionDetail />)} />
+          <Route path="/cam-nang" element={<CamNang />} />
+          <Route path="/cam-nang/:slug" element={<CamNangDetail />} />
           <Route path="/admin" element={noindex("/admin", "Quản trị", <Admin />)} />
           <Route path="/phong-tra" element={<Navigate to="/cong-dong" replace />} />
           <Route path="*" element={noindex("/404", "Không tìm thấy trang", <NotFound />)} />
         </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
